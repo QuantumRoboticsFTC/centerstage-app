@@ -22,6 +22,13 @@ import java.util.concurrent.ExecutorService;
 public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarningSource {
     public static final String TAG = "Robot";
 
+    public Drivetrain drive;
+    public Intake intake;
+    public Outtake outtake;
+    public Climb climb;
+    public Drone drone;
+    public Elevator elevator;
+
     private LynxModule hub1;
     private LynxModule hub2;
 
@@ -88,8 +95,49 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
 
         //region Initialize subsystems
         subsystems = new ArrayList<>();
+        try {
+            drive = new Drivetrain(opMode.hardwareMap, this, isAutonomous);
+            subsystems.add(drive);
+            Log.w(TAG, "DriveTrain intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize DriveTrain: " + e.getMessage());
+        }
+        try {
+            intake = new Intake(opMode.hardwareMap, this);
+            subsystems.add(intake);
+            Log.w(TAG, "Intake intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize Intake: " + e.getMessage());
+        }
+        try {
+            outtake = new Outtake(opMode.hardwareMap, this);
+            subsystems.add(outtake);
+            Log.w(TAG, "Outtake intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize Outtake: " + e.getMessage());
+        }
+        try {
+            elevator = new Elevator(opMode.hardwareMap, this);
+            subsystems.add(elevator);
+            Log.w(TAG, "Elevator intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize Elevator: " + e.getMessage());
+        }
+        try {
+            climb = new Climb(opMode.hardwareMap, this);
+            subsystems.add(climb);
+            Log.w(TAG, "Climb intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize Climb: " + e.getMessage());
+        }
+        try {
+            drone = new Drone(opMode.hardwareMap, this);
+            subsystems.add(drone);
+            Log.w(TAG, "Drone intialized successfully");
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to initialize Drone: " + e.getMessage());
+        }
 
-        // TODO: subsystems
         //endregion
         for (Subsystem subsystem : subsystems) {
             top100Subsystems.put(subsystem, new MovingStatistics(100));

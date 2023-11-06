@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class CachingDcMotorEx extends CachingDcMotor implements DcMotorEx {
-
     private DcMotorEx delegate;
 
     public CachingDcMotorEx(DcMotorEx dcMotorEx) {
