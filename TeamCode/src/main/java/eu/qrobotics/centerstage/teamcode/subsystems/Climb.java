@@ -14,18 +14,16 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingServoImplEx;
 @Config
 public class Climb implements Subsystem {
     public enum ClimbState {
-        INIT,
         PASSIVE,
         ACTIVE,
         CLIMBED,
     }
 
-    //0.97 e jos, 0.2 e sus
-    // -0.12
-    public static double CLIMB_INIT_POSITION = 0.97;
-    public static double CLIMB_PASSIVE_POSITION = 0.52;
-    public static double CLIMB_ACTIVE_POSITION = 1;
-    public static double offset = 0.12;
+    // 0.3 - stanga
+    // 0.48 - dreapta
+    public static double CLIMB_PASSIVE_POSITION = 0.125;
+    public static double CLIMB_ACTIVE_POSITION = 0.7;
+    public static double offset = 0.38;
 
     public ClimbState climbState;
 
@@ -52,8 +50,8 @@ public class Climb implements Subsystem {
     }
 
     private void setPosition(double position) {
-        leftServo.setPosition(position - offset);
-        rightServo.setPosition(position);
+        leftServo.setPosition(position);
+        rightServo.setPosition(position + offset);
     }
 
     public Climb(HardwareMap hardwareMap, Robot robot) {
@@ -73,9 +71,6 @@ public class Climb implements Subsystem {
 //        setPosition(CLIMB_ACTIVE_POSITION);
 
         switch (climbState) {
-            case INIT:
-                setPosition(CLIMB_PASSIVE_POSITION);
-                break;
             case PASSIVE:
                 setPosition(CLIMB_PASSIVE_POSITION);
                 break;

@@ -40,7 +40,7 @@ public class Intake implements Subsystem {
     public static double INTAKE_OUT_SPEED = 1;
 
     public static double INTAKE_DROPDOWN_UP = 0.5;
-    public static double INTAKE_DROPDOWN_DOWN = 0.7;
+    public static double INTAKE_DROPDOWN_DOWN = 0.79;
     public double manualPosition;
 
     private CachingDcMotorEx motor;

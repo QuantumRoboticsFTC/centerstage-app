@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -36,7 +37,7 @@ public class Elevator implements Subsystem {
     public static double SCORE_POSITION = 50;
     public static double DOWN_POWER = -0.75;
     public static double UP_POWER = -0.75;
-    public static double IDLE_POWER = 0.0;
+    public static double IDLE_POWER = 0.18;
 
     public static double tolerance;
     public double manualOffset;
@@ -113,6 +114,8 @@ public class Elevator implements Subsystem {
         motorLeft = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderLeft"));
         motorRight = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderRight"));
 
+        motorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -128,13 +131,17 @@ public class Elevator implements Subsystem {
         manualPower = IDLE_POWER;
     }
 
-    public static boolean IS_DISABLED = true;
+    public static boolean IS_DISABLED = false;
 
     @Override
     public void update() {
         if (IS_DISABLED) return;
 
-        setPower(IDLE_POWER);
+        if (elevatorState == ElevatorState.MANUAL) {
+            setPower(manualPower);
+        } else {
+            setPower(IDLE_POWER);
+        }
 
         if (targetHeight == TargetHeight.TRANSFER) {
             manualOffset = 0;
