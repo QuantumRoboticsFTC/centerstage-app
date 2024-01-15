@@ -60,6 +60,7 @@ public class Climb implements Subsystem {
         leftServo = new CachingServoImplEx(hardwareMap.get(ServoImplEx.class, "climbLeft"));
         rightServo = new CachingServoImplEx(hardwareMap.get(ServoImplEx.class, "climbRight"));
         leftServo.setDirection(Servo.Direction.REVERSE);
+        climbState = ClimbState.PASSIVE;
     }
 
     public static boolean IS_DISABLED = false;

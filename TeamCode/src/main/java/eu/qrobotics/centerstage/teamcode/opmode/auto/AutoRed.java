@@ -12,16 +12,16 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipeline;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryTest;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryTestRed;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 AutoTest")
-public class AutoTest extends LinearOpMode {
+@Autonomous(name = "#00 AutoRed")
+public class AutoRed extends LinearOpMode {
 
     Robot robot;
     List<Trajectory> trajectories;
@@ -33,7 +33,7 @@ public class AutoTest extends LinearOpMode {
         int readFromCamera = noDetectionFlag;
 
         OpenCvCamera camera;
-        TeamPropPipeline teamPropPieline = new TeamPropPipeline();
+        TeamPropPipelineRed teamPropPieline = new TeamPropPipelineRed();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -69,6 +69,10 @@ public class AutoTest extends LinearOpMode {
         return readFromCamera;
     }
 
+    void gotobackboard() {
+        ;
+    }
+
     void solvePurplePixel() {
         robot.drive.followTrajectory(trajectories.get(0));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -77,57 +81,64 @@ public class AutoTest extends LinearOpMode {
         robot.sleep(0.1);
 
         // TODO: place pixelussy
-        robot.intake.intakeMode = Intake.IntakeMode.OUT;
-        robot.sleep(0.25);
-        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
-        robot.sleep(0.1);
+        robot.intake.dropdownState = Intake.DropdownState.UP;
+        robot.sleep(0.07);
     }
 
-    void solveYellowPixel() {
+    void placePixel(Outtake.DiffyHortizontalState hState, boolean goToBackboard) {
         // TODO: outtake in score mode
-        robot.elevator.elevatorState = Elevator.ElevatorState.AUTOMATIC;
-        robot.elevator.setTargetHeight(Elevator.TargetHeight.SCORE);
+        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+        robot.elevator.setTargetHeight(Elevator.TargetHeight.FIRST_LINE);
         robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.sleep(1);
+        robot.outtake.diffyHState = hState;
+        robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
+        robot.sleep(0.8);
 
         // TODO: adaptive path following towards apriltag idfk
-        // gotobackboard();
+        if (goToBackboard) {
+            gotobackboard();
+        }
 
         // TODO: place pixelussy and retract outtake
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.35);
+        robot.sleep(0.15);
+        robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
+        robot.sleep(0.1);
 
-        robot.elevator.elevatorState = Elevator.ElevatorState.AUTOMATIC;
-        robot.elevator.setTargetHeight(Elevator.TargetHeight.TRANSFER);
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
-
-        // TODO: slowly leave
-        robot.drive.setMotorPowers(0.3, 0.3, 0.3, 0.3);
-        robot.sleep(0.5);
+        robot.outtake.rotateState = Outtake.RotateState.CENTER;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+        robot.sleep(0.3);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryTest.START_POSE);
-        robot.start();
-
+        robot.drive.setPoseEstimate(TrajectoryTestRed.START_POSE);
         int teamProp = cameraTeamProp();
+
+        robot.start();
+        robot.intake.dropdownState = Intake.DropdownState.DOWN;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+        robot.sleep(0.05);
 
         if (teamProp == -10) {
             return;
         }
 
-        trajectories = TrajectoryTest.getTrajectories(teamProp);
+        trajectories = TrajectoryTestRed.getTrajectories(teamProp);
 
         solvePurplePixel();
+        robot.outtake.clawState = Outtake.ClawState.CLOSED;
 
         robot.drive.followTrajectory(trajectories.get(1));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }
+        robot.sleep(0.05);
         // we are now kinda in front of the backboard
-        solveYellowPixel();
+        placePixel(Outtake.DiffyHortizontalState.CENTER, true);
 
         // TODO: *cica* cycles
 
@@ -136,7 +147,7 @@ public class AutoTest extends LinearOpMode {
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }
-        robot.sleep(0.1);
+        robot.sleep(0.3);
 
         robot.stop();
     }

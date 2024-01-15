@@ -32,8 +32,8 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = 0.692; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 11.1;
-    public static double FORWARD_OFFSET = -5.1;
+    public static double LATERAL_DISTANCE = 11.04;
+    public static double FORWARD_OFFSET = -5.97;
 
     public static Pose2d LEFT_POSE = new Pose2d(0,  LATERAL_DISTANCE / 2, 0);
     public static Pose2d RIGHT_POSE = new Pose2d(0, -LATERAL_DISTANCE / 2, 0);
@@ -51,6 +51,7 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
                 REAR_POSE // front
         ));
 
+        // TOOD: astea ar tb schimbate
         leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
         rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
         rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightFront"));

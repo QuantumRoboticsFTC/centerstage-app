@@ -17,12 +17,15 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.NanoClock;
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
@@ -39,6 +42,7 @@ import eu.qrobotics.centerstage.teamcode.util.MecanumUtil;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.*;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 
 @Config
@@ -73,7 +77,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
-//    private BNO055IMU imu;
+    private BHI260IMU imu;
+    private IMU.Parameters IMUParameters;
 
     private double[] motorPowers;
 
@@ -105,11 +110,14 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         }
         motorPowers = new double[]{0.0, 0.0, 0.0, 0.0};
 
-//        imu = hardwareMap.get(BNO055IMU.class, "imu");
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-//        imu.initialize(parameters);
-//        BNO055IMUUtil.remapAxes(imu, AxesOrder.YZX, AxesSigns.NPP);
+        IMUParameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+                )
+        );
+        imu = hardwareMap.get(BHI260IMU.class, "imu");
+        imu.initialize(IMUParameters);
 
         poseHistory = new LinkedList<>();
 
@@ -315,17 +323,16 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         rightFront.setPower(v3);
     }
 
-
     @Override
     public double getRawExternalHeading() {
-//        return imu.getAngularOrientation().firstAngle;
-        return 0;
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        return 0;
     }
 
-//    @Override
-//    public Double getExternalHeadingVelocity() {
-//        return (double) imu.getAngularVelocity().yRotationRate;
-//    }
+    @Override
+    public Double getExternalHeadingVelocity() {
+        return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+    }
 
     @NonNull
     @Override

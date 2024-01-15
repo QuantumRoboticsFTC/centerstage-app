@@ -13,7 +13,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrajectoryTest {
+public class TrajectoryTestRed {
     public static Pose2d START_POSE = new Pose2d(-37, -65, Math.toRadians(270));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {

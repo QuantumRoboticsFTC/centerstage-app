@@ -4,13 +4,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -20,26 +18,28 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
 @Config
 public class Elevator implements Subsystem {
     public enum ElevatorState {
-        AUTOMATIC,
+        LINES,
+        TRANSFER,
         MANUAL
     }
 
     public enum TargetHeight {
-        TRANSFER,
-        SCORE
+        FIRST_LINE,
+        SECOND_LINE,
+        THIRD_LINE
     }
 
     public ElevatorState elevatorState;
     public ElevatorState lastState;
     public TargetHeight targetHeight;
 
-    public static double TRANSFER_POSITION = 10;
-    public static double SCORE_POSITION = 50;
-    public static double DOWN_POWER = -0.75;
-    public static double UP_POWER = -0.75;
-    public static double IDLE_POWER = 0.18;
+    public static double TRANSFER_POSITION = 0;
+    public static double FIRST_POSITION = 250;
+    public static double SECOND_POSITION = 500;
+    public static double THIRD_POSITION = 830;
+    public static double IDLE_POWER = 0.13;
 
-    public static double tolerance;
+    public double groundPositionOffset;
     public double manualOffset;
 
     public double manualPower;
@@ -50,25 +50,32 @@ public class Elevator implements Subsystem {
     private static double maxAcceleration = 15;
     private static double maxJerk = 2;
     private MotionProfile mp;
-    public static PIDCoefficients coefs = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.00045, 0.00035);
     private PIDFController controller = new PIDFController(coefs);
-    private double ff1 = 0, ff2 = 0;
+    public static double ff1 = 0.05, ff2 = 0.00007;
 
     private CachingDcMotorEx motorLeft;
     private CachingDcMotorEx motorRight;
     private Robot robot;
+
+    public void setElevatorState(ElevatorState es) {
+        if (elevatorState != es) {
+            lastState = elevatorState;
+        }
+        elevatorState = es;
+    }
 
     public void setTargetHeight(TargetHeight height) {
         targetHeight = height;
 
         elapsedTime.reset();
 
-        mp = MotionProfileGenerator.generateSimpleMotionProfile(
-            new MotionState(getCurrentPosition(), 0, 0),
-            new MotionState(getTargetPosition(height), 0, 0),
-            maxVelocity,
-            maxAcceleration,
-            maxJerk);
+//        mp = MotionProfileGenerator.generateSimpleMotionProfile(
+//            new MotionState(getCurrentPosition(), 0, 0),
+//            new MotionState(getTargetPosition(height), 0, 0),
+//            maxVelocity,
+//            maxAcceleration,
+//            maxJerk);
     }
 
     public void setPower(double power) {
@@ -77,27 +84,37 @@ public class Elevator implements Subsystem {
     }
 
     public double getTargetPosition() {
+        if (elevatorState == ElevatorState.TRANSFER) {
+            return TRANSFER_POSITION + groundPositionOffset;
+        }
         switch (targetHeight) {
-            case TRANSFER:
-                return TRANSFER_POSITION + manualOffset;
-            case SCORE:
-                return SCORE_POSITION + manualOffset;
+            case FIRST_LINE:
+                return FIRST_POSITION + manualOffset + groundPositionOffset;
+            case SECOND_LINE:
+                return SECOND_POSITION + manualOffset + groundPositionOffset;
+            case THIRD_LINE:
+                return THIRD_POSITION + manualOffset + groundPositionOffset;
         }
         return 0;
     }
 
-    public double getTargetPosition(TargetHeight ta) {
+    public double getTargetPosition(ElevatorState es, TargetHeight ta) {
+        if (es == ElevatorState.TRANSFER) {
+            return TRANSFER_POSITION;
+        }
         switch (ta) {
-            case TRANSFER:
-                return TRANSFER_POSITION;
-            case SCORE:
-                return SCORE_POSITION;
+            case FIRST_LINE:
+                return FIRST_POSITION + groundPositionOffset;
+            case SECOND_LINE:
+                return SECOND_POSITION + groundPositionOffset;
+            case THIRD_LINE:
+                return THIRD_POSITION + groundPositionOffset;
         }
         return 0;
     }
 
     public double getCurrentPosition() {
-        return motorLeft.getCurrentPosition();
+        return motorRight.getCurrentPosition();
     }
 
     public double getCurrentLeft() {
@@ -122,11 +139,11 @@ public class Elevator implements Subsystem {
         motorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        tolerance = 75;
         manualOffset = 0;
+        groundPositionOffset = -getCurrentPosition();
 
-        elevatorState = lastState = ElevatorState.AUTOMATIC;
-        targetHeight = TargetHeight.TRANSFER;
+        elevatorState = lastState = ElevatorState.TRANSFER;
+        targetHeight = TargetHeight.FIRST_LINE;
 
         manualPower = IDLE_POWER;
     }
@@ -137,46 +154,18 @@ public class Elevator implements Subsystem {
     public void update() {
         if (IS_DISABLED) return;
 
-        if (elevatorState == ElevatorState.MANUAL) {
-            setPower(manualPower);
-        } else {
-            setPower(IDLE_POWER);
-        }
-
-        if (targetHeight == TargetHeight.TRANSFER) {
-            manualOffset = 0;
-        }
-
-//        switch (elevatorState) {
-//            case AUTOMATIC:
-//                switch (targetHeight) {
-//                    case TRANSFER:
-//                        if (getCurrentPosition() >= getTargetPosition() + tolerance) {
-//                            setPower(DOWN_POWER);
-//                        }
-//                        break;
-//                    case SCORE:
-//                        if (getCurrentPosition() + tolerance <= getTargetPosition()) {
-//                            setPower(UP_POWER);
-//                        }
-//                        break;
-//                }
-//                break;
-//            case MANUAL:
-//                setPower(manualPower);
-//                break;
+//        if (elevatorState == ElevatorState.TRANSFER) {
+//            manualOffset = 0;
 //        }
 
         // TODO: THIS IS EASY **PID TUNER**
-//        switch (elevatorState) {
-//            case AUTOMATIC:
-//                controller.setTargetPosition(getTargetPosition());
-//                setPower(controller.update(getCurrentPosition()) + ff1 + getCurrentPosition() * ff2);
-//                break;
-//            case MANUAL:
-//                setPower(manualPower);
-//                break;
-//        }
+        if (elevatorState == ElevatorState.LINES ||
+            elevatorState == ElevatorState.TRANSFER) {
+            controller.setTargetPosition(getTargetPosition());
+            setPower(controller.update(getCurrentPosition()) + ff1 + getCurrentPosition() * ff2);
+        } else {
+            setPower(manualPower);
+        }
 
         // TODO: MP IN PID
 //        switch (elevatorState) {

@@ -21,7 +21,8 @@ public class Intake implements Subsystem {
     public enum IntakeMode {
         IN,
         IDLE,
-        OUT
+        OUT,
+        OUT_SLOW
     }
 
     public enum DropdownState {
@@ -35,12 +36,13 @@ public class Intake implements Subsystem {
 
     public static double blockedThreshold = 100000;
 
-    public static double INTAKE_IN_SPEED = -1;
+    public static double INTAKE_IN_SPEED = -0.8;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = 1;
+    public static double INTAKE_OUT_SLOW_SPEED = 0.5;
 
-    public static double INTAKE_DROPDOWN_UP = 0.5;
-    public static double INTAKE_DROPDOWN_DOWN = 0.79;
+    public static double INTAKE_DROPDOWN_UP = 0.44;
+    public static double INTAKE_DROPDOWN_DOWN = 0.75;
     public double manualPosition;
 
     private CachingDcMotorEx motor;
@@ -85,6 +87,9 @@ public class Intake implements Subsystem {
                 break;
             case OUT:
                 motor.setPower(INTAKE_OUT_SPEED);
+                break;
+            case OUT_SLOW:
+                motor.setPower(INTAKE_OUT_SLOW_SPEED);
                 break;
         }
 
