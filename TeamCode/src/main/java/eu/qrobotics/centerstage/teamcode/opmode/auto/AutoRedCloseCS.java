@@ -13,16 +13,15 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.List;
 
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineRed;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryTestRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryCloseRed;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 AutoRed")
-public class AutoRed extends LinearOpMode {
-
+@Autonomous(name = "01 AutoRedCloseCS")
+public class AutoRedCloseCS extends LinearOpMode {
     Robot robot;
     List<Trajectory> trajectories;
 
@@ -81,8 +80,9 @@ public class AutoRed extends LinearOpMode {
         robot.sleep(0.1);
 
         // TODO: place pixelussy
-        robot.intake.dropdownState = Intake.DropdownState.UP;
-        robot.sleep(0.07);
+        robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
+        robot.sleep(0.1);
+        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
     }
 
     void placePixel(Outtake.DiffyHortizontalState hState, boolean goToBackboard) {
@@ -115,11 +115,10 @@ public class AutoRed extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryTestRed.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryCloseRed.START_POSE);
         int teamProp = cameraTeamProp();
 
         robot.start();
-        robot.intake.dropdownState = Intake.DropdownState.DOWN;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
         robot.sleep(0.05);
 
@@ -127,7 +126,7 @@ public class AutoRed extends LinearOpMode {
             return;
         }
 
-        trajectories = TrajectoryTestRed.getTrajectories(teamProp);
+        trajectories = TrajectoryCloseRed.getTrajectories(teamProp, false, true);
 
         solvePurplePixel();
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
@@ -138,12 +137,44 @@ public class AutoRed extends LinearOpMode {
         }
         robot.sleep(0.05);
         // we are now kinda in front of the backboard
-        placePixel(Outtake.DiffyHortizontalState.CENTER, true);
+        if (teamProp == 1) {
+            placePixel(Outtake.DiffyHortizontalState.LEFT, false);
+        } else if (teamProp == 2) {
+            placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+        } else if (teamProp == 3) {
+            placePixel(Outtake.DiffyHortizontalState.RIGHT, false);
+        }
 
         // TODO: *cica* cycles
+        robot.drive.followTrajectory(trajectories.get(2));
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.01);
+        robot.intake.dropdownState = Intake.DropdownState.DOWN;
+        robot.sleep(0.05);
+
+        robot.drive.followTrajectory(trajectories.get(3));
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.05);
+        robot.intake.intakeMode = Intake.IntakeMode.IN;
+        robot.sleep(0.2);
+        robot.intake.intakeMode = Intake.IntakeMode.OUT;
+        robot.sleep(0.05);
+        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+
+        robot.drive.followTrajectory(trajectories.get(4));
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.02);
+        placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+        robot.sleep(0.02);
 
         // park
-        robot.drive.followTrajectory(trajectories.get(2));
+        robot.drive.followTrajectory(trajectories.get(5));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }

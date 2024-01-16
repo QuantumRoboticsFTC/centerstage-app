@@ -25,8 +25,7 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
     public Drivetrain drive;
     public Intake intake;
     public Outtake outtake;
-    public Climb climb;
-    public Drone drone;
+    public Endgame endgame;
     public Elevator elevator;
 
     private LynxModule hub1;
@@ -132,18 +131,11 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
             Log.w(TAG, "Failed to initialize Elevator: " + e.getMessage());
         }
         try {
-            climb = new Climb(opMode.hardwareMap, this);
-            subsystems.add(climb);
+            endgame = new Endgame(opMode.hardwareMap, this);
+            subsystems.add(endgame);
             Log.w(TAG, "Climb intialized successfully");
         } catch (Exception e) {
             Log.w(TAG, "Failed to initialize Climb: " + e.getMessage());
-        }
-        try {
-            drone = new Drone(opMode.hardwareMap, this);
-            subsystems.add(drone);
-            Log.w(TAG, "Drone intialized successfully");
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to initialize Drone: " + e.getMessage());
         }
 
         //endregion

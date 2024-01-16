@@ -1,49 +1,50 @@
 package eu.qrobotics.centerstage.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.profile.MotionProfile;
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
-import com.acmerobotics.roadrunner.profile.MotionState;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServoImplEx;
 
 @Config
-public class Climb implements Subsystem {
+public class Endgame implements Subsystem {
     public enum ClimbState {
         PASSIVE,
+        SHOOTER,
         ACTIVE,
         CLIMBED,
     }
 
-    // 0.3 - stanga
-    // 0.48 - dreapta
-    public static double CLIMB_PASSIVE_POSITION = 0.125;
-    public static double CLIMB_ACTIVE_POSITION = 0.7;
-    public static double offset = 0.38;
+    public enum DroneState {
+        PASSIVE,
+        ACTIVE
+    }
 
     public ClimbState climbState;
+    public DroneState droneState;
 
-    public ElapsedTime timer = new ElapsedTime(0);
-    public double timerRestraint = 1.2;
+    public static double CLIMB_PASSIVE_POSITION = 0.26;
+    public static double CLIMB_SHOOTER_POSITION = 0.55;
+    public static double CLIMB_ACTIVE_POSITION = 0.7;
+    public static double offset = 0.29;
+    public static double shooterClimbPosition;
 
-    private static double maxVelocity = 0.08;
-    private static double maxAcceleration = 0.015;
-    private static double maxJerk = 0.005;
-    private MotionProfile motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-            new MotionState(CLIMB_PASSIVE_POSITION, 0, 0),
-            new MotionState(CLIMB_ACTIVE_POSITION, 0, 0),
-            maxVelocity,
-            maxAcceleration,
-            maxJerk);
+    public static double SHOOTER_PASSIVE_POSITION = 0;
+    public static double SHOOTER_ACTIVE_POSITION = 1;
 
     private CachingServoImplEx leftServo;
     private CachingServoImplEx rightServo;
+    private CachingServo droneServo;
 
     private Robot robot;
+
+    private void updateShooterPosition() {
+//        TODO: dynamic shooter
+        return;
+    }
 
     public double getPosition() {
         return leftServo.getPosition();
@@ -54,13 +55,17 @@ public class Climb implements Subsystem {
         rightServo.setPosition(position + offset);
     }
 
-    public Climb(HardwareMap hardwareMap, Robot robot) {
+    public Endgame(HardwareMap hardwareMap, Robot robot) {
         this.robot = robot;
 
         leftServo = new CachingServoImplEx(hardwareMap.get(ServoImplEx.class, "climbLeft"));
         rightServo = new CachingServoImplEx(hardwareMap.get(ServoImplEx.class, "climbRight"));
+        droneServo = new CachingServo(hardwareMap.get(Servo.class, "droneServo"));
+
         leftServo.setDirection(Servo.Direction.REVERSE);
         climbState = ClimbState.PASSIVE;
+        droneState = DroneState.PASSIVE;
+        shooterClimbPosition = CLIMB_SHOOTER_POSITION;
     }
 
     public static boolean IS_DISABLED = false;
@@ -71,17 +76,30 @@ public class Climb implements Subsystem {
         // DEBUG SECTION
 //        setPosition(CLIMB_ACTIVE_POSITION);
 
+        updateShooterPosition();
+
         switch (climbState) {
             case PASSIVE:
                 setPosition(CLIMB_PASSIVE_POSITION);
                 break;
+            case SHOOTER:
+                setPosition(shooterClimbPosition);
+                break;
             case ACTIVE:
-//                setPosition(motionProfile.get(timer.seconds()).getX());
                 setPosition(CLIMB_ACTIVE_POSITION);
                 break;
             case CLIMBED:
                 leftServo.setPwmDisable();
                 rightServo.setPwmDisable();
+                break;
+        }
+
+        switch (droneState) {
+            case PASSIVE:
+                droneServo.setPosition(SHOOTER_PASSIVE_POSITION);
+                break;
+            case ACTIVE:
+                droneServo.setPosition(SHOOTER_ACTIVE_POSITION);
                 break;
         }
     }

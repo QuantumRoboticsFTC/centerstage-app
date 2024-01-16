@@ -20,7 +20,8 @@ public class Elevator implements Subsystem {
     public enum ElevatorState {
         LINES,
         TRANSFER,
-        MANUAL
+        MANUAL,
+        CLIMBED
     }
 
     public enum TargetHeight {
@@ -38,8 +39,11 @@ public class Elevator implements Subsystem {
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
     public static double IDLE_POWER = 0.13;
+    public static double climbedPosition;
+    public static double imuPitchGain = 25;
 
     public double groundPositionOffset;
+    public double heightCap = 850;
     public double manualOffset;
 
     public double manualPower;
@@ -79,6 +83,9 @@ public class Elevator implements Subsystem {
     }
 
     public void setPower(double power) {
+        if ((motorRight.getCurrentPosition() > groundPositionOffset + heightCap && power > 0) ||
+            (motorRight.getCurrentPosition() < groundPositionOffset && power < 0))
+            return;
         motorLeft.setPower(power);
         motorRight.setPower(power);
     }
@@ -111,6 +118,16 @@ public class Elevator implements Subsystem {
                 return THIRD_POSITION + groundPositionOffset;
         }
         return 0;
+    }
+
+    private void updateClimbedPosition() {
+//        TODO: auto glisiere pe imu
+        climbedPosition = climbedPosition + robot.drive.getPitchValue() * imuPitchGain;
+        if (climbedPosition < groundPositionOffset)
+            climbedPosition = 0;
+        if (climbedPosition > groundPositionOffset + heightCap)
+            climbedPosition = groundPositionOffset + heightCap;
+        return;
     }
 
     public double getCurrentPosition() {
@@ -146,6 +163,7 @@ public class Elevator implements Subsystem {
         targetHeight = TargetHeight.FIRST_LINE;
 
         manualPower = IDLE_POWER;
+        climbedPosition = FIRST_POSITION;
     }
 
     public static boolean IS_DISABLED = false;
@@ -163,8 +181,11 @@ public class Elevator implements Subsystem {
             elevatorState == ElevatorState.TRANSFER) {
             controller.setTargetPosition(getTargetPosition());
             setPower(controller.update(getCurrentPosition()) + ff1 + getCurrentPosition() * ff2);
-        } else {
+        } else if (elevatorState == ElevatorState.MANUAL) {
             setPower(manualPower);
+        } else if (elevatorState == ElevatorState.CLIMBED) {
+            updateClimbedPosition();
+            setPower(climbedPosition);
         }
 
         // TODO: MP IN PID

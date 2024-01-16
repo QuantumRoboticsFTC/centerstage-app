@@ -2,6 +2,7 @@ package eu.qrobotics.centerstage.teamcode.opmode.teleop;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -10,7 +11,7 @@ import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 
-import eu.qrobotics.centerstage.teamcode.subsystems.Climb;
+import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -24,9 +25,11 @@ public class TeleOP extends OpMode {
         SLOW
     }
 
+    private static Pose2d ENDGAME_POSITION = new Pose2d(72, 20, Math.toRadians(180));
+
     // Previous State Region
     // Subsystems
-    private Climb.ClimbState lastClimbState;
+    private Endgame.ClimbState lastClimbState;
 
     // Timers
     private ElapsedTime blockedIntake = new ElapsedTime(0);
@@ -39,6 +42,7 @@ public class TeleOP extends OpMode {
     public static boolean outtakeTelemetry = true;
     public static boolean elevatorTelemetry = true;
     public static boolean drivetrainTelemetry = true;
+    public static boolean extraTelemetry = true;
 
     public static boolean debugTelemetry = false;
 
@@ -66,11 +70,11 @@ public class TeleOP extends OpMode {
         telemetry.log().add("Ready!");
 
         // TODO: Last States init
-        lastClimbState = Climb.ClimbState.PASSIVE;
+        lastClimbState = Endgame.ClimbState.PASSIVE;
 
         // TODO: subsystem in init positions, drivetrain pose estimate
         // here
-        robot.climb.climbState = Climb.ClimbState.PASSIVE;
+        robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
     }
 
     @Override
@@ -182,15 +186,16 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (stickyGamepad1.dpad_down) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.FIRST_LINE;
-        }
-        if (stickyGamepad1.dpad_right) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.SECOND_LINE;
-        }
-        if (stickyGamepad1.dpad_up) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.THIRD_LINE;
-        }
+//        DRIVER 1 LIFT TARGETHEIGHTS
+//        if (stickyGamepad1.dpad_down) {
+//            robot.elevator.targetHeight = Elevator.TargetHeight.FIRST_LINE;
+//        }
+//        if (stickyGamepad1.dpad_right) {
+//            robot.elevator.targetHeight = Elevator.TargetHeight.SECOND_LINE;
+//        }
+//        if (stickyGamepad1.dpad_up) {
+//            robot.elevator.targetHeight = Elevator.TargetHeight.THIRD_LINE;
+//        }
 
         // ELEVATOR
         if (gamepad2.right_trigger > 0.2) {
@@ -357,19 +362,34 @@ public class TeleOP extends OpMode {
 //            robot.outtake.manualFourbarPos += gamepad2.right_stick_x;
 //        }
 
-        // Climber State Machine
-        switch (robot.climb.climbState) {
+        // Endgame State Machine
+        if (stickyGamepad1.dpad_down) {
+            robot.drive.setPoseEstimate(ENDGAME_POSITION);
+        }
+        switch (robot.endgame.climbState) {
             case PASSIVE:
+                if (stickyGamepad1.dpad_right) {
+                    robot.endgame.climbState = Endgame.ClimbState.SHOOTER;
+                }
+                break;
+            case SHOOTER:
+                if (stickyGamepad1.dpad_right) {
+                    switch (robot.endgame.droneState) {
+                        case PASSIVE:
+                            robot.endgame.droneState = Endgame.DroneState.ACTIVE;
+                            break;
+                        case ACTIVE:
+                            robot.endgame.climbState = Endgame.ClimbState.ACTIVE;
+                            break;
+                    }
+                }
                 if (stickyGamepad1.dpad_left) {
-                    robot.climb.climbState = Climb.ClimbState.ACTIVE;
-                    robot.climb.timer.reset();
+                    robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
                 }
                 break;
             case ACTIVE:
-                if (robot.climb.getPosition() == Climb.CLIMB_ACTIVE_POSITION &&
-                    robot.climb.timerRestraint < robot.climb.timer.seconds()) {
-                    robot.climb.climbState = Climb.ClimbState.CLIMBED;
-                }
+                robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
+                robot.elevator.elevatorState = Elevator.ElevatorState.CLIMBED;
                 break;
         }
 
@@ -427,6 +447,10 @@ public class TeleOP extends OpMode {
             telemetry.addData("heading val", robot.drive.getRawExternalHeading());
             telemetry.addData("heading velocity", robot.drive.getExternalHeadingVelocity());
         }
+        telemetry.addLine("<----> MISC <---->");
+        if (extraTelemetry) {
+            telemetry.addData("pitch value", robot.drive.getPitchValue());
+        }
 
         addStatistics();
         telemetry.update();
@@ -444,7 +468,7 @@ public class TeleOP extends OpMode {
     }
 
     private void lastStateUpdate() {
-        lastClimbState = robot.climb.climbState;
+        lastClimbState = robot.endgame.climbState;
     }
 
     private static String formatResults(MovingStatistics statistics) {

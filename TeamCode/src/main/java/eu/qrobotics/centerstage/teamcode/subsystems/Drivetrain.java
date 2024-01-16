@@ -323,6 +323,10 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         rightFront.setPower(v3);
     }
 
+    public double getPitchValue() {
+        return imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
+    }
+
     @Override
     public double getRawExternalHeading() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);

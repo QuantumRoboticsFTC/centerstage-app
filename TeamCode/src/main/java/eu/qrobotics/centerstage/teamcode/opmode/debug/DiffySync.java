@@ -6,18 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
-import eu.qrobotics.centerstage.teamcode.subsystems.Climb;
-import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
-import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
-import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
-import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
 @TeleOp
