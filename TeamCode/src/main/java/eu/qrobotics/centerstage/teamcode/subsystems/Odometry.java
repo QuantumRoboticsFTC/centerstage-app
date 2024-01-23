@@ -28,12 +28,12 @@ import java.util.List;
  */
 @Config
 public class Odometry extends ThreeTrackingWheelLocalizer {
-    public static double TICKS_PER_REV = 8192;
-    public static double WHEEL_RADIUS = 0.692; // in
+    public static double TICKS_PER_REV = 2000;
+    public static double WHEEL_RADIUS = 1.89 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 11.04;
-    public static double FORWARD_OFFSET = -5.97;
+    public static double LATERAL_DISTANCE = 11.05;
+    public static double FORWARD_OFFSET = 7;
 
     public static Pose2d LEFT_POSE = new Pose2d(0,  LATERAL_DISTANCE / 2, 0);
     public static Pose2d RIGHT_POSE = new Pose2d(0, -LATERAL_DISTANCE / 2, 0);
@@ -52,13 +52,13 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
         ));
 
         // TOOD: astea ar tb schimbate
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
-        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightFront"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
+        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
 
-        rightEncoder.setDirection(Encoder.Direction.REVERSE);
-//        rearEncoder.setDirection(Encoder.Direction.REVERSE);
-//        leftEncoder.setDirection(Encoder.Direction.REVERSE);
+//        rightEncoder.setDirection(Encoder.Direction.REVERSE);
+        rearEncoder.setDirection(Encoder.Direction.REVERSE);
+        leftEncoder.setDirection(Encoder.Direction.REVERSE);
     }
 
     public static double encoderTicksToInches(double ticks) {
@@ -68,9 +68,9 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     @NonNull
     @Override
     public List<Double> getWheelPositions() {
-        int leftPos = leftEncoder.getCurrentPosition();
-        int rightPos = rightEncoder.getCurrentPosition();
-        int frontPos = rearEncoder.getCurrentPosition();
+        double leftPos = leftEncoder.getCurrentPosition();
+        double rightPos = rightEncoder.getCurrentPosition();
+        double frontPos = rearEncoder.getCurrentPosition();
 
         return Arrays.asList(
                 encoderTicksToInches(leftPos),
@@ -82,9 +82,9 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     @NonNull
     @Override
     public List<Double> getWheelVelocities() {
-        int leftVel = (int) leftEncoder.getCorrectedVelocity();
-        int rightVel = (int) rightEncoder.getCorrectedVelocity();
-        int frontVel = (int) rearEncoder.getCorrectedVelocity();
+        double leftVel = leftEncoder.getCorrectedVelocity() * X_MULTIPLIER;
+        double rightVel = rightEncoder.getCorrectedVelocity() * X_MULTIPLIER;
+        double frontVel = rearEncoder.getCorrectedVelocity() * Y_MULTIPLIER;
 
         return Arrays.asList(
                 encoderTicksToInches(leftVel),

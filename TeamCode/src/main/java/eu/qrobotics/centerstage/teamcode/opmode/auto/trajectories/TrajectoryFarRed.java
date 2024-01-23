@@ -168,7 +168,7 @@ public class TrajectoryFarRed {
                 .build()
         );
 
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(200), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(160), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToSplineHeading(new Pose2d(-55, -44, Math.toRadians(140)))
                 .splineToSplineHeading(new Pose2d(5, -60, Math.toRadians(180)), Math.toRadians(0))
                 .splineToSplineHeading(new Pose2d(48, -48, Math.toRadians(180)), Math.toRadians(30))

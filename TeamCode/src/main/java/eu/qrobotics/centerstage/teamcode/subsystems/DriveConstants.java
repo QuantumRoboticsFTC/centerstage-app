@@ -14,14 +14,14 @@ import java.util.Arrays;
 
 @Config
 public class DriveConstants {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 0.5);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(9, 0, 0.75);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1.7;
 
-    public static double WHEEL_RADIUS = 1.8897; // in
+    public static double WHEEL_RADIUS = 3.780 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 12.5; // in
+    public static double TRACK_WIDTH = 15; // in
 
     public static double MAX_ANG_VEL = Math.toRadians(180);
     public static double MAX_ANG_ACCEL = Math.toRadians(180);
@@ -48,8 +48,8 @@ public class DriveConstants {
             getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
     public static double kV = 0.0125; //0.013
-    public static double kA = 0.0055; //0.004
-    public static double kStatic = 0.002; //0.0001
+    public static double kA = 0.004; //0.004
+    public static double kStatic = 0.04; //0.0001
 
     public static double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;

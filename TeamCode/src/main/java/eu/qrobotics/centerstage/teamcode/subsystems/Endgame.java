@@ -27,13 +27,14 @@ public class Endgame implements Subsystem {
     public DroneState droneState;
 
     public static double CLIMB_PASSIVE_POSITION = 0.26;
-    public static double CLIMB_SHOOTER_POSITION = 0.55;
+    public static double CLIMB_SHOOTER_POSITION = 0.5;
+
     public static double CLIMB_ACTIVE_POSITION = 0.7;
     public static double offset = 0.29;
     public static double shooterClimbPosition;
 
-    public static double SHOOTER_PASSIVE_POSITION = 0;
-    public static double SHOOTER_ACTIVE_POSITION = 1;
+    public static double SHOOTER_PASSIVE_POSITION = 0.33;
+    public static double SHOOTER_ACTIVE_POSITION = 0.05;
 
     private CachingServoImplEx leftServo;
     private CachingServoImplEx rightServo;
@@ -43,6 +44,7 @@ public class Endgame implements Subsystem {
 
     private void updateShooterPosition() {
 //        TODO: dynamic shooter
+
         return;
     }
 

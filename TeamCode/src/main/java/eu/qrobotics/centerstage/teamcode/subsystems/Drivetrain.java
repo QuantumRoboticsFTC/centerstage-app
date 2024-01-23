@@ -17,14 +17,16 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.NanoClock;
-import com.qualcomm.hardware.bosch.BHI260IMU;
+import eu.qrobotics.centerstage.teamcode.util.BNO055IMUUtil;
+
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -75,9 +77,14 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     private Robot robot;
     private boolean isAutonomous;
 
-    private DcMotorEx leftFront, leftRear, rightRear, rightFront;
+    public DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
-    private BHI260IMU imu;
+
+    private IMU imuChub;
+    private IMU imuEhub;
+    public static double initPitchChub;
+    public static double initPitchEhub;
+
     private IMU.Parameters IMUParameters;
 
     private double[] motorPowers;
@@ -116,8 +123,13 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         );
-        imu = hardwareMap.get(BHI260IMU.class, "imu");
-        imu.initialize(IMUParameters);
+        imuChub = hardwareMap.get(IMU.class, "imu");
+        imuChub.initialize(IMUParameters);
+        initPitchChub = 0;
+
+        imuEhub = hardwareMap.get(IMU.class, "bbno$");
+        imuEhub.initialize(IMUParameters);
+        initPitchEhub = 0;
 
         poseHistory = new LinkedList<>();
 
@@ -131,6 +143,11 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+//        INTAKEI NFRONT
+//        leftFront = hardwareMap.get(DcMotorEx.class, "rightRear");
+//        leftRear = hardwareMap.get(DcMotorEx.class, "rightFront");
+//        rightRear = hardwareMap.get(DcMotorEx.class, "leftFront");
+//        rightFront = hardwareMap.get(DcMotorEx.class, "leftRear");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
@@ -323,19 +340,53 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         rightFront.setPower(v3);
     }
 
+    public double getPitchValueChub() {
+        return imuChub.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS) - initPitchChub;
+    }
+
+    public double getPitchValueEhub() {
+        return imuEhub.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS) - initPitchEhub;
+    }
+
     public double getPitchValue() {
-        return imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
+        return getPitchValueEhub();
     }
 
     @Override
     public double getRawExternalHeading() {
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-//        return 0;
+//        return imuChub.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        return 0;
+    }
+
+    // CHUB
+    public double getTruePitchChub() {
+        return imuChub.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
+    }
+
+    public double getTrueYawChub() {
+        return imuChub.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    }
+
+    public double getTrueRollChub() {
+        return imuChub.getRobotYawPitchRollAngles().getRoll(AngleUnit.RADIANS);
+    }
+
+    // EHUB
+    public double getTruePitchEhub() {
+        return imuEhub.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS);
+    }
+
+    public double getTrueYawEhub() {
+        return imuEhub.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    }
+
+    public double getTrueRollEhub() {
+        return imuEhub.getRobotYawPitchRollAngles().getRoll(AngleUnit.RADIANS);
     }
 
     @Override
     public Double getExternalHeadingVelocity() {
-        return (double) imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+        return (double) imuChub.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
     }
 
     @NonNull

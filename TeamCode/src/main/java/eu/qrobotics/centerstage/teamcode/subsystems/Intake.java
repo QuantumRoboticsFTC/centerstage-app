@@ -20,6 +20,7 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingServoImplEx;
 public class Intake implements Subsystem {
     public enum IntakeMode {
         IN,
+        IN_SLOW,
         IDLE,
         OUT,
         OUT_SLOW
@@ -28,6 +29,7 @@ public class Intake implements Subsystem {
     public enum DropdownState {
         DOWN,
         UP,
+        STACK_5,
         MANUAL
     }
 
@@ -39,11 +41,12 @@ public class Intake implements Subsystem {
     public static double INTAKE_IN_SPEED = -0.8;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = 1;
-    public static double INTAKE_OUT_SLOW_SPEED = 0.5;
+    public static double INTAKE_OUT_SLOW_SPEED = 0.3;
+    public static double INTAKE_IN_SLOW_SPEED = -0.65;
 
     public static double INTAKE_DROPDOWN_UP = 0.44;
-    public static double INTAKE_DROPDOWN_DOWN = 0.75;
-    public double manualPosition;
+    public static double INTAKE_DROPDOWN_DOWN = 0.754;
+    public static double manualPosition;
 
     private CachingDcMotorEx motor;
     private CachingServo servo;
@@ -81,6 +84,9 @@ public class Intake implements Subsystem {
         switch (intakeMode) {
             case IN:
                 motor.setPower(INTAKE_IN_SPEED);
+                break;
+            case IN_SLOW:
+                motor.setPower(INTAKE_IN_SLOW_SPEED);
                 break;
             case IDLE:
                 motor.setPower(INTAKE_IDLE_SPEED);

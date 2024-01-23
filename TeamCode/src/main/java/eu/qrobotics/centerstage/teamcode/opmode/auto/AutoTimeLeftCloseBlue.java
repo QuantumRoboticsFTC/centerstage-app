@@ -10,15 +10,15 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineRed;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 AParkLeftCloseRed")
-public class AutoParkLeftCloseRed extends LinearOpMode {
+@Autonomous(name = "#00 ATimeCloseBlue")
+public class AutoTimeLeftCloseBlue extends LinearOpMode {
     Robot robot;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
@@ -27,7 +27,7 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
         int readFromCamera = noDetectionFlag;
 
         OpenCvCamera camera;
-        TeamPropPipelineRed teamPropPieline = new TeamPropPipelineRed();
+        TeamPropPipelineBlue teamPropPieline = new TeamPropPipelineBlue();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -66,19 +66,23 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
         return readFromCamera;
     }
 
+    void spin(double val) {
+        robot.drive.setMotorPowers(val, val, -val, -val);
+    }
+
+    void translational(double val) {
+        robot.drive.setMotorPowers(-val, val, -val, val);
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
         robot.intake.intakeMode = Intake.IntakeMode.IDLE;
         int camera = cameraTeamProp();
-//        if (camera == 1) {
-//            camera = 2;
-//        }
 //        int camera = 2;
 //        while (!isStarted() && !isStopRequested());
 
         robot.start();
-
         robot.sleep(1);
 
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
@@ -92,24 +96,24 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
         if (camera == 2) {
             // center
             robot.drive.setMotorPowers(-0.4, -0.4, -0.4, -0.4);
-            robot.sleep(0.75);
+            robot.sleep(0.73);
 
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.5);
+            robot.outtake.clawState = Outtake.ClawState.CLOSED;
             robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
             robot.sleep(0.6);
             robot.intake.intakeMode = Intake.IntakeMode.IDLE;
 
             // spate un pic
             robot.drive.setMotorPowers(0.3, 0.3, 0.3, 0.3);
-            robot.outtake.clawState = Outtake.ClawState.CLOSED;
-            robot.sleep(0.26);
+            robot.sleep(0.3);
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.5);
 
             // spin
-            robot.drive.setMotorPowers(-0.4, -0.4, 0.4, 0.4);
-            robot.sleep(0.837);
+            spin(0.4);
+            robot.sleep(0.7);
             robot.drive.setMotorPowers(0, 0, 0, 0);
 
             robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
@@ -119,24 +123,25 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
 
             // go to backboard
             robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
-            robot.sleep(1.33);
+            robot.sleep(1.23);
+//            gotobackboard();
 
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(1.2);
-        } else if (camera == 1) {
+        } else if (camera == 3) {
             // stanga
             robot.drive.setMotorPowers(-0.4, -0.4, -0.4, -0.4);
             robot.sleep(0.48);
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.25);
 
-            robot.drive.setMotorPowers(-0.4, -0.4, 0.4, 0.4);
+            spin(0.4);
             robot.sleep(0.52);
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.3);
 
             robot.drive.setMotorPowers(-0.4, -0.4, -0.4, -0.4);
-            robot.sleep(0.18);
+            robot.sleep(0.23);
 
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.5);
@@ -146,25 +151,25 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
 
             // spate un pic
             robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
-            robot.sleep(0.4);
+            robot.sleep(0.45);
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.5);
             robot.drive.setMotorPowers(0, 0, 0, 0);
 
             // spin
-            robot.drive.setMotorPowers(-0.4, -0.4, 0.4, 0.4);
+            spin(0.4);
             robot.sleep(0.64);
             robot.drive.setMotorPowers(0, 0, 0, 0);
 
             // go to backboard
             robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
             robot.outtake.clawState = Outtake.ClawState.CLOSED;
-            robot.sleep(0.82);
+            robot.sleep(0.65);
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.5);
 
-            robot.drive.setMotorPowers(0.4, 0.4, -0.4, -0.4);
-            robot.sleep(0.375);
+            spin(-0.4);
+            robot.sleep(0.418);
             robot.drive.setMotorPowers(0, 0, 0, 0);
 
             robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
@@ -173,11 +178,12 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
             robot.sleep(0.7);
 
             robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
-            robot.sleep(0.72);
+            robot.sleep(0.64);
+//            gotobackboard();
             robot.drive.setMotorPowers(0, 0, 0, 0);
-        } else if (camera == 3) {
+        } else if (camera == 1) {
             // stanga
-            robot.drive.setMotorPowers(0.4, 0.4, -0.4, -0.4);
+            spin(-0.4);
             robot.sleep(0.22);
 
             robot.drive.setMotorPowers(-0.4, -0.4, -0.4, -0.4);
@@ -196,9 +202,9 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
             robot.sleep(0.4);
 
             // spin
-            robot.drive.setMotorPowers(-0.4, -0.4, 0.4, 0.4);
+            spin(0.4);
             robot.outtake.clawState = Outtake.ClawState.CLOSED;
-            robot.sleep(1.08);
+            robot.sleep(0.9);
             robot.drive.setMotorPowers(0, 0, 0, 0);
 
             robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
@@ -208,7 +214,8 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
 
             // go to backboard
             robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
-            robot.sleep(1.15);
+            robot.sleep(1.23);
+//            gotobackboard();
             robot.drive.setMotorPowers(0, 0, 0, 0);
             robot.sleep(0.4);
         }
@@ -227,17 +234,23 @@ public class AutoParkLeftCloseRed extends LinearOpMode {
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(1);
 
-        robot.drive.setMotorPowers(0.6, -0.6, 0.6, -0.6);
+        translational(0.6);
         if (camera == 2) {
-            robot.sleep(1);
+            robot.sleep(0.82);
         } else if (camera == 1) {
-            robot.sleep(1.22);
+            robot.sleep(1.07);
         } else if (camera == 3) {
             robot.sleep(0.65);
         }
         robot.drive.setMotorPowers(0, 0, 0, 0);
+        robot.sleep(0.5);
+
+        robot.drive.setMotorPowers(0.4, 0.4, 0.4, 0.4);
+        robot.sleep(0.75);
+
+        robot.drive.setMotorPowers(0, 0, 0, 0);
+        robot.sleep(0.5);
 
         robot.stop();
     }
-
 }

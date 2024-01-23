@@ -38,8 +38,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
     public MovingStatistics top250, top100, top10;
     public Map<Subsystem, MovingStatistics> top100Subsystems = new HashMap<>();
 
-    public static int pixelsInRobot;
-
     private boolean started;
 
     private static double getCurrentTime() {
@@ -80,12 +78,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
     };
 
     public Robot(OpMode opMode, boolean isAutonomous) {
-        if (isAutonomous) {
-            pixelsInRobot = 2;
-        } else {
-            pixelsInRobot = 0;
-        }
-
         // Initialize statistics
         top10 = new MovingStatistics(10);
         top100 = new MovingStatistics(100);

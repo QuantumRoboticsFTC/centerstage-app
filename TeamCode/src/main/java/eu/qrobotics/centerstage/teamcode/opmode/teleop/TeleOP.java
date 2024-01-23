@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
@@ -43,7 +44,6 @@ public class TeleOP extends OpMode {
     public static boolean elevatorTelemetry = true;
     public static boolean drivetrainTelemetry = true;
     public static boolean extraTelemetry = true;
-
     public static boolean debugTelemetry = false;
 
     public static boolean left_trigger_pressed;
@@ -115,9 +115,10 @@ public class TeleOP extends OpMode {
         if (stickyGamepad1.y) {
             if (robot.drive.fieldCentric) {
                 robot.drive.fieldCentric = false;
-            } else {
-                robot.drive.fieldCentric = true;
             }
+//            } else {
+//                robot.drive.fieldCentric = true;
+//            }
         }
 
         // INTAKE
@@ -264,22 +265,25 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case TRANSFER:
-                if (0.5 < transferTimer.seconds() && transferTimer.seconds() < 0.55) {
+                if (0.45 < transferTimer.seconds() && transferTimer.seconds() < 0.65) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.7 < transferTimer.seconds() && transferTimer.seconds() < 0.75) {
+                if (0.75 < transferTimer.seconds() && transferTimer.seconds() < 0.95) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.POST_TRANSFER;
+                }
+                if (stickyGamepad2.right_bumper) {
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
                 break;
             case POST_TRANSFER:
-                if (0.9 < transferTimer.seconds() && transferTimer.seconds() < 0.95) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-                    robot.elevator.manualPower = 1;
-                }
-
-                if (1.0 < transferTimer.seconds() && transferTimer.seconds() < 1.05) {
+                if (1.0 < transferTimer.seconds() && transferTimer.seconds() < 1.2) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                }
+                if (stickyGamepad2.right_bumper) {
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+                    robot.outtake.outtakeState  = Outtake.OuttakeState.SCORE;
                 }
                 break;
             case SCORE:
@@ -300,19 +304,14 @@ public class TeleOP extends OpMode {
                 if (stickyGamepad2.right_bumper) {
                     transferTimer.reset();
                 }
-                if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.3) {
+                if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.35) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.4 < transferTimer.seconds() && transferTimer.seconds() < 0.45) {
+                if (0.4 < transferTimer.seconds() && transferTimer.seconds() < 0.5) {
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
                 }
-                if (0.65 < transferTimer.seconds() && transferTimer.seconds() < 0.6) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-                    robot.elevator.manualPower = 1;
+                if (0.65 < transferTimer.seconds() && transferTimer.seconds() < 0.75) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                }
-                if (0.95 < transferTimer.seconds() && transferTimer.seconds() < 1.0) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                 }
 
                 if (stickyGamepad2.a) {
@@ -328,11 +327,11 @@ public class TeleOP extends OpMode {
                 }
                 break;
         }
-        if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.25) {
+        if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
             robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
             leaveBackboardTimer.reset();
         }
-        if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.5) {
+        if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
             robot.outtake.rotateState = Outtake.RotateState.CENTER;
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
             robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
@@ -340,15 +339,15 @@ public class TeleOP extends OpMode {
         }
 
         // manual
-        if (gamepad2.right_stick_y != 0) {
-            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
-            robot.outtake.getManualValues();
-            robot.outtake.manualVDiffy += gamepad2.right_stick_y * -0.005;
-        }
         if (gamepad2.left_stick_y != 0) {
             robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
             robot.outtake.getManualValues();
             robot.outtake.manualHDiffy += gamepad2.left_stick_y * 0.005;
+        }
+        if (gamepad2.right_stick_y != 0) {
+            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
+            robot.outtake.getManualValues();
+            robot.outtake.manualVDiffy += gamepad2.right_stick_y * -0.005;
         }
 //        if (gamepad2.left_stick_y != 0) {
 //            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
@@ -377,6 +376,8 @@ public class TeleOP extends OpMode {
                     switch (robot.endgame.droneState) {
                         case PASSIVE:
                             robot.endgame.droneState = Endgame.DroneState.ACTIVE;
+                            robot.drive.initPitchChub = robot.drive.getPitchValueChub();
+                            robot.drive.initPitchEhub = robot.drive.getPitchValueEhub();
                             break;
                         case ACTIVE:
                             robot.endgame.climbState = Endgame.ClimbState.ACTIVE;
@@ -388,8 +389,11 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case ACTIVE:
-                robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
-                robot.elevator.elevatorState = Elevator.ElevatorState.CLIMBED;
+                if (stickyGamepad1.dpad_right) {
+                    robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                    robot.elevator.elevatorState = Elevator.ElevatorState.CLIMBED;
+                }
                 break;
         }
 
@@ -403,9 +407,9 @@ public class TeleOP extends OpMode {
         if (intakeTelemetry) {
             telemetry.addData("intake_motor_velocity_deg", robot.intake.getVelocity());
             telemetry.addData("intake_mode", robot.intake.intakeMode);
-            if (debugTelemetry) {
-                telemetry.addData("intake_motor_amps", robot.intake.getCurrent());
-            }
+//            if (debugTelemetry) {
+//                telemetry.addData("intake_motor_amps", robot.intake.getCurrent());
+//            }
         }
         telemetry.addLine("<----> OUTTAKE <---->");
         if (outtakeTelemetry) {
@@ -417,16 +421,16 @@ public class TeleOP extends OpMode {
             telemetry.addData("rotate state", robot.outtake.rotateState);
             telemetry.addData("rotate value", robot.outtake.getRotatePosition());
             telemetry.addData("claw state", robot.outtake.clawState);
-            if (debugTelemetry) {
-                telemetry.addData("manual rotate position", robot.outtake.manualRotatePos);
-                telemetry.addData("manual fourbar pos", robot.outtake.manualFourbarPos);
-                telemetry.addData("diffy_last_horizontal", robot.outtake.lastHDiffy);
-                telemetry.addData("diffy_last_vertical", robot.outtake.lastVDiffy);
-                telemetry.addData("diffy_horizontal_manual", robot.outtake.manualHDiffy);
-                telemetry.addData("diffy_vertical_manual", robot.outtake.manualVDiffy);
-                telemetry.addData("diffy left", robot.outtake.manualVDiffy + robot.outtake.manualHDiffy);
-                telemetry.addData("diffy right", robot.outtake.manualVDiffy - robot.outtake.manualHDiffy);
-            }
+//            if (debugTelemetry) {
+//                telemetry.addData("manual rotate position", robot.outtake.manualRotatePos);
+//                telemetry.addData("manual fourbar pos", robot.outtake.manualFourbarPos);
+//                telemetry.addData("diffy_last_horizontal", robot.outtake.lastHDiffy);
+//                telemetry.addData("diffy_last_vertical", robot.outtake.lastVDiffy);
+//                telemetry.addData("diffy_horizontal_manual", robot.outtake.manualHDiffy);
+//                telemetry.addData("diffy_vertical_manual", robot.outtake.manualVDiffy);
+//                telemetry.addData("diffy left", robot.outtake.manualVDiffy + robot.outtake.manualHDiffy);
+//                telemetry.addData("diffy right", robot.outtake.manualVDiffy - robot.outtake.manualHDiffy);
+//            }
         }
         telemetry.addLine("<----> ELEVATOR <---->");
         if (elevatorTelemetry) {
@@ -436,20 +440,26 @@ public class TeleOP extends OpMode {
             telemetry.addData("elevator_encoder", robot.elevator.getCurrentPosition());
             telemetry.addData("manual offset", robot.elevator.manualOffset);
             telemetry.addData("ground offset", robot.elevator.groundPositionOffset);
-            if (debugTelemetry) {
-                telemetry.addData("elevator_left_motor_amps", robot.elevator.getCurrentLeft());
-                telemetry.addData("elevator_right_motor_amps", robot.elevator.getCurrentRight());
-            }
+            telemetry.addData("left trigger", gamepad2.left_trigger);
+            telemetry.addData("right trigger", gamepad2.right_trigger);
+//            if (debugTelemetry) {
+//                telemetry.addData("elevator_left_motor_amps", robot.elevator.getCurrentLeft());
+//                telemetry.addData("elevator_right_motor_amps", robot.elevator.getCurrentRight());
+//            }
         }
         telemetry.addLine("<----> DRIVETRAIN <---->");
         if (drivetrainTelemetry) {
             telemetry.addData("field centric", robot.drive.fieldCentric);
-            telemetry.addData("heading val", robot.drive.getRawExternalHeading());
-            telemetry.addData("heading velocity", robot.drive.getExternalHeadingVelocity());
         }
         telemetry.addLine("<----> MISC <---->");
         if (extraTelemetry) {
-            telemetry.addData("pitch value", robot.drive.getPitchValue());
+            telemetry.addData("climb_state", robot.endgame.climbState);
+            telemetry.addData("pitch chub", robot.drive.getTruePitchChub());
+            telemetry.addData("pitch ehub", robot.drive.getTruePitchEhub());
+            telemetry.addData("roll chub", robot.drive.getTrueRollChub());
+            telemetry.addData("roll ehub", robot.drive.getTrueRollEhub());
+            telemetry.addData("yaw chub", robot.drive.getTrueYawChub());
+            telemetry.addData("yaw ehub", robot.drive.getTrueYawEhub());
         }
 
         addStatistics();

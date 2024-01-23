@@ -48,12 +48,14 @@ public class Outtake implements Subsystem {
     public static double HDIFFY_LEFT_POS = -0.14;
     public static double HDIFFY_CENTER_POS = 0.115;
     public static double HDIFFY_RIGHT_POS = 0.38;
-    public static double vDiffyThreshold = 0.54;
+    public static double vDiffyThresholdVS = 0.4; // vertical speed
+    public static double vDiffyThresholdH = 0.54; // horizontal moving
+    public static double hDiffyThreshold = 0.02;
     public static double currVDiffy;
     public static double currHDiffy;
-    public static double gainVDiffyUp = 0.03;
-    public static double gainVDiffyDown = 0.0125;
-    public static double gainHDiffy = 0.03;
+    public static double gainVDiffyInside = 0.005;
+    public static double gainVDiffyOutside = 0.03;
+    public static double gainHDiffy = 0.02; //0.035
 
     // Other Outtake Servo Values
     public static double FOURBAR_TRANSFER_POS = 0.13;
@@ -63,9 +65,9 @@ public class Outtake implements Subsystem {
     public static double CLAW_OPEN_POS = 0.2;
     public static double CLAW_CLOSE_POS = 0.8;
 
-    public static double ROTATE_TRANSFER_POS = 0.345;
-    public static double ROTATE_LEFT_POS = 0.03;
-    public static double ROTATE_RIGHT_POS = 0.68;
+    public static double ROTATE_TRANSFER_POS = 0.33;
+    public static double ROTATE_LEFT_POS = 0;
+    public static double ROTATE_RIGHT_POS = 0.665;
     public static double rotateGain = 1.3154; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual shit
@@ -88,8 +90,6 @@ public class Outtake implements Subsystem {
     private double diffyHPosition;
     public double lastVDiffy;
     public double lastHDiffy;
-    public static double DIFFYH = 0.0;
-    public static double DIFFYV = 0.2;
 
     public void getManualValues() {
         if (lastOuttakeState == OuttakeState.MANUAL) return;
@@ -100,22 +100,51 @@ public class Outtake implements Subsystem {
     }
 
     private boolean updateDiffyPosition() {
-        if (vDiffyThreshold < currVDiffy) {
+        if (outtakeState == OuttakeState.MANUAL) {
+            diffyVPosition = manualVDiffy;
+            if (diffyVPosition < vDiffyThresholdH) {
+                if (HDIFFY_CENTER_POS < manualHDiffy) {
+                    diffyHPosition = Math.min(manualHDiffy, HDIFFY_CENTER_POS + hDiffyThreshold);
+                } else {
+                    diffyHPosition = Math.max(manualHDiffy, HDIFFY_CENTER_POS - hDiffyThreshold);
+                }
+            } else {
+                diffyHPosition = manualHDiffy;
+            }
+        }
+
+        if (vDiffyThresholdH < currVDiffy) {
             if (diffyHPosition < currHDiffy) {
                 currHDiffy = Math.max(currHDiffy - gainHDiffy, diffyHPosition);
             }
             if (currHDiffy < diffyHPosition) {
                 currHDiffy = Math.min(currHDiffy + gainHDiffy, diffyHPosition);
             }
+        } else {
+            if (diffyHPosition < currHDiffy &&
+                    HDIFFY_CENTER_POS + hDiffyThreshold < currHDiffy) {
+                currHDiffy = Math.max(Math.max(currHDiffy - gainHDiffy, diffyHPosition), HDIFFY_CENTER_POS + hDiffyThreshold);
+            }
+            if (currHDiffy < diffyHPosition &&
+                    currHDiffy < HDIFFY_CENTER_POS + hDiffyThreshold) {
+                currHDiffy = Math.min(Math.min(currHDiffy + gainHDiffy, diffyHPosition), HDIFFY_CENTER_POS - hDiffyThreshold);
+            }
         }
         if (diffyVPosition < currVDiffy &&
-            currHDiffy == diffyHPosition) {
-            currVDiffy = Math.max(currVDiffy - gainVDiffyDown, diffyVPosition);
+                currHDiffy == diffyHPosition) {
+            if (currVDiffy <= vDiffyThresholdVS) {
+                currVDiffy = Math.max(currVDiffy - gainVDiffyInside, diffyVPosition);
+            } else {
+                currVDiffy = Math.max(currVDiffy - gainVDiffyOutside, diffyVPosition);
+            }
         }
-        if (currVDiffy < diffyVPosition) {
-            currVDiffy = Math.min(currVDiffy + gainVDiffyUp, diffyVPosition);
+        if (currVDiffy <= diffyVPosition) {
+            if (currVDiffy <= vDiffyThresholdVS) {
+                currVDiffy = Math.max(currVDiffy + gainVDiffyInside, diffyVPosition);
+            } else {
+                currVDiffy = Math.max(currVDiffy + gainVDiffyOutside, diffyVPosition);
+            }
         }
-
 
         if (outtakeState != OuttakeState.MANUAL) {
             if (Math.min(currVDiffy - currHDiffy, currVDiffy + currHDiffy) < 0 ||
@@ -168,7 +197,6 @@ public class Outtake implements Subsystem {
         if (outtakeState != OuttakeState.MANUAL) {
             manualRotatePos = 0;
         }
-
         rotateServo.setPosition(position + manualRotatePos);
     }
 

@@ -27,7 +27,8 @@ public class Elevator implements Subsystem {
     public enum TargetHeight {
         FIRST_LINE,
         SECOND_LINE,
-        THIRD_LINE
+        THIRD_LINE,
+        AUTO_HEIGHT
     }
 
     public ElevatorState elevatorState;
@@ -36,14 +37,15 @@ public class Elevator implements Subsystem {
 
     public static double TRANSFER_POSITION = 0;
     public static double FIRST_POSITION = 250;
+    public static double AUTO_HEIGHT = 380;
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
     public static double IDLE_POWER = 0.13;
     public static double climbedPosition;
-    public static double imuPitchGain = 25;
+    public static double imuPitchGain = 70;
 
     public double groundPositionOffset;
-    public double heightCap = 850;
+    public double heightCap = 910;
     public double manualOffset;
 
     public double manualPower;
@@ -56,7 +58,9 @@ public class Elevator implements Subsystem {
     private MotionProfile mp;
     public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.00045, 0.00035);
     private PIDFController controller = new PIDFController(coefs);
-    public static double ff1 = 0.05, ff2 = 0.00007;
+    public static double ff1 = 0.05;
+
+    public static double diffyHOffset = 60;
 
     private CachingDcMotorEx motorLeft;
     private CachingDcMotorEx motorRight;
@@ -98,31 +102,48 @@ public class Elevator implements Subsystem {
             case FIRST_LINE:
                 return FIRST_POSITION + manualOffset + groundPositionOffset;
             case SECOND_LINE:
-                return SECOND_POSITION + manualOffset + groundPositionOffset;
+                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
+                    return SECOND_POSITION + manualOffset + groundPositionOffset;
+                } else {
+                    return SECOND_POSITION + manualOffset + groundPositionOffset + diffyHOffset;
+                }
             case THIRD_LINE:
-                return THIRD_POSITION + manualOffset + groundPositionOffset;
+                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
+                    return THIRD_POSITION + manualOffset + groundPositionOffset;
+                } else {
+                    return THIRD_POSITION + manualOffset + groundPositionOffset + diffyHOffset;
+                }
+            case AUTO_HEIGHT:
+                return AUTO_HEIGHT;
         }
         return 0;
     }
 
     public double getTargetPosition(ElevatorState es, TargetHeight ta) {
         if (es == ElevatorState.TRANSFER) {
-            return TRANSFER_POSITION;
+            return TRANSFER_POSITION + groundPositionOffset;
         }
         switch (ta) {
             case FIRST_LINE:
                 return FIRST_POSITION + groundPositionOffset;
             case SECOND_LINE:
-                return SECOND_POSITION + groundPositionOffset;
+                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
+                    return SECOND_POSITION + groundPositionOffset;
+                } else {
+                    return SECOND_POSITION + groundPositionOffset + diffyHOffset;
+                }
             case THIRD_LINE:
-                return THIRD_POSITION + groundPositionOffset;
+                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
+                    return THIRD_POSITION + groundPositionOffset;
+                } else {
+                    return THIRD_POSITION + groundPositionOffset + diffyHOffset;
+                }
         }
         return 0;
     }
 
     private void updateClimbedPosition() {
-//        TODO: auto glisiere pe imu
-        climbedPosition = climbedPosition + robot.drive.getPitchValue() * imuPitchGain;
+        climbedPosition = climbedPosition + ((robot.drive.getPitchValue()) * imuPitchGain);
         if (climbedPosition < groundPositionOffset)
             climbedPosition = 0;
         if (climbedPosition > groundPositionOffset + heightCap)
@@ -180,12 +201,13 @@ public class Elevator implements Subsystem {
         if (elevatorState == ElevatorState.LINES ||
             elevatorState == ElevatorState.TRANSFER) {
             controller.setTargetPosition(getTargetPosition());
-            setPower(controller.update(getCurrentPosition()) + ff1 + getCurrentPosition() * ff2);
+            setPower(controller.update(getCurrentPosition()) + ff1);
         } else if (elevatorState == ElevatorState.MANUAL) {
             setPower(manualPower);
         } else if (elevatorState == ElevatorState.CLIMBED) {
             updateClimbedPosition();
-            setPower(climbedPosition);
+            controller.setTargetPosition(climbedPosition);
+            setPower(controller.update(getCurrentPosition()) + ff1);
         }
 
         // TODO: MP IN PID
@@ -206,7 +228,7 @@ public class Elevator implements Subsystem {
         controller.setTargetVelocity(state.getV());
         controller.setTargetAcceleration(state.getA());
 
-        double power = controller.update(getCurrentPosition()) + ff1 + getCurrentPosition() * ff2;
+        double power = controller.update(getCurrentPosition()) + ff1;
         setPower(power);
     }
 }
