@@ -1,5 +1,7 @@
 package eu.qrobotics.centerstage.teamcode.cv;
 
+import android.graphics.Canvas;
+
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Core;
@@ -8,7 +10,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public abstract class TeamPropDetection implements VisionProcessor {
+public class TeamPropDetection implements VisionProcessor {
     private Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
     private Scalar bLowerBound = new Scalar(105.0, 80.0, 35.0);
     private Scalar bUpperBound = new Scalar(120.0, 255.0, 255.0);
@@ -21,6 +23,10 @@ public abstract class TeamPropDetection implements VisionProcessor {
     private int cnt = 0;
 
     Mat processMat = new Mat();
+
+    public TeamPropDetection(boolean isPropRed){
+        this.isPropRed=isPropRed;
+    }
 
     public double getMax() {
         return 0;
@@ -91,4 +97,10 @@ public abstract class TeamPropDetection implements VisionProcessor {
 
         return null;
     }
+
+    @Override
+    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+
+    }
+
 }

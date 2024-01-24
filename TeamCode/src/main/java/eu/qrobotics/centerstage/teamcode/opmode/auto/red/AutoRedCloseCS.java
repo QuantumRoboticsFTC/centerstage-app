@@ -1,5 +1,6 @@
 package eu.qrobotics.centerstage.teamcode.opmode.auto.red;
 
+import android.graphics.Canvas;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -8,10 +9,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
@@ -34,34 +39,52 @@ public class AutoRedCloseCS extends LinearOpMode {
     public static int cycleCount = 2;
     int trajectoryIdx = 0;
 
-    int cameraTeamProp() {
+    private AprilDetector aprilDetector;
+
+    int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
+
+        teamPropDetectionRed= new TeamPropDetection(true);
+
+        telemetry.addData("Webcam 1", "Initing");
+        telemetry.update();
 
         visionPortalTeamProp = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(1920, 1080))
                 .addProcessor(teamPropDetectionRed)
-                .enableLiveView(true)
+                .setLiveViewContainerId(portalId)
                 .build();
 
         telemetry.setMsTransmissionInterval(50);
 
         if (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            telemetry.addData("Camera", "Waiting");
+            telemetry.addData("Webcam 1", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
+                telemetry.addData("Webcam 1", "Waiting");
+                telemetry.addData("State", visionPortalTeamProp.getCameraState());
+                telemetry.update();
+                sleep(50);
+                //sleep(20);
             }
-            telemetry.addData("Camera", "Ready");
+            telemetry.addData("Webcam 1", "Ready");
             telemetry.update();
         }
 
-        if (isStopRequested()) {
+        if (isStopRequested()&&!isStopRequested()) {
             robot.stop();
             return robotStopFlag;
         }
 
+        while(!isStarted()){
+            readFromCamera=teamPropDetectionRed.getTeamProp();
+            telemetry.addData("Case", readFromCamera);
+            telemetry.update();
+        }
+
         visionPortalTeamProp.close();
+
         return readFromCamera;
     }
 
@@ -110,7 +133,15 @@ public class AutoRedCloseCS extends LinearOpMode {
         trajectoriesCenter = TrajectoryCloseRedCS.getTrajectories(robot, cycleCount, 2, false);
         trajectoriesRight = TrajectoryCloseRedCS.getTrajectories(robot, cycleCount, 3, false);
 
-        teamProp = cameraTeamProp();
+        int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
+
+
+        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
+        setManualExposure(6,250);
+        robot.setTagDetector(aprilDetector);
+        teamProp = cameraTeamProp(portals[1]);
+        aprilDetector.track=false;
+
         robot.start();
         // TODO: is this order? ^^^^
 
@@ -228,6 +259,45 @@ public class AutoRedCloseCS extends LinearOpMode {
 //        robot.sleep(0.1);
 
         robot.stop();
+    }
+
+
+    private void setManualExposure(int exposureMS, int gain) {
+        // Wait for the camera to be open, then use the controls
+
+        if (aprilDetector.visionPortal == null) {
+            return;
+        }
+
+        // Make sure camera is streaming before we try to set the exposure controls
+        if (aprilDetector.visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Webcam 2", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (aprilDetector.visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                telemetry.addData("Webcam 2", "Waiting");
+                telemetry.addData("State:", aprilDetector.visionPortal.getCameraState());
+                telemetry.update();
+                sleep(50);
+            }
+            telemetry.addData("Webcam 2", "Ready");
+            telemetry.update();
+        }
+
+        // Set camera controls unless we are stopping.
+        if (!isStopRequested())
+        {
+            ExposureControl exposureControl = aprilDetector.visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                sleep(50);
+            }
+            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            sleep(20);
+            GainControl gainControl = aprilDetector.visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+            sleep(20);
+        }
+
     }
 
 }

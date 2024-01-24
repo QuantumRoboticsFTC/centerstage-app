@@ -12,11 +12,15 @@ import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.kinematics.Kinematics;
+import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.NanoClock;
+
+import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.util.BNO055IMUUtil;
 
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -96,6 +100,10 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public double rotateScale = 0.8;
 
     public boolean fieldCentric = false;
+
+    public AprilDetector aprilDetector;
+
+
 
     Drivetrain(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -255,6 +263,13 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         if(IS_DISABLED) return;
 
         updatePoseEstimate();
+        //TODO:: Add april detection
+        if(aprilDetector!=null&&aprilDetector.track&&aprilDetector.detected){
+            Pose2d currentPose=getPoseEstimate();
+            Pose2d newPose=new Pose2d(aprilDetector.pose2d.getX(),aprilDetector.pose2d.getY(),currentPose.getHeading());//,aprilDetector.pose2d.getHeading());
+
+            setPoseEstimate(newPose);
+        }
 
         if (!isAutonomous) {
             setMotorPowers(motorPowers[0], motorPowers[1], motorPowers[2], motorPowers[3]);
@@ -282,6 +297,13 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         packet.put("xError", lastError.getX());
         packet.put("yError", lastError.getY());
         packet.put("headingError (deg)", Math.toDegrees(lastError.getHeading()));
+
+        if(aprilDetector!=null){
+            packet.put("Debug april",aprilDetector.debugText);
+        }
+        else{
+            packet.put("Debug april","Is null");
+        }
 
         switch (mode) {
             case IDLE:
@@ -330,6 +352,28 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         packet.put("Battery", batteryVoltageSensor.getVoltage());
 
         dashboard.sendTelemetryPacket(packet);
+    }
+
+    @Override
+    public void setDriveSignal(DriveSignal driveSignal) {
+        List<Double> velocities = MecanumKinematics.robotToWheelVelocities(
+                driveSignal.getVel(),
+               TRACK_WIDTH,
+                TRACK_WIDTH,
+               LATERAL_MULTIPLIER
+        );
+        List<Double> accelerations = MecanumKinematics.robotToWheelAccelerations(
+                driveSignal.getAccel(),
+                TRACK_WIDTH,
+                TRACK_WIDTH,
+                LATERAL_MULTIPLIER
+        );
+        List<Double> powers = Kinematics.calculateMotorFeedforward(velocities, accelerations, kV, kA, kStatic);
+        setMotorPowers(powers.get(0), powers.get(1), powers.get(2), powers.get(3));
+    }
+
+    public void setTagDetector(AprilDetector aprilDetector){
+        this.aprilDetector=aprilDetector;
     }
 
     @Override

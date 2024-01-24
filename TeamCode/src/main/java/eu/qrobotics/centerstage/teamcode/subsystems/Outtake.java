@@ -53,7 +53,7 @@ public class Outtake implements Subsystem {
     public static double hDiffyThreshold = 0.02;
     public static double currVDiffy;
     public static double currHDiffy;
-    public static double gainVDiffyInside = 0.005;
+    public static double gainVDiffyInside = 0.01;
     public static double gainVDiffyOutside = 0.03;
     public static double gainHDiffy = 0.035; //0.035
 
