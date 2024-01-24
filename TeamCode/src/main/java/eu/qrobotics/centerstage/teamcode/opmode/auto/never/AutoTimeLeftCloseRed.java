@@ -19,7 +19,6 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;

@@ -1,18 +1,21 @@
 package eu.qrobotics.centerstage.teamcode.opmode.auto.blue;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryFarBlue;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
@@ -25,37 +28,33 @@ public class AutoBlueFarCS extends LinearOpMode {
     Robot robot;
     List<Trajectory> trajectories;
 
+    private VisionPortal visionPortalTeamProp;
+    private TeamPropDetection teamPropDetectionRed;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
+    int teamProp = -1;
+    public static int cycleCount = 2;
+    int trajectoryIdx = 0;
 
     int cameraTeamProp() {
         int readFromCamera = noDetectionFlag;
 
-        OpenCvCamera camera;
-        TeamPropPipelineBlue teamPropPieline = new TeamPropPipelineBlue();
-
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-
-        camera.setPipeline(teamPropPieline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                camera.startStreaming(1920, 1080, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {
-                // :salute:
-            }
-        });
+        visionPortalTeamProp = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(1920, 1080))
+                .addProcessor(teamPropDetectionRed)
+                .enableLiveView(true)
+                .build();
 
         telemetry.setMsTransmissionInterval(50);
 
-        while (!isStarted() && !isStopRequested()) {
-            readFromCamera = teamPropPieline.getTeamProp();
-            telemetry.addData("getTeamProp() ", teamPropPieline.getTeamProp());
-            telemetry.addData("readFromCamera ", readFromCamera);
+        if (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Camera", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                sleep(20);
+            }
+            telemetry.addData("Camera", "Ready");
             telemetry.update();
         }
 
@@ -64,7 +63,7 @@ public class AutoBlueFarCS extends LinearOpMode {
             return robotStopFlag;
         }
 
-        camera.closeCameraDeviceAsync(() -> {});
+        visionPortalTeamProp.close();
         return readFromCamera;
     }
 
