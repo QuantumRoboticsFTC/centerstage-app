@@ -37,8 +37,8 @@ public class DriveConstants {
     public static TrajectoryVelocityConstraint NORMAL_VEL_CONSTRAINT = new MecanumVelocityConstraint(40, TRACK_WIDTH, LATERAL_MULTIPLIER);
     public static TrajectoryAccelerationConstraint NORMAL_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(40);
 
-    public static TrajectoryVelocityConstraint SLOW_VEL_CONSTRAINT = new MecanumVelocityConstraint(7, TRACK_WIDTH, LATERAL_MULTIPLIER);
-    public static TrajectoryAccelerationConstraint SLOW_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(30);
+    public static TrajectoryVelocityConstraint SLOW_VEL_CONSTRAINT = new MecanumVelocityConstraint(25, TRACK_WIDTH, LATERAL_MULTIPLIER);
+    public static TrajectoryAccelerationConstraint SLOW_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(33);
 
     public static final double TICKS_PER_REV = 384.5;
     public static final double MAX_RPM = 435;

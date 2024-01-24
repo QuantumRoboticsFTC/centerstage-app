@@ -113,7 +113,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
         if(isAutonomous) {
             follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                    new Pose2d(0.25, 0.25, Math.toRadians(0.0)), 1.5);
+                    new Pose2d(0.25, 0.25, Math.toRadians(0.0)), 0.5);
         }
         motorPowers = new double[]{0.0, 0.0, 0.0, 0.0};
 

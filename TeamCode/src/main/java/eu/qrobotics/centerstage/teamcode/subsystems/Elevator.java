@@ -28,18 +28,25 @@ public class Elevator implements Subsystem {
         FIRST_LINE,
         SECOND_LINE,
         THIRD_LINE,
-        AUTO_HEIGHT
+        AUTO_HEIGHT0,
+        AUTO_HEIGHT1,
+        AUTO_HEIGHT2
     }
 
     public ElevatorState elevatorState;
     public ElevatorState lastState;
     public TargetHeight targetHeight;
 
-    public static double TRANSFER_POSITION = 0;
+    public static double TRANSFER_POSITION = -20;
     public static double FIRST_POSITION = 250;
-    public static double AUTO_HEIGHT = 380;
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
+    public static double AUTO_HEIGHT0 = 420; // preload
+    public static double AUTO_HEIGHT1 = 480; // first cycle
+    public static double AUTO_HEIGHT2 = 590; // second cycle
+    public static double NEUTRAL_SIDE_THRESHOLD = 300;
+    public static double diffyHOffset = 230;
+    public static double diffyValue = 0;
     public static double IDLE_POWER = 0.13;
     public static double climbedPosition;
     public static double imuPitchGain = 70;
@@ -59,8 +66,6 @@ public class Elevator implements Subsystem {
     public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.00045, 0.00035);
     private PIDFController controller = new PIDFController(coefs);
     public static double ff1 = 0.05;
-
-    public static double diffyHOffset = 60;
 
     private CachingDcMotorEx motorLeft;
     private CachingDcMotorEx motorRight;
@@ -96,48 +101,36 @@ public class Elevator implements Subsystem {
 
     public double getTargetPosition() {
         if (elevatorState == ElevatorState.TRANSFER) {
-            return TRANSFER_POSITION + groundPositionOffset;
+            return TRANSFER_POSITION + groundPositionOffset + diffyValue;
         }
         switch (targetHeight) {
             case FIRST_LINE:
-                return FIRST_POSITION + manualOffset + groundPositionOffset;
+                return FIRST_POSITION + manualOffset + groundPositionOffset + diffyValue;
             case SECOND_LINE:
-                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
-                    return SECOND_POSITION + manualOffset + groundPositionOffset;
-                } else {
-                    return SECOND_POSITION + manualOffset + groundPositionOffset + diffyHOffset;
-                }
+                return SECOND_POSITION + manualOffset + groundPositionOffset + diffyValue;
             case THIRD_LINE:
-                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
-                    return THIRD_POSITION + manualOffset + groundPositionOffset;
-                } else {
-                    return THIRD_POSITION + manualOffset + groundPositionOffset + diffyHOffset;
-                }
-            case AUTO_HEIGHT:
-                return AUTO_HEIGHT;
+                return THIRD_POSITION + manualOffset + groundPositionOffset + diffyValue;
+            case AUTO_HEIGHT0:
+                return AUTO_HEIGHT0;
+            case AUTO_HEIGHT1:
+                return AUTO_HEIGHT1;
+            case AUTO_HEIGHT2:
+                return AUTO_HEIGHT2;
         }
         return 0;
     }
 
     public double getTargetPosition(ElevatorState es, TargetHeight ta) {
         if (es == ElevatorState.TRANSFER) {
-            return TRANSFER_POSITION + groundPositionOffset;
+            return TRANSFER_POSITION + groundPositionOffset + diffyValue;
         }
         switch (ta) {
             case FIRST_LINE:
-                return FIRST_POSITION + groundPositionOffset;
+                return FIRST_POSITION + groundPositionOffset + diffyValue;
             case SECOND_LINE:
-                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
-                    return SECOND_POSITION + groundPositionOffset;
-                } else {
-                    return SECOND_POSITION + groundPositionOffset + diffyHOffset;
-                }
+                return SECOND_POSITION + groundPositionOffset + diffyValue;
             case THIRD_LINE:
-                if (robot.outtake.diffyHState != Outtake.DiffyHortizontalState.CENTER) {
-                    return THIRD_POSITION + groundPositionOffset;
-                } else {
-                    return THIRD_POSITION + groundPositionOffset + diffyHOffset;
-                }
+                return THIRD_POSITION + groundPositionOffset + diffyValue;
         }
         return 0;
     }
@@ -185,6 +178,7 @@ public class Elevator implements Subsystem {
 
         manualPower = IDLE_POWER;
         climbedPosition = FIRST_POSITION;
+        diffyValue = 0;
     }
 
     public static boolean IS_DISABLED = false;
@@ -196,6 +190,14 @@ public class Elevator implements Subsystem {
 //        if (elevatorState == ElevatorState.TRANSFER) {
 //            manualOffset = 0;
 //        }
+
+        diffyValue = 0;
+        if (robot.outtake.diffyHState != Outtake.DiffyHorizontalState.CENTER &&
+            NEUTRAL_SIDE_THRESHOLD <= getTargetPosition()) {
+            diffyValue = diffyHOffset;
+        } else {
+            diffyValue = 0;
+        }
 
         // TODO: THIS IS EASY **PID TUNER**
         if (elevatorState == ElevatorState.LINES ||

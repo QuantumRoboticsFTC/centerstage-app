@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
@@ -199,17 +198,17 @@ public class TeleOP extends OpMode {
 //        }
 
         // ELEVATOR
-        if (gamepad2.right_trigger > 0.2) {
+        if (gamepad2.right_trigger > 0.1) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-            robot.elevator.manualPower = gamepad2.right_trigger;
-        } else if (gamepad2.left_trigger > 0.2) {
+            robot.elevator.manualPower = (gamepad2.right_trigger + Elevator.IDLE_POWER);
+        } else if (gamepad2.left_trigger > 0.1) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-            robot.elevator.manualPower = -gamepad2.left_trigger;
+            robot.elevator.manualPower = Elevator.IDLE_POWER - gamepad2.left_trigger;
         } else if (robot.elevator.elevatorState == Elevator.ElevatorState.MANUAL &&
                 (left_trigger_pressed ||
                 right_trigger_pressed)) {
             if (robot.elevator.lastState == Elevator.ElevatorState.TRANSFER) {
-                robot.elevator.groundPositionOffset = robot.elevator.getCurrentPosition() - robot.elevator.getTargetPosition(robot.elevator.lastState, robot.elevator.targetHeight);
+                robot.elevator.groundPositionOffset += robot.elevator.getCurrentPosition() - robot.elevator.getTargetPosition(robot.elevator.lastState, robot.elevator.targetHeight);
                 robot.elevator.elevatorState = robot.elevator.lastState;
                 robot.elevator.manualPower = Elevator.IDLE_POWER;
             }  else if (robot.elevator.lastState == Elevator.ElevatorState.LINES) {
@@ -248,13 +247,13 @@ public class TeleOP extends OpMode {
 
         // H DIFFY STATE
         if (stickyGamepad2.x) {
-            robot.outtake.diffyHState = Outtake.DiffyHortizontalState.LEFT;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
         }
         if (stickyGamepad2.y) {
-            robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         }
         if (stickyGamepad2.b) {
-            robot.outtake.diffyHState = Outtake.DiffyHortizontalState.RIGHT;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
 
         switch (robot.outtake.outtakeState) {
@@ -290,7 +289,7 @@ public class TeleOP extends OpMode {
                 if (stickyGamepad2.left_bumper) {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-                    robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 }
 
@@ -322,7 +321,7 @@ public class TeleOP extends OpMode {
                 if (stickyGamepad2.left_bumper) {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-                    robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 }
                 break;
@@ -334,7 +333,7 @@ public class TeleOP extends OpMode {
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
             robot.outtake.rotateState = Outtake.RotateState.CENTER;
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-            robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
             robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         }
 

@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.blue;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -13,16 +13,15 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.List;
 
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineRed;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryFarBlue;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryCloseBlue;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "04 AutoBlueFarCS")
-public class AutoBlueFarCS extends LinearOpMode {
+@Autonomous(name = "03 AutoBlueCloseCS", group = "Blue")
+public class AutoBlueCloseCS extends LinearOpMode {
     Robot robot;
     List<Trajectory> trajectories;
 
@@ -86,7 +85,7 @@ public class AutoBlueFarCS extends LinearOpMode {
         robot.intake.intakeMode = Intake.IntakeMode.IDLE;
     }
 
-    void placePixel(Outtake.DiffyHortizontalState hState, boolean goToBackboard) {
+    void placePixel(Outtake.DiffyHorizontalState hState, boolean goToBackboard) {
         // TODO: outtake in score mode
         robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
         robot.elevator.setTargetHeight(Elevator.TargetHeight.FIRST_LINE);
@@ -108,7 +107,7 @@ public class AutoBlueFarCS extends LinearOpMode {
 
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(0.3);
     }
@@ -116,7 +115,7 @@ public class AutoBlueFarCS extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryFarBlue.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryCloseBlue.START_POSE);
         int teamProp = cameraTeamProp();
 
         robot.start();
@@ -127,7 +126,7 @@ public class AutoBlueFarCS extends LinearOpMode {
             return;
         }
 
-        trajectories = TrajectoryFarBlue.getTrajectories(teamProp, false, true);
+        trajectories = TrajectoryCloseBlue.getTrajectories(robot, teamProp, false, true);
 
         solvePurplePixel();
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
@@ -139,11 +138,11 @@ public class AutoBlueFarCS extends LinearOpMode {
         robot.sleep(0.05);
         // we are now kinda in front of the backboard
         if (teamProp == 1) {
-            placePixel(Outtake.DiffyHortizontalState.LEFT, false);
+            placePixel(Outtake.DiffyHorizontalState.LEFT, false);
         } else if (teamProp == 2) {
-            placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+            placePixel(Outtake.DiffyHorizontalState.CENTER, false);
         } else if (teamProp == 3) {
-            placePixel(Outtake.DiffyHortizontalState.RIGHT, false);
+            placePixel(Outtake.DiffyHorizontalState.RIGHT, false);
         }
 
         // TODO: *cica* cycles
@@ -171,11 +170,11 @@ public class AutoBlueFarCS extends LinearOpMode {
             robot.sleep(0.01);
         }
         robot.sleep(0.02);
-        placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+        placePixel(Outtake.DiffyHorizontalState.CENTER, false);
         robot.sleep(0.02);
 
         // park
-        robot.drive.followTrajectory(trajectories.get(2));
+        robot.drive.followTrajectory(trajectories.get(5));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }

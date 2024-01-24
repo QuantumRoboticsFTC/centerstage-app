@@ -29,7 +29,7 @@ public class Outtake implements Subsystem {
         CLOSED
     }
 
-    public enum DiffyHortizontalState {
+    public enum DiffyHorizontalState {
         CENTER,
         LEFT,
         RIGHT
@@ -37,7 +37,7 @@ public class Outtake implements Subsystem {
 
     public ClawState clawState;
     public RotateState rotateState;
-    public DiffyHortizontalState diffyHState;
+    public DiffyHorizontalState diffyHState;
     public OuttakeState outtakeState;
     public OuttakeState lastOuttakeState;
 
@@ -45,9 +45,9 @@ public class Outtake implements Subsystem {
     public static double VDIFFY_TRANSFER_PREP_POS = 0.25;
     public static double VDIFFY_TRANSFER_POS = 0.215;
     public static double VDIFFY_SCORE_POS = 0.56;
-    public static double HDIFFY_LEFT_POS = -0.14;
+    public static double HDIFFY_LEFT_POS = -0.13;
     public static double HDIFFY_CENTER_POS = 0.115;
-    public static double HDIFFY_RIGHT_POS = 0.38;
+    public static double HDIFFY_RIGHT_POS = 0.36;
     public static double vDiffyThresholdVS = 0.4; // vertical speed
     public static double vDiffyThresholdH = 0.54; // horizontal moving
     public static double hDiffyThreshold = 0.02;
@@ -55,12 +55,13 @@ public class Outtake implements Subsystem {
     public static double currHDiffy;
     public static double gainVDiffyInside = 0.005;
     public static double gainVDiffyOutside = 0.03;
-    public static double gainHDiffy = 0.02; //0.035
+    public static double gainHDiffy = 0.035; //0.035
 
     // Other Outtake Servo Values
     public static double FOURBAR_TRANSFER_POS = 0.13;
     public static double FOURBAR_POST_TRANSFER_POS = 0.16;
-    public static double FOURBAR_SCORE_POS = 0.65;
+    public static double FOURBAR_SCORE_POS = 0.58;
+    public static double FOURBAR_SCORE_ANGLED_POS = 0.65;
 
     public static double CLAW_OPEN_POS = 0.2;
     public static double CLAW_CLOSE_POS = 0.8;
@@ -226,7 +227,7 @@ public class Outtake implements Subsystem {
         lastOuttakeState = OuttakeState.TRANSFER_PREP;
         clawState = ClawState.OPEN;
         rotateState = RotateState.CENTER;
-        diffyHState = DiffyHortizontalState.CENTER;
+        diffyHState = DiffyHorizontalState.CENTER;
 
         currVDiffy = VDIFFY_TRANSFER_PREP_POS;
         currHDiffy = HDIFFY_CENTER_POS;
@@ -268,16 +269,18 @@ public class Outtake implements Subsystem {
                 diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
                 break;
             case SCORE:
-                fourBarServo.setPosition(FOURBAR_SCORE_POS);
                 diffyVPosition = VDIFFY_SCORE_POS;
                 switch (diffyHState) {
                     case LEFT:
+                        fourBarServo.setPosition(FOURBAR_SCORE_ANGLED_POS);
                         diffyHPosition = HDIFFY_LEFT_POS;
                         break;
                     case CENTER:
+                        fourBarServo.setPosition(FOURBAR_SCORE_POS);
                         diffyHPosition = HDIFFY_CENTER_POS;
                         break;
                     case RIGHT:
+                        fourBarServo.setPosition(FOURBAR_SCORE_ANGLED_POS);
                         diffyHPosition = HDIFFY_RIGHT_POS;
                         break;
                 }

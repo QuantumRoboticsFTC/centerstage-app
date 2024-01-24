@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.never;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -11,13 +11,12 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
-import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 ATimeFarBlue")
+@Autonomous(name = "#00 ATimeFarBlue", group = "Time")
 public class AutoTimeLeftFarBlue extends LinearOpMode {
     Robot robot;
     int noDetectionFlag = -1;

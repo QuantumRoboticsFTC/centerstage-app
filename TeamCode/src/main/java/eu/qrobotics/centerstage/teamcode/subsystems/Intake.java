@@ -21,6 +21,7 @@ public class Intake implements Subsystem {
     public enum IntakeMode {
         IN,
         IN_SLOW,
+        IN_QUICK,
         IDLE,
         OUT,
         OUT_SLOW
@@ -30,6 +31,9 @@ public class Intake implements Subsystem {
         DOWN,
         UP,
         STACK_5,
+        STACK_4,
+        STACK_3,
+        STACK_2,
         MANUAL
     }
 
@@ -38,14 +42,19 @@ public class Intake implements Subsystem {
 
     public static double blockedThreshold = 100000;
 
+    public static double INTAKE_IN_QUICK_SPEED = -1;
     public static double INTAKE_IN_SPEED = -0.8;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = 1;
     public static double INTAKE_OUT_SLOW_SPEED = 0.3;
-    public static double INTAKE_IN_SLOW_SPEED = -0.65;
+    public static double INTAKE_IN_SLOW_SPEED = -0.3;
 
     public static double INTAKE_DROPDOWN_UP = 0.44;
     public static double INTAKE_DROPDOWN_DOWN = 0.754;
+    public static double INTAKE_DROPDOWN_5 = 0.622;
+    public static double INTAKE_DROPDOWN_4 = 0.645;
+    public static double INTAKE_DROPDOWN_3 = 0.69;
+    public static double INTAKE_DROPDOWN_2 = 0.72;
     public static double manualPosition;
 
     private CachingDcMotorEx motor;
@@ -88,6 +97,9 @@ public class Intake implements Subsystem {
             case IN_SLOW:
                 motor.setPower(INTAKE_IN_SLOW_SPEED);
                 break;
+            case IN_QUICK:
+                motor.setPower(INTAKE_IN_QUICK_SPEED);
+                break;
             case IDLE:
                 motor.setPower(INTAKE_IDLE_SPEED);
                 break;
@@ -105,6 +117,18 @@ public class Intake implements Subsystem {
                 break;
             case DOWN:
                 servo.setPosition(INTAKE_DROPDOWN_DOWN);
+                break;
+            case STACK_5:
+                servo.setPosition(INTAKE_DROPDOWN_5);
+                break;
+            case STACK_4:
+                servo.setPosition(INTAKE_DROPDOWN_4);
+                break;
+            case STACK_3:
+                servo.setPosition(INTAKE_DROPDOWN_3);
+                break;
+            case STACK_2:
+                servo.setPosition(INTAKE_DROPDOWN_2);
                 break;
             case MANUAL:
                 servo.setPosition(manualPosition);

@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
@@ -100,7 +100,7 @@ public class TrajectoryCloseBlue {
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
                 })
                 .addTemporalMarker(1.85, () -> {
-                    robot.outtake.diffyHState = Outtake.DiffyHortizontalState.RIGHT;
+                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
                 })
                 .build()
         );

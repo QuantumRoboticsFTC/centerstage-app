@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.red;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -12,16 +12,16 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryCloseBlue;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRed;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "03 AutoBlueCloseCS")
-public class AutoBlueCloseCS extends LinearOpMode {
+@Autonomous(name = "03 AutoRedFarCS", group = "Red")
+public class AutoRedFarCS extends LinearOpMode {
     Robot robot;
     List<Trajectory> trajectories;
 
@@ -32,7 +32,7 @@ public class AutoBlueCloseCS extends LinearOpMode {
         int readFromCamera = noDetectionFlag;
 
         OpenCvCamera camera;
-        TeamPropPipelineBlue teamPropPieline = new TeamPropPipelineBlue();
+        TeamPropPipelineRed teamPropPieline = new TeamPropPipelineRed();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -85,7 +85,7 @@ public class AutoBlueCloseCS extends LinearOpMode {
         robot.intake.intakeMode = Intake.IntakeMode.IDLE;
     }
 
-    void placePixel(Outtake.DiffyHortizontalState hState, boolean goToBackboard) {
+    void placePixel(Outtake.DiffyHorizontalState hState, boolean goToBackboard) {
         // TODO: outtake in score mode
         robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
         robot.elevator.setTargetHeight(Elevator.TargetHeight.FIRST_LINE);
@@ -107,7 +107,7 @@ public class AutoBlueCloseCS extends LinearOpMode {
 
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(0.3);
     }
@@ -115,7 +115,7 @@ public class AutoBlueCloseCS extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryCloseBlue.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryFarRed.START_POSE);
         int teamProp = cameraTeamProp();
 
         robot.start();
@@ -126,7 +126,7 @@ public class AutoBlueCloseCS extends LinearOpMode {
             return;
         }
 
-        trajectories = TrajectoryCloseBlue.getTrajectories(robot, teamProp, false, true);
+        trajectories = TrajectoryFarRed.getTrajectories(teamProp, false, true);
 
         solvePurplePixel();
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
@@ -138,11 +138,11 @@ public class AutoBlueCloseCS extends LinearOpMode {
         robot.sleep(0.05);
         // we are now kinda in front of the backboard
         if (teamProp == 1) {
-            placePixel(Outtake.DiffyHortizontalState.LEFT, false);
+            placePixel(Outtake.DiffyHorizontalState.LEFT, false);
         } else if (teamProp == 2) {
-            placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+            placePixel(Outtake.DiffyHorizontalState.CENTER, false);
         } else if (teamProp == 3) {
-            placePixel(Outtake.DiffyHortizontalState.RIGHT, false);
+            placePixel(Outtake.DiffyHorizontalState.RIGHT, false);
         }
 
         // TODO: *cica* cycles
@@ -170,11 +170,11 @@ public class AutoBlueCloseCS extends LinearOpMode {
             robot.sleep(0.01);
         }
         robot.sleep(0.02);
-        placePixel(Outtake.DiffyHortizontalState.CENTER, false);
+        placePixel(Outtake.DiffyHorizontalState.CENTER, false);
         robot.sleep(0.02);
 
         // park
-        robot.drive.followTrajectory(trajectories.get(5));
+        robot.drive.followTrajectory(trajectories.get(2));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }

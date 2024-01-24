@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.never;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -20,13 +20,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropPipelineBlue;
-import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 ATimeFarRed")
+@Autonomous(name = "#00 ATimeFarRed", group = "Time")
 public class AutoTimeLeftFarRed extends LinearOpMode {
     Robot robot;
     int noDetectionFlag = -1;

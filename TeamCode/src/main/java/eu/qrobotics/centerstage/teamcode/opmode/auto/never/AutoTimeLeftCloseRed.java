@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.never;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -26,7 +26,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#00 ATimeCloseRed")
+@Autonomous(name = "#00 ATimeCloseRed", group = "Time")
 public class AutoTimeLeftCloseRed extends LinearOpMode {
     Robot robot;
     int noDetectionFlag = -1;
@@ -429,7 +429,7 @@ public class AutoTimeLeftCloseRed extends LinearOpMode {
         robot.sleep(0.04);
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(1);
 
