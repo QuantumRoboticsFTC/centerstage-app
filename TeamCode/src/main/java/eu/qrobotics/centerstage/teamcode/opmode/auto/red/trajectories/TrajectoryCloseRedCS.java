@@ -108,13 +108,13 @@ public class TrajectoryCloseRedCS {
         // CYCLE 1
         // intake pixel form stack FIRST
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-58.8, -13.5))
+                .lineToConstantHeading(new Vector2d(-58.8, -14.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-            .splineToConstantHeading(new Vector2d(-49, -15), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(-52, -13.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-49, -16), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-52, -14.5), Math.toRadians(0))
             .addTemporalMarker(0.2, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
             })
@@ -160,8 +160,8 @@ public class TrajectoryCloseRedCS {
             .lineToConstantHeading(new Vector2d(-45, -10))
             .splineToConstantHeading(new Vector2d(15, -14), Math.toRadians(0))
             .splineToConstantHeading(new Vector2d(47.25, -28), Math.toRadians(0))
-            .addTemporalMarker(0.05, () -> {
-                robot.intake.intakeMode = Intake.IntakeMode.IN;
+            .addTemporalMarker(0.15, () -> {
+                robot.intake.dropdownState = Intake.DropdownState.UP;
             })
             .addTemporalMarker(0.65, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IDLE;
@@ -257,8 +257,8 @@ public class TrajectoryCloseRedCS {
             .lineToConstantHeading(new Vector2d(-45, -10))
             .splineToConstantHeading(new Vector2d(15, -14), Math.toRadians(0))
             .splineToConstantHeading(new Vector2d(48, -28), Math.toRadians(0))
-            .addTemporalMarker(0.05, () -> {
-                robot.intake.intakeMode = Intake.IntakeMode.IN;
+            .addTemporalMarker(0.15, () -> {
+                robot.intake.dropdownState = Intake.DropdownState.UP;
             })
             .addTemporalMarker(0.65, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IDLE;

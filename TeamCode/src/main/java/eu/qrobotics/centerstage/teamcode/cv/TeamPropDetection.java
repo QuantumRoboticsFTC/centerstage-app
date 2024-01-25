@@ -29,8 +29,7 @@ public class TeamPropDetection implements VisionProcessor {
     }
 
     public double getMax() {
-        return 0;
-//        return maxAverage;
+        return maxAverage;
     }
 
     public int getCount() {
@@ -46,7 +45,7 @@ public class TeamPropDetection implements VisionProcessor {
     }
 
     private void evaluateFrame(boolean isRed, double leftAvg, double centAvg, double rightAvg) {
-        double maxAverage = 0;
+        maxAverage = 0;
         if (maxAverage < leftAvg) {
             maxAverage = leftAvg;
             isPropRed = isRed;
@@ -84,18 +83,18 @@ public class TeamPropDetection implements VisionProcessor {
         Core.inRange(processMat, bLowerBound, bUpperBound, processMat);
 
         evaluateFrame(false, Core.sumElems(processMat.submat(leftRect)).val[0],
-                Core.sumElems(processMat.submat(centRect)).val[1],
-                Core.sumElems(processMat.submat(rightRect)).val[2]);
+                Core.sumElems(processMat.submat(centRect)).val[0],
+                Core.sumElems(processMat.submat(rightRect)).val[0]);
 
         // RED
         Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
         Core.inRange(processMat, rLowerBound, rUpperBound, processMat);
 
         evaluateFrame(true, Core.sumElems(processMat.submat(leftRect)).val[0],
-                Core.sumElems(processMat.submat(centRect)).val[1],
-                Core.sumElems(processMat.submat(rightRect)).val[2]);
+                Core.sumElems(processMat.submat(centRect)).val[0],
+                Core.sumElems(processMat.submat(rightRect)).val[0]);
 
-        return null;
+        return input;
     }
 
     @Override

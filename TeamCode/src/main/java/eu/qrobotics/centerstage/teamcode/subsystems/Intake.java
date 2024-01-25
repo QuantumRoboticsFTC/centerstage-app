@@ -51,7 +51,7 @@ public class Intake implements Subsystem {
 
     public static double INTAKE_DROPDOWN_UP = 0.44;
     public static double INTAKE_DROPDOWN_DOWN = 0.754;
-    public static double INTAKE_DROPDOWN_5 = 0.622;
+    public static double INTAKE_DROPDOWN_5 = 0.618;
     public static double INTAKE_DROPDOWN_4 = 0.645;
     public static double INTAKE_DROPDOWN_3 = 0.69;
     public static double INTAKE_DROPDOWN_2 = 0.72;

@@ -8,15 +8,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRedCS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRedTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -25,7 +28,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 @Config
 @Autonomous(name = "03 AutoRedFarCS", group = "Red")
 public class AutoRedFarCS extends LinearOpMode {
-    Robot robot;
+    public Robot robot;
+    List<Trajectory> trajectoriesLeft, trajectoriesCenter, trajectoriesRight;
     List<Trajectory> trajectories;
 
     private VisionPortal visionPortalTeamProp;
@@ -36,34 +40,52 @@ public class AutoRedFarCS extends LinearOpMode {
     public static int cycleCount = 2;
     int trajectoryIdx = 0;
 
-    int cameraTeamProp() {
+    private AprilDetector aprilDetector;
+
+    int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
+
+        teamPropDetectionRed= new TeamPropDetection(true);
+
+        telemetry.addData("Webcam 1", "Initing");
+        telemetry.update();
 
         visionPortalTeamProp = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(1920, 1080))
                 .addProcessor(teamPropDetectionRed)
-                .enableLiveView(true)
+                .setLiveViewContainerId(portalId)
                 .build();
 
         telemetry.setMsTransmissionInterval(50);
 
         if (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            telemetry.addData("Camera", "Waiting");
+            telemetry.addData("Webcam 1", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
+                telemetry.addData("Webcam 1", "Waiting");
+                telemetry.addData("State", visionPortalTeamProp.getCameraState());
+                telemetry.update();
+                sleep(50);
+                //sleep(20);
             }
-            telemetry.addData("Camera", "Ready");
+            telemetry.addData("Webcam 1", "Ready");
             telemetry.update();
         }
 
-        if (isStopRequested()) {
+        if (isStopRequested()&&!isStopRequested()) {
             robot.stop();
             return robotStopFlag;
         }
 
+        while(!isStarted()){
+            readFromCamera=teamPropDetectionRed.getTeamProp();
+            telemetry.addData("Case", readFromCamera);
+            telemetry.update();
+        }
+
         visionPortalTeamProp.close();
+
         return readFromCamera;
     }
 
@@ -80,19 +102,17 @@ public class AutoRedFarCS extends LinearOpMode {
 
         // TODO: place pixelussy
         robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
-        robot.sleep(0.1);
+        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+        robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
+        robot.sleep(0.5);
+        if (teamProp != 2) {
+            robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
+        }
         robot.intake.intakeMode = Intake.IntakeMode.IDLE;
     }
 
-    void placePixel(Outtake.DiffyHorizontalState hState, boolean goToBackboard) {
-        // TODO: outtake in score mode
-        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-        robot.elevator.setTargetHeight(Elevator.TargetHeight.FIRST_LINE);
-        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.outtake.diffyHState = hState;
-        robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
-        robot.sleep(0.8);
-
+    void placePixel(boolean goToBackboard) {
         // TODO: adaptive path following towards apriltag idfk
         if (goToBackboard) {
             gotobackboard();
@@ -100,86 +120,163 @@ public class AutoRedFarCS extends LinearOpMode {
 
         // TODO: place pixelussy and retract outtake
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.15);
-        robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
-        robot.sleep(0.1);
-
-        robot.outtake.rotateState = Outtake.RotateState.CENTER;
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.sleep(0.3);
+        robot.sleep(0.2);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryFarRed.START_POSE);
-        int teamProp = cameraTeamProp();
+        robot.drive.setPoseEstimate(TrajectoryFarRedCS.START_POSE);
+        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+
+        trajectoriesLeft = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 3, false);
+
+        int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
+//        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
+//        setManualExposure(6,250);
+//        robot.setTagDetector(aprilDetector);
+        teamProp = cameraTeamProp(portals[1]);
+//        aprilDetector.track=false;
 
         robot.start();
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.sleep(0.05);
+        // TODO: is this order? ^^^^
 
         if (teamProp == -10) {
+            robot.stop();
             return;
         }
 
-        trajectories = TrajectoryFarRed.getTrajectories(teamProp, false, true);
+        if (teamProp == 1) {
+            trajectories = trajectoriesLeft;
+        } else if (teamProp == 2) {
+            trajectories = trajectoriesCenter;
+        } else {
+            trajectories = trajectoriesRight;
+        }
 
         solvePurplePixel();
-        robot.outtake.clawState = Outtake.ClawState.CLOSED;
-
         robot.drive.followTrajectory(trajectories.get(1));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }
-        robot.sleep(0.05);
-        // we are now kinda in front of the backboard
-        if (teamProp == 1) {
-            placePixel(Outtake.DiffyHorizontalState.LEFT, false);
-        } else if (teamProp == 2) {
-            placePixel(Outtake.DiffyHorizontalState.CENTER, false);
-        } else if (teamProp == 3) {
-            placePixel(Outtake.DiffyHorizontalState.RIGHT, false);
-        }
 
+        trajectoryIdx = 2;
         // TODO: *cica* cycles
-        robot.drive.followTrajectory(trajectories.get(2));
-        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-            robot.sleep(0.01);
-        }
-        robot.sleep(0.01);
-        robot.intake.dropdownState = Intake.DropdownState.DOWN;
-        robot.sleep(0.05);
+        for (int i = 1; i <= cycleCount; i++) {
+//            if (i == 1) {
+//                robot.intake.dropdownState = Intake.DropdownState.STACK_5;
+//            } else {
+//                robot.intake.dropdownState = Intake.DropdownState.STACK_3;
+//            }
 
-        robot.drive.followTrajectory(trajectories.get(3));
-        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-            robot.sleep(0.01);
-        }
-        robot.sleep(0.05);
-        robot.intake.intakeMode = Intake.IntakeMode.IN;
-        robot.sleep(0.2);
-        robot.intake.intakeMode = Intake.IntakeMode.OUT;
-        robot.sleep(0.05);
-        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+            if (i > 1) {
+                robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                    robot.sleep(0.01);
+                }
+                robot.intake.dropdownState = Intake.DropdownState.STACK_4;
+                robot.sleep(0.2);
+            }
 
-        robot.drive.followTrajectory(trajectories.get(4));
-        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-            robot.sleep(0.01);
-        }
-        robot.sleep(0.02);
-        placePixel(Outtake.DiffyHorizontalState.CENTER, false);
-        robot.sleep(0.02);
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+            // DOWN SI IN by now
+            robot.sleep(0.7);
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+            robot.intake.dropdownState = Intake.DropdownState.UP;
 
-        // park
-        robot.drive.followTrajectory(trajectories.get(2));
-        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-            robot.sleep(0.01);
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+            if (i == 1) {
+                robot.intake.dropdownState = Intake.DropdownState.STACK_5;
+            } else {
+                robot.intake.dropdownState = Intake.DropdownState.STACK_3;
+            }
+            robot.sleep(0.2);
+
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+            // DOWN SI IN by now
+            robot.sleep(0.7);
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+            robot.intake.dropdownState = Intake.DropdownState.UP;
+            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+
+            placePixel(false);
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
         }
-        robot.sleep(0.3);
+
+//        robot.outtake.rotateState = Outtake.RotateState.CENTER;
+//        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+//        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.CENTER;
+//        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+//        robot.sleep(1.25);
+//        robot.outtake.clawState = Outtake.ClawState.CLOSED;
+//        robot.sleep(0.25);
+//        robot.outtake.rotateState = Outtake.RotateState.LEFT;
+//        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+//        robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
+//        robot.outtake.diffyHState = Outtake.DiffyHortizontalState.RIGHT;
+//        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+//        robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT;
+//        robot.sleep(0.65);
+//        robot.outtake.clawState = Outtake.ClawState.OPEN;
+//        robot.sleep(0.1);
 
         robot.stop();
     }
 
+    private void setManualExposure(int exposureMS, int gain) {
+        // Wait for the camera to be open, then use the controls
+
+        if (aprilDetector.visionPortal == null) {
+            return;
+        }
+
+        // Make sure camera is streaming before we try to set the exposure controls
+        if (aprilDetector.visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Webcam 2", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (aprilDetector.visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                telemetry.addData("Webcam 2", "Waiting");
+                telemetry.addData("State:", aprilDetector.visionPortal.getCameraState());
+                telemetry.update();
+                sleep(50);
+            }
+            telemetry.addData("Webcam 2", "Ready");
+            telemetry.update();
+        }
+
+        // Set camera controls unless we are stopping.
+        if (!isStopRequested())
+        {
+            ExposureControl exposureControl = aprilDetector.visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                sleep(50);
+            }
+            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            sleep(20);
+            GainControl gainControl = aprilDetector.visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+            sleep(20);
+        }
+    }
 }

@@ -41,21 +41,26 @@ public class Outtake implements Subsystem {
     public OuttakeState outtakeState;
     public OuttakeState lastOuttakeState;
 
-    // TODO: diffy shit
+    // TODO: diffy stuff
     public static double VDIFFY_TRANSFER_PREP_POS = 0.25;
     public static double VDIFFY_TRANSFER_POS = 0.215;
     public static double VDIFFY_SCORE_POS = 0.56;
+
     public static double HDIFFY_LEFT_POS = -0.13;
     public static double HDIFFY_CENTER_POS = 0.115;
     public static double HDIFFY_RIGHT_POS = 0.36;
+
     public static double vDiffyThresholdVS = 0.4; // vertical speed
-    public static double vDiffyThresholdH = 0.54; // horizontal moving
+    public static double vDiffyThresholdH = 0.55; // horizontal moving
     public static double hDiffyThreshold = 0.02;
+
     public static double currVDiffy;
     public static double currHDiffy;
+
     public static double gainVDiffyInside = 0.01;
-    public static double gainVDiffyOutside = 0.03;
-    public static double gainHDiffy = 0.035; //0.035
+    public static double gainVDiffyOutside = 0.02;
+    public static double gainHDiffy = 0.02; //0.035
+
 
     // Other Outtake Servo Values
     public static double FOURBAR_TRANSFER_POS = 0.13;
