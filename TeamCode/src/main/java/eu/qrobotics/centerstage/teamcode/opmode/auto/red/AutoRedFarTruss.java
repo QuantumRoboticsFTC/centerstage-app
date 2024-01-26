@@ -97,11 +97,11 @@ public class AutoRedFarTruss extends LinearOpMode {
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }
-        robot.sleep(0.1);
+        robot.sleep(0.3);
 
         // TODO: place pixelussy
         robot.intake.intakeMode = Intake.IntakeMode.OUT;
-        robot.sleep(1.2);
+        robot.sleep(1);
     }
 
     void placePixel(boolean goToBackboard) {
@@ -111,8 +111,9 @@ public class AutoRedFarTruss extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
+        robot.sleep(0.25);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.2);
+        robot.sleep(0.25);
     }
 
     @Override
@@ -122,9 +123,9 @@ public class AutoRedFarTruss extends LinearOpMode {
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
-        trajectoriesLeft = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 1, true);
+        trajectoriesCenter = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 2, true);
+        trajectoriesRight = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 3, true);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -157,13 +158,13 @@ public class AutoRedFarTruss extends LinearOpMode {
 
         trajectoryIdx = 2;
         if (teamProp == 2) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
+            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0_CENTER;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         } else if (teamProp == 1) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
+            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
         } else if (teamProp == 3) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
+            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
         // TODO: *cica* cycles
@@ -180,7 +181,7 @@ public class AutoRedFarTruss extends LinearOpMode {
                     robot.sleep(0.01);
                 }
                 robot.intake.dropdownState = Intake.DropdownState.STACK_4;
-                robot.sleep(0.2);
+                robot.sleep(0.3);
 
                 robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
                 while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -197,12 +198,13 @@ public class AutoRedFarTruss extends LinearOpMode {
                 }
             }
 
+            robot.sleep(0.3);
             if (i == 1) {
                 robot.intake.dropdownState = Intake.DropdownState.STACK_5;
             } else {
                 robot.intake.dropdownState = Intake.DropdownState.STACK_3;
             }
-            robot.sleep(0.05);
+            robot.sleep(0.3);
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {

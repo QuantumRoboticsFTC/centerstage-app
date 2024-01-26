@@ -28,6 +28,7 @@ public class Elevator implements Subsystem {
         FIRST_LINE,
         SECOND_LINE,
         THIRD_LINE,
+        AUTO_HEIGHT0_CENTER,
         AUTO_HEIGHT0,
         AUTO_HEIGHT1,
         AUTO_HEIGHT2
@@ -41,7 +42,8 @@ public class Elevator implements Subsystem {
     public static double FIRST_POSITION = 250;
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
-    public static double AUTO_HEIGHT0 = 420; // preload
+    public static double AUTO_HEIGHT0_CENTER = 75; // preload
+    public static double AUTO_HEIGHT0 = 350; // preload
     public static double AUTO_HEIGHT1 = 480; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
     public static double NEUTRAL_SIDE_THRESHOLD = 300;
@@ -49,7 +51,7 @@ public class Elevator implements Subsystem {
     public static double diffyValue = 0;
     public static double IDLE_POWER = 0.13;
     public static double climbedPosition;
-    public static double imuPitchGain = 70;
+    public static double imuPitchGain = 100;
 
     public double groundPositionOffset;
     public double heightCap = 910;
@@ -110,6 +112,8 @@ public class Elevator implements Subsystem {
                 return SECOND_POSITION + manualOffset + groundPositionOffset + diffyValue;
             case THIRD_LINE:
                 return THIRD_POSITION + manualOffset + groundPositionOffset + diffyValue;
+            case AUTO_HEIGHT0_CENTER:
+                return AUTO_HEIGHT0_CENTER;
             case AUTO_HEIGHT0:
                 return AUTO_HEIGHT0;
             case AUTO_HEIGHT1:

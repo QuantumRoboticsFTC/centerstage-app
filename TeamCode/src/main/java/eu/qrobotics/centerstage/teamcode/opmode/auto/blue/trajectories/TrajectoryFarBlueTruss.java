@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
@@ -6,8 +6,6 @@ import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL_VEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.SLOW_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.SLOW_VEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.ZOOM_ACCEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.ZOOM_VEL_CONSTRAINT;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -24,8 +22,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
-public class TrajectoryFarRedTruss {
-    public static Pose2d START_POSE = new Pose2d(-38.1, -63.5, Math.toRadians(270));
+public class TrajectoryFarBlueTruss {
+    public static Pose2d START_POSE = new Pose2d(-38.1, 63.5, Math.toRadians(90));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
         if(trajectories.size() == 0)
@@ -49,29 +47,29 @@ public class TrajectoryFarRedTruss {
         List<Trajectory> trajectories = new ArrayList<>();
 
         if (teamProp == 1) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-39, -33.5, Math.toRadians(330)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-39, 33.5, Math.toRadians(30)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(30), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-33.5, -40, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(120))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
                     .build()
             );
         } else if (teamProp == 2) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-37, -37, Math.toRadians(245)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-37, -37, Math.toRadians(115)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(245), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(115), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-39, -39, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(135))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
                     .build()
             );
         } else if (teamProp == 3) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-35, -32.5, Math.toRadians(180)))
                     .build()
             );
