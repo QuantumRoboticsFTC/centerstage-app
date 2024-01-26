@@ -21,7 +21,9 @@ public class Outtake implements Subsystem {
     public enum RotateState {
         CENTER,
         LEFT,
-        RIGHT
+        LEFT45,
+        RIGHT,
+        RIGHT45
     }
 
     public enum ClawState {
@@ -42,8 +44,8 @@ public class Outtake implements Subsystem {
     public OuttakeState lastOuttakeState;
 
     // TODO: diffy stuff
-    public static double VDIFFY_TRANSFER_PREP_POS = 0.25;
-    public static double VDIFFY_TRANSFER_POS = 0.215;
+    public static double VDIFFY_TRANSFER_PREP_POS = 0.245;
+    public static double VDIFFY_TRANSFER_POS = 0.21; //0.215
     public static double VDIFFY_SCORE_POS = 0.56;
 
     public static double HDIFFY_LEFT_POS = -0.13;
@@ -63,17 +65,19 @@ public class Outtake implements Subsystem {
 
 
     // Other Outtake Servo Values
-    public static double FOURBAR_TRANSFER_POS = 0.13;
+    public static double FOURBAR_TRANSFER_POS = 0.115; //0.13
     public static double FOURBAR_POST_TRANSFER_POS = 0.16;
     public static double FOURBAR_SCORE_POS = 0.58;
-    public static double FOURBAR_SCORE_ANGLED_POS = 0.65;
+    public static double FOURBAR_SCORE_ANGLED_POS = 0.63;
 
     public static double CLAW_OPEN_POS = 0.2;
     public static double CLAW_CLOSE_POS = 0.8;
 
     public static double ROTATE_TRANSFER_POS = 0.33;
     public static double ROTATE_LEFT_POS = 0;
+    public static double ROTATE_LEFT45_POS = 0.165;
     public static double ROTATE_RIGHT_POS = 0.665;
+    public static double ROTATE_RIGHT45_POS = 0.495;
     public static double rotateGain = 1.3154; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual shit
@@ -182,10 +186,14 @@ public class Outtake implements Subsystem {
         switch (rotateState) {
             case LEFT:
                 return ROTATE_LEFT_POS;
+            case LEFT45:
+                return ROTATE_LEFT45_POS;
             case CENTER:
                 return ROTATE_TRANSFER_POS;
             case RIGHT:
                 return ROTATE_RIGHT_POS;
+            case RIGHT45:
+                return ROTATE_RIGHT45_POS;
         }
         return 0;
     }

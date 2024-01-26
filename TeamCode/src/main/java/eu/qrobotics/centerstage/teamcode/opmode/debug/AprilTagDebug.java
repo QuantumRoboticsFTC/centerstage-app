@@ -35,22 +35,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedCloseCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
@@ -133,7 +127,7 @@ public class AprilTagDebug extends LinearOpMode {
 
         // Initialize the Apriltag Detection process
         Robot robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryCloseRedCS.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedCloseCS.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 

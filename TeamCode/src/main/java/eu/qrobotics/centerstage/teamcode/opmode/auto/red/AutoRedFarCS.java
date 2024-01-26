@@ -17,9 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRedCS;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRedTruss;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedFarCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -126,13 +124,13 @@ public class AutoRedFarCS extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryFarRedCS.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedFarCS.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectoriesLeft = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryFarRedCS.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);

@@ -17,8 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedTruss;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryFarRedTruss;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedFarTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -100,7 +99,11 @@ public class AutoRedFarTruss extends LinearOpMode {
         robot.sleep(0.3);
 
         // TODO: place pixelussy
-        robot.intake.intakeMode = Intake.IntakeMode.OUT;
+        if (teamProp == 2) {
+            robot.intake.intakeMode = Intake.IntakeMode.OUT;
+        } else {
+            robot.intake.intakeMode = Intake.IntakeMode.OUT;
+        }
         robot.sleep(1);
     }
 
@@ -111,21 +114,21 @@ public class AutoRedFarTruss extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
-        robot.sleep(0.25);
+        robot.sleep(0.35);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.25);
+        robot.sleep(0.35);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryFarRedTruss.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedFarTruss.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
-        trajectoriesLeft = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 1, true);
-        trajectoriesCenter = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 2, true);
-        trajectoriesRight = TrajectoryFarRedTruss.getTrajectories(robot, cycleCount, 3, true);
+        trajectoriesLeft = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 1, true);
+        trajectoriesCenter = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 2, true);
+        trajectoriesRight = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 3, true);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);

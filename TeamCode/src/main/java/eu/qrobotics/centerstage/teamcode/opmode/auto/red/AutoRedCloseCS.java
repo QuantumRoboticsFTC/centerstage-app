@@ -1,6 +1,5 @@
 package eu.qrobotics.centerstage.teamcode.opmode.auto.red;
 
-import android.graphics.Canvas;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedCloseCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -102,9 +101,10 @@ public class AutoRedCloseCS extends LinearOpMode {
 
         // TODO: place pixelussy
         robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
+        robot.sleep(0.25);
         robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
         robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
-        robot.sleep(0.5);
+        robot.sleep(0.25);
         if (teamProp != 2) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
         } else {
@@ -121,20 +121,21 @@ public class AutoRedCloseCS extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
-        robot.outtake.clawState = Outtake.ClawState.OPEN;
         robot.sleep(0.2);
+        robot.outtake.clawState = Outtake.ClawState.OPEN;
+        robot.sleep(0.3);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryCloseRedCS.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedCloseCS.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectoriesLeft = TrajectoryCloseRedCS.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryCloseRedCS.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryCloseRedCS.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryRedCloseCS.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryRedCloseCS.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryRedCloseCS.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);

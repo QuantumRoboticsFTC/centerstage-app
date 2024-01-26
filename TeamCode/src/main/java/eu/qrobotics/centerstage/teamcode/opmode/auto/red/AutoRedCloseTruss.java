@@ -11,17 +11,13 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedCS;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryCloseRedTruss;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedCloseTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -128,13 +124,13 @@ public class AutoRedCloseTruss extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryCloseRedTruss.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedCloseTruss.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectoriesLeft = TrajectoryCloseRedTruss.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryCloseRedTruss.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryCloseRedTruss.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryRedCloseTruss.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryRedCloseTruss.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryRedCloseTruss.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);

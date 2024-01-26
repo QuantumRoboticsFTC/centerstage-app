@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
@@ -22,8 +22,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
-public class TrajectoryFarBlueTruss {
-    public static Pose2d START_POSE = new Pose2d(-38.1, 63.5, Math.toRadians(90));
+public class TrajectoryRedFarTruss {
+    public static Pose2d START_POSE = new Pose2d(-38.1, -63.5, Math.toRadians(270));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
         if(trajectories.size() == 0)
@@ -47,29 +47,29 @@ public class TrajectoryFarBlueTruss {
         List<Trajectory> trajectories = new ArrayList<>();
 
         if (teamProp == 1) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-39, 33.5, Math.toRadians(30)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-39, -33.5, Math.toRadians(330)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(30), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-33.5, -40, Math.toRadians(0)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-33.5, -38, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(120))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
                     .build()
             );
         } else if (teamProp == 2) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-37, -37, Math.toRadians(115)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-41, -33.5, Math.toRadians(310)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(115), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-39, -39, Math.toRadians(0)))
-                    .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(135))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(-34.5, -36.5, Math.toRadians(0)))
+                    .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(120))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
                     .build()
             );
         } else if (teamProp == 3) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-35, -32.5, Math.toRadians(180)))
                     .build()
             );
@@ -104,18 +104,20 @@ public class TrajectoryFarBlueTruss {
 
         // go to backboard
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-45, -52))
-                .splineToConstantHeading(new Vector2d(10, -61), Math.toRadians(0))
+                .lineToConstantHeading(new Vector2d(-45, -55))
+                .splineToConstantHeading(new Vector2d(10, -60), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(47.25, -37.5), Math.toRadians(0))
-                .addTemporalMarker(0.65, () -> {
+                .addTemporalMarker(0.5, () -> {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
-                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
                     robot.elevator.manualPower = -1;
                 })
-                .addTemporalMarker(1.0, () -> {
+                .addTemporalMarker(1.2, () -> {
+                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                })
+                .addTemporalMarker(1.4, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
                 .addTemporalMarker(1.9, () -> {
@@ -196,21 +198,23 @@ public class TrajectoryFarBlueTruss {
 
         // go to backboard
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-46, -50))
-                .splineToConstantHeading(new Vector2d(12, -61), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(47.5, -46), Math.toRadians(0))
-                .addTemporalMarker(0.65, () -> {
+                .lineToConstantHeading(new Vector2d(-45, -55))
+                .splineToConstantHeading(new Vector2d(10, -60), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(47.25, -43.5), Math.toRadians(0))
+                .addTemporalMarker(0.5, () -> {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
-                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
                     robot.elevator.manualPower = -1;
                 })
                 .addTemporalMarker(1.2, () -> {
+                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                })
+                .addTemporalMarker(1.4, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
-                .addTemporalMarker(1.5, () -> {
+                .addTemporalMarker(1.9, () -> {
                     robot.outtake.rotateState = Outtake.RotateState.LEFT;
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;

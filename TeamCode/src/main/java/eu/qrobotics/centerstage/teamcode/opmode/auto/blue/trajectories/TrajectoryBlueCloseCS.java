@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
@@ -22,8 +22,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
-public class TrajectoryCloseRedCS {
-    public static Pose2d START_POSE = new Pose2d(14.1, -63.5, Math.toRadians(270));
+public class TrajectoryBlueCloseCS {
+    public static Pose2d START_POSE = new Pose2d(14.1, 63.5, Math.toRadians(90));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
         if(trajectories.size() == 0)
@@ -48,44 +48,44 @@ public class TrajectoryCloseRedCS {
         List<Trajectory> trajectories = new ArrayList<>();
 
         if (teamProp == 1) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(9, -41, Math.toRadians(320)))
-                    .addTemporalMarker(0.07, () -> {
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(9, 41, Math.toRadians(40)))
+                    .addTemporalMarker(0.1, () -> {
                         robot.outtake.clawState = Outtake.ClawState.CLOSED;
                     })
                     .build()
             );
 
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(320), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(14, -42, Math.toRadians(0)))
-                    .splineToSplineHeading(new Pose2d(47.25, -36.5, Math.toRadians(0)), Math.toRadians(30))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(40), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(14, 42, Math.toRadians(0)))
+                    .splineToSplineHeading(new Pose2d(47.25, 36.5, Math.toRadians(0)), Math.toRadians(30))
                     .build()
             );
         } else if (teamProp == 2) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(23, -32.5, Math.toRadians(320)))
-                    .addTemporalMarker(0.07, () -> {
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(23, 32.5, Math.toRadians(40)))
+                    .addTemporalMarker(0.1, () -> {
                         robot.outtake.clawState = Outtake.ClawState.CLOSED;
                     })
                     .build()
             );
 
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(320), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(26, -35, Math.toRadians(0)))
-                    .splineToSplineHeading(new Pose2d(47.25, -36.5, Math.toRadians(0)), Math.toRadians(30))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(40), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(26, 35, Math.toRadians(0)))
+                    .splineToSplineHeading(new Pose2d(47.25, 36.5, Math.toRadians(0)), Math.toRadians(30))
                     .build()
             );
         } else if (teamProp == 3) {
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(31, -40, Math.toRadians(320)))
-                    .addTemporalMarker(0.07, () -> {
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(31, 40, Math.toRadians(40)))
+                    .addTemporalMarker(0.1, () -> {
                         robot.outtake.clawState = Outtake.ClawState.CLOSED;
                     })
                     .build()
             );
 
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(320), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(47.25, -36.5, Math.toRadians(0)))
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(40), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                    .lineToSplineHeading(new Pose2d(47.25, 36.5, Math.toRadians(0)))
                     .build()
             );
         }
@@ -93,9 +93,9 @@ public class TrajectoryCloseRedCS {
         // cycleurile
         // first goto pixels
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(41, -17))
-                .splineToConstantHeading(new Vector2d(-15, -13), Math.toRadians(160))
-                .splineToConstantHeading(new Vector2d(-52, -13), Math.toRadians(180))
+                .lineToConstantHeading(new Vector2d(41, 15))
+                .splineToConstantHeading(new Vector2d(-15, 15), Math.toRadians(160))
+                .splineToConstantHeading(new Vector2d(-52, 15), Math.toRadians(180))
                 .addTemporalMarker(0.2, () -> {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
@@ -108,13 +108,13 @@ public class TrajectoryCloseRedCS {
         // CYCLE 1
         // intake pixel form stack FIRST
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-59, -15.5))
+                .lineToConstantHeading(new Vector2d(-59, 15.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-            .splineToConstantHeading(new Vector2d(-49, -17), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(-52, -15.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-49, 17), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-52, 15.5), Math.toRadians(0))
             .addTemporalMarker(0.2, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
             })
@@ -132,13 +132,13 @@ public class TrajectoryCloseRedCS {
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-59, -14.5))
+                .lineToConstantHeading(new Vector2d(-59, 14.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-            .splineToConstantHeading(new Vector2d(-49, -16), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(-52.75, -14.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-49, 16), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-52.75, 14.5), Math.toRadians(0))
             .addTemporalMarker(0.2, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
             })
@@ -157,9 +157,9 @@ public class TrajectoryCloseRedCS {
 
         // go to backboard
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-            .lineToConstantHeading(new Vector2d(-45, -10))
-            .splineToConstantHeading(new Vector2d(15, -14), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(47.25, -28), Math.toRadians(0))
+            .lineToConstantHeading(new Vector2d(-45, 14))
+            .splineToConstantHeading(new Vector2d(15, 14), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(47.25, 28), Math.toRadians(0))
             .addTemporalMarker(0.15, () -> {
                 robot.intake.dropdownState = Intake.DropdownState.UP;
             })
@@ -174,7 +174,7 @@ public class TrajectoryCloseRedCS {
                 robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
             })
             .addTemporalMarker(1.5, () -> {
-                robot.outtake.rotateState = Outtake.RotateState.LEFT;
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT;
                 robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
             })
@@ -188,9 +188,9 @@ public class TrajectoryCloseRedCS {
 
         // go to pixel stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-            .lineToConstantHeading(new Vector2d(28, -12))
-            .splineToConstantHeading(new Vector2d(-15, -10), Math.toRadians(160))
-            .splineToConstantHeading(new Vector2d(-52, -12), Math.toRadians(180))
+            .lineToConstantHeading(new Vector2d(28, 14))
+            .splineToConstantHeading(new Vector2d(-15, 12.5), Math.toRadians(160))
+            .splineToConstantHeading(new Vector2d(-52, 14), Math.toRadians(180))
             .addTemporalMarker(0.3, () -> {
                 robot.outtake.rotateState = Outtake.RotateState.CENTER;
                 robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
@@ -200,17 +200,16 @@ public class TrajectoryCloseRedCS {
             .build()
         );
 
-
         // CYCLE 2
         // intake pixel form stack FIRST
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-59, -14.5))
+                .lineToConstantHeading(new Vector2d(-59, 14.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-            .splineToConstantHeading(new Vector2d(-49, -16), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(-52, -14.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-49, 15.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-52, 13), Math.toRadians(0))
             .addTemporalMarker(0.2, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
             })
@@ -229,13 +228,13 @@ public class TrajectoryCloseRedCS {
 
         // intake pixel form stack SECOND
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-58.8, -14.5))
+                .lineToConstantHeading(new Vector2d(-58.8, 14.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-            .splineToConstantHeading(new Vector2d(-49, -16), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(-51, -14.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-49, 16), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(-51, 14.5), Math.toRadians(0))
             .addTemporalMarker(0.2, () -> {
                 robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
             })
@@ -254,9 +253,9 @@ public class TrajectoryCloseRedCS {
 
         // go to backboard
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-            .lineToConstantHeading(new Vector2d(-45, -10))
-            .splineToConstantHeading(new Vector2d(15, -14), Math.toRadians(0))
-            .splineToConstantHeading(new Vector2d(48, -28), Math.toRadians(0))
+            .lineToConstantHeading(new Vector2d(-45, 14.5))
+            .splineToConstantHeading(new Vector2d(15, 14.5), Math.toRadians(0))
+            .splineToConstantHeading(new Vector2d(48, 28), Math.toRadians(0))
             .addTemporalMarker(0.15, () -> {
                 robot.intake.dropdownState = Intake.DropdownState.UP;
             })
@@ -271,7 +270,7 @@ public class TrajectoryCloseRedCS {
                 robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
             })
             .addTemporalMarker(1.5, () -> {
-                robot.outtake.rotateState = Outtake.RotateState.LEFT;
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT;
                 robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
             })
@@ -287,8 +286,8 @@ public class TrajectoryCloseRedCS {
         // parked right
         if (parkedRight) {
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineTo(new Vector2d(46, -64))
-                    .splineToConstantHeading(new Vector2d(56, -64), Math.toRadians(0))
+                    .lineTo(new Vector2d(46, 64))
+                    .splineToConstantHeading(new Vector2d(56, 64), Math.toRadians(0))
                     .addTemporalMarker(0.25, () -> {
                         robot.outtake.rotateState = Outtake.RotateState.CENTER;
                         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
@@ -300,8 +299,8 @@ public class TrajectoryCloseRedCS {
         } else {
             // parked left
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineTo(new Vector2d(44, -27))
-                    .splineToConstantHeading(new Vector2d(55, -13), Math.toRadians(0))
+                    .lineTo(new Vector2d(39, 23))
+                    .splineToConstantHeading(new Vector2d(55, 13), Math.toRadians(0))
                     .addTemporalMarker(0.1, () -> {
                         robot.outtake.rotateState = Outtake.RotateState.CENTER;
                         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;

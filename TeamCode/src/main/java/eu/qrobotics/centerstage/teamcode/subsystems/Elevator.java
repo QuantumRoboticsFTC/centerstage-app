@@ -42,11 +42,12 @@ public class Elevator implements Subsystem {
     public static double FIRST_POSITION = 250;
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
-    public static double AUTO_HEIGHT0_CENTER = 75; // preload
-    public static double AUTO_HEIGHT0 = 350; // preload
-    public static double AUTO_HEIGHT1 = 480; // first cycle
+
+    public static double AUTO_HEIGHT0_CENTER = 100; // preload
+    public static double AUTO_HEIGHT0 = 390; // preload
+    public static double AUTO_HEIGHT1 = 520; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
-    public static double NEUTRAL_SIDE_THRESHOLD = 300;
+    public static double NEUTRAL_SIDE_THRESHOLD = 60; // no global coordinates below this point
     public static double diffyHOffset = 230;
     public static double diffyValue = 0;
     public static double IDLE_POWER = 0.13;
