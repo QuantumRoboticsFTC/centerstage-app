@@ -236,13 +236,21 @@ public class TeleOP extends OpMode {
 
         // ROTATE STATE
         if (stickyGamepad2.dpad_left) {
-            robot.outtake.rotateState = Outtake.RotateState.LEFT;
+            if (robot.outtake.rotateState != Outtake.RotateState.LEFT45) {
+                robot.outtake.rotateState = Outtake.RotateState.LEFT45;
+            } else {
+                robot.outtake.rotateState = Outtake.RotateState.LEFT;
+            }
         }
         if (stickyGamepad2.dpad_up) {
             robot.outtake.rotateState = Outtake.RotateState.CENTER;
         }
         if (stickyGamepad2.dpad_right) {
-            robot.outtake.rotateState = Outtake.RotateState.RIGHT;
+            if (robot.outtake.rotateState != Outtake.RotateState.RIGHT45) {
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT45;
+            } else {
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT;
+            }
         }
 
         // H DIFFY STATE

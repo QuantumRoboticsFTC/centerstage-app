@@ -4,8 +4,6 @@ import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_A
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL_VEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.SLOW_ACCEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.SLOW_VEL_CONSTRAINT;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -51,7 +49,7 @@ public class TrajectoryRedFarTruss25 {
                     .lineToSplineHeading(new Pose2d(-39, -33.5, Math.toRadians(330)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-33.5, -38, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(120))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
@@ -62,7 +60,7 @@ public class TrajectoryRedFarTruss25 {
                     .lineToSplineHeading(new Pose2d(-37, -37, Math.toRadians(245)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(245), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(245), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-39, -39, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(135))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
@@ -73,7 +71,7 @@ public class TrajectoryRedFarTruss25 {
                     .lineToSplineHeading(new Pose2d(-35, -32.5, Math.toRadians(180)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-50, -41, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(135))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
@@ -83,7 +81,7 @@ public class TrajectoryRedFarTruss25 {
 
         // cycleurile
         // first goto pixels
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-53.5, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
@@ -147,12 +145,12 @@ public class TrajectoryRedFarTruss25 {
 
         // CYCLE 2
         // intake pixel form stack FIRST
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-61, -37.5))
                 .build()
         );
 
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-53.5, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
@@ -172,12 +170,12 @@ public class TrajectoryRedFarTruss25 {
         );
 
         // intake pixel form stack SECOND
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-61, -37.5))
                 .build()
         );
 
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-52.75, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
@@ -245,12 +243,12 @@ public class TrajectoryRedFarTruss25 {
 
         // CYCLE 3
         // intake pixel form stack FIRST
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-61, -37.5))
                 .build()
         );
 
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-53.5, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
@@ -270,12 +268,12 @@ public class TrajectoryRedFarTruss25 {
         );
 
         // intake pixel form stack SECOND
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-61, -37.5))
                 .build()
         );
 
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-52.75, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {

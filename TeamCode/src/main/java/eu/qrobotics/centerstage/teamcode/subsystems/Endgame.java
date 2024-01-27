@@ -30,7 +30,7 @@ public class Endgame implements Subsystem {
     public static double CLIMB_SHOOTER_POSITION = 0.5;
 
     public static double CLIMB_ACTIVE_POSITION = 0.7;
-    public static double offset = 0.29;
+    public static double offset = 0.25;
     public static double shooterClimbPosition;
 
     public static double SHOOTER_PASSIVE_POSITION = 0.33;

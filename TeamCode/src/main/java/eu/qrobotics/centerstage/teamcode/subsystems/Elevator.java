@@ -38,7 +38,7 @@ public class Elevator implements Subsystem {
     public ElevatorState lastState;
     public TargetHeight targetHeight;
 
-    public static double TRANSFER_POSITION = -20;
+    public static double TRANSFER_POSITION = 0;
     public static double FIRST_POSITION = 250;
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
@@ -47,7 +47,8 @@ public class Elevator implements Subsystem {
     public static double AUTO_HEIGHT0 = 390; // preload
     public static double AUTO_HEIGHT1 = 520; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
-    public static double NEUTRAL_SIDE_THRESHOLD = 60; // no global coordinates below this point
+    public static double NEUTRAL_SIDE_THRESHOLD_LOW = 60; // no global coordinates below this point
+    public static double NEUTRAL_SIDE_THRESHOLD_HIGH = 550; // no global coordinates below this point
     public static double diffyHOffset = 230;
     public static double diffyValue = 0;
     public static double IDLE_POWER = 0.13;
@@ -66,9 +67,9 @@ public class Elevator implements Subsystem {
     private static double maxAcceleration = 15;
     private static double maxJerk = 2;
     private MotionProfile mp;
-    public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.00045, 0.00035);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.0005, 0.0005);
     private PIDFController controller = new PIDFController(coefs);
-    public static double ff1 = 0.05;
+    public static double ff1 = 0.1;
 
     private CachingDcMotorEx motorLeft;
     private CachingDcMotorEx motorRight;
@@ -176,7 +177,8 @@ public class Elevator implements Subsystem {
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         manualOffset = 0;
-        groundPositionOffset = -getCurrentPosition();
+//        groundPositionOffset = -getCurrentPosition();
+        groundPositionOffset = 0;
 
         elevatorState = lastState = ElevatorState.TRANSFER;
         targetHeight = TargetHeight.FIRST_LINE;
@@ -198,7 +200,9 @@ public class Elevator implements Subsystem {
 
         diffyValue = 0;
         if (robot.outtake.diffyHState != Outtake.DiffyHorizontalState.CENTER &&
-            NEUTRAL_SIDE_THRESHOLD <= getTargetPosition()) {
+            NEUTRAL_SIDE_THRESHOLD_LOW <= getTargetPosition() &&
+            getTargetPosition() <= NEUTRAL_SIDE_THRESHOLD_HIGH &&
+            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
             diffyValue = diffyHOffset;
         } else {
             diffyValue = 0;

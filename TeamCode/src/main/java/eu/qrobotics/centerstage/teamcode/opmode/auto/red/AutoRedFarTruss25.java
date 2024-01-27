@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedFarTruss;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedFarTruss25;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -122,13 +122,13 @@ public class AutoRedFarTruss25 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryRedFarTruss.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedFarTruss25.START_POSE);
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
-        trajectoriesLeft = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 1, true);
-        trajectoriesCenter = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 2, true);
-        trajectoriesRight = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 3, true);
+        trajectoriesLeft = TrajectoryRedFarTruss25.getTrajectories(robot, cycleCount, 1, true);
+        trajectoriesCenter = TrajectoryRedFarTruss25.getTrajectories(robot, cycleCount, 2, true);
+        trajectoriesRight = TrajectoryRedFarTruss25.getTrajectories(robot, cycleCount, 3, true);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -184,14 +184,14 @@ public class AutoRedFarTruss25 extends LinearOpMode {
                     robot.sleep(0.01);
                 }
                 robot.intake.dropdownState = Intake.DropdownState.STACK_4;
-                robot.sleep(0.3);
+                robot.sleep(0.2);
 
                 robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
                 while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                     robot.sleep(0.01);
                 }
                 // DOWN SI IN by now
-                robot.sleep(0.6);
+                robot.sleep(0.5);
                 robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 robot.intake.dropdownState = Intake.DropdownState.UP;
 
@@ -207,14 +207,14 @@ public class AutoRedFarTruss25 extends LinearOpMode {
             } else {
                 robot.intake.dropdownState = Intake.DropdownState.STACK_3;
             }
-            robot.sleep(0.3);
+            robot.sleep(0.2);
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
             // DOWN SI IN by now
-            robot.sleep(0.6);
+            robot.sleep(0.5);
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {

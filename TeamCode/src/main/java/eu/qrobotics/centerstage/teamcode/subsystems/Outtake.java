@@ -63,7 +63,6 @@ public class Outtake implements Subsystem {
     public static double gainVDiffyOutside = 0.02;
     public static double gainHDiffy = 0.013; //0.035
 
-
     // Other Outtake Servo Values
     public static double FOURBAR_TRANSFER_POS = 0.115; //0.13
     public static double FOURBAR_POST_TRANSFER_POS = 0.16;
@@ -75,9 +74,9 @@ public class Outtake implements Subsystem {
 
     public static double ROTATE_TRANSFER_POS = 0.33;
     public static double ROTATE_LEFT_POS = 0;
-    public static double ROTATE_LEFT45_POS = 0.165;
+    public static double ROTATE_LEFT45_POS = 0.495; //idk dc tudor vrea asa
     public static double ROTATE_RIGHT_POS = 0.665;
-    public static double ROTATE_RIGHT45_POS = 0.495;
+    public static double ROTATE_RIGHT45_POS = 0.165; // idk
     public static double rotateGain = 1.3154; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual shit
@@ -222,7 +221,7 @@ public class Outtake implements Subsystem {
         return diffyHPosition;
     }
 
-    public Outtake(HardwareMap hardwareMap, Robot robot) {
+    public Outtake(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         this.robot = robot;
 
         diffyLeftServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "diffyLeft"));
@@ -244,6 +243,16 @@ public class Outtake implements Subsystem {
 
         currVDiffy = VDIFFY_TRANSFER_PREP_POS;
         currHDiffy = HDIFFY_CENTER_POS;
+
+        if (isAutonomous) {
+            gainVDiffyInside = 0.01;
+            gainVDiffyOutside = 0.02;
+            gainHDiffy = 0.013;
+        } else {
+            gainVDiffyInside = 0.0125;
+            gainVDiffyOutside = 0.025;
+            gainHDiffy = 0.03;
+        }
     }
 
     public static boolean IS_DISABLED = false;
