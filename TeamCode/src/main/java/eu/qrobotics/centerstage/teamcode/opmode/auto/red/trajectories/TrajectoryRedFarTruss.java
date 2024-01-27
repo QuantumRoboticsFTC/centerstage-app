@@ -17,6 +17,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.qrobotics.centerstage.teamcode.opmode.auto.red.AutoRedFarTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
@@ -59,15 +60,16 @@ public class TrajectoryRedFarTruss {
             );
         } else if (teamProp == 2) {
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToSplineHeading(new Pose2d(-41, -33.5, Math.toRadians(310)))
+                    .lineToSplineHeading(new Pose2d(-39, -34.75, Math.toRadians(290)))
                     .build()
             );
-            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(330), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
+            trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(290), SLOW_VEL_CONSTRAINT, SLOW_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-34.5, -36.5, Math.toRadians(0)))
                     .splineToConstantHeading(new Vector2d(-60.75, -37.5), Math.toRadians(120))
                     .addTemporalMarker(0.3, ()->{robot.intake.intakeMode = Intake.IntakeMode.IDLE;})
                     .build()
             );
+
         } else if (teamProp == 3) {
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToSplineHeading(new Pose2d(-35, -32.5, Math.toRadians(180)))
@@ -106,25 +108,24 @@ public class TrajectoryRedFarTruss {
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-45, -55))
                 .splineToConstantHeading(new Vector2d(10, -60), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(47.25, -37.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(48, -37.5), Math.toRadians(0))
                 .addTemporalMarker(0.5, () -> {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
                     robot.elevator.manualPower = -1;
                 })
-                .addTemporalMarker(1.2, () -> {
+                .addTemporalMarker(1.1, () -> {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 })
                 .addTemporalMarker(1.4, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
-                .addTemporalMarker(1.9, () -> {
+                .addTemporalMarker(1.65, () -> {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
-                })
-                .addTemporalMarker(2.0, () -> {
+//                    robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                 })
                 .build()
@@ -135,7 +136,7 @@ public class TrajectoryRedFarTruss {
                 .lineToConstantHeading(new Vector2d(41, -41))
                 .splineToConstantHeading(new Vector2d(30, -61), Math.toRadians(190))
                 .splineToConstantHeading(new Vector2d(-20, -61), Math.toRadians(190))
-                .splineToConstantHeading(new Vector2d(-52, -43), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(-52, -42), Math.toRadians(180))
                 .addTemporalMarker(0.35, () -> {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
@@ -148,13 +149,13 @@ public class TrajectoryRedFarTruss {
         // CYCLE 2
         // intake pixel form stack FIRST
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-61, -37.5))
+                .lineToConstantHeading(new Vector2d(-61, -35.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(-53.5, -37.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-49, -37), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-53.5, -35.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
                     robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
                 })
@@ -173,13 +174,13 @@ public class TrajectoryRedFarTruss {
 
         // intake pixel form stack SECOND
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-61, -37.5))
+                .lineToConstantHeading(new Vector2d(-61, -35.5))
                 .build()
         );
 
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), NORMAL_VEL_CONSTRAINT, NORMAL_ACCEL_CONSTRAINT)
-                .splineToConstantHeading(new Vector2d(-49, -39), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(-52.75, -37.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-49, -37), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-52.75, -35.5), Math.toRadians(0))
                 .addTemporalMarker(0.2, () -> {
                     robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
                 })
@@ -201,28 +202,25 @@ public class TrajectoryRedFarTruss {
                 .lineToConstantHeading(new Vector2d(-45, -55))
                 .splineToConstantHeading(new Vector2d(10, -60), Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(47.25, -43.5), Math.toRadians(0))
-                .addTemporalMarker(0.5, () -> {
+                .addTemporalMarker(0.7, () -> {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
                     robot.elevator.manualPower = -1;
                 })
-                .addTemporalMarker(1.2, () -> {
+                .addTemporalMarker(1.3, () -> {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 })
-                .addTemporalMarker(1.4, () -> {
+                .addTemporalMarker(1.5, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
-                .addTemporalMarker(1.9, () -> {
-                    robot.outtake.rotateState = Outtake.RotateState.LEFT;
+                .addTemporalMarker(1.85, () -> {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                    robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
-                })
-                .addTemporalMarker(2.0, () -> {
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
+                    robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
+                    robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT2;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-                    robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
                 })
                 .build()
         );
@@ -254,6 +252,29 @@ public class TrajectoryRedFarTruss {
                     .build()
             );
         }
+
+        // debug Trajectory 1 <-> if no sliders and shit, reposition and try again
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                .lineTo(new Vector2d(-12, -60))
+                .splineToConstantHeading(new Vector2d(15, -57), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(47.25, -37.5), Math.toRadians(0))
+                .addTemporalMarker(0.35, () -> {
+                    if (5 <= robot.drive.getLocalizer().getPoseEstimate().getX()) {
+                        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                        robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
+                        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+                    }
+                })
+                .build()
+        );
+
+        // debug Trajectory 2 <-> pentru cand mergem la pixeli
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                .lineToConstantHeading(new Vector2d(-12, -60))
+                .splineToConstantHeading(new Vector2d(-30, -57), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(-52, -43), Math.toRadians(180))
+                .build()
+        );
         return trajectories;
     }
 }

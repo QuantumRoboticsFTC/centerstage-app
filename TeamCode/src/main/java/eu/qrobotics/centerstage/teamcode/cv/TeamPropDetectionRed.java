@@ -10,7 +10,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class TeamPropDetection implements VisionProcessor {
+public class TeamPropDetectionRed implements VisionProcessor {
     private Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
     private Scalar bLowerBound = new Scalar(105.0, 80.0, 35.0);
     private Scalar bUpperBound = new Scalar(120.0, 255.0, 255.0);
@@ -19,12 +19,13 @@ public class TeamPropDetection implements VisionProcessor {
 
     private double maxAverage;
     private int teamProp; // 123 <=> LCR
+    private String position = "undefined";
     private boolean isPropRed; // false = blue, true = red
     private int cnt = 0;
 
     Mat processMat = new Mat();
 
-    public TeamPropDetection(boolean isPropRed){
+    public TeamPropDetectionRed(boolean isPropRed){
         this.isPropRed=isPropRed;
     }
 
@@ -44,22 +45,43 @@ public class TeamPropDetection implements VisionProcessor {
         return isPropRed;
     }
 
+    public String getID() {
+        return position;
+    }
+
     private void evaluateFrame(boolean isRed, double leftAvg, double centAvg, double rightAvg) {
         maxAverage = 0;
         if (maxAverage < leftAvg) {
             maxAverage = leftAvg;
             isPropRed = isRed;
-            teamProp = 1;
+            if (isRed) {
+                teamProp = 1;
+                position = "RED LEFT";
+            } else {
+                teamProp = 3;
+                position = "BLUE LEFT";
+            }
         }
         if (maxAverage < centAvg) {
             maxAverage = centAvg;
             isPropRed = isRed;
             teamProp = 2;
+            if (isRed) {
+                position = "RED CENT";
+            } else {
+                position = "BLUE CENT";
+            }
         }
         if (maxAverage < rightAvg) {
             maxAverage = rightAvg;
             isPropRed = isRed;
-            teamProp = 3;
+            if (isRed) {
+                teamProp = 3;
+                position = "RED RIGHT";
+            } else {
+                teamProp = 1;
+                position = "BLUE RIGHT";
+            }
         }
         return;
     }
@@ -79,12 +101,12 @@ public class TeamPropDetection implements VisionProcessor {
         Rect rightRect = new Rect(1280, 500, 639, 220);
 
         // BLUE
-        Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
-        Core.inRange(processMat, bLowerBound, bUpperBound, processMat);
-
-        evaluateFrame(false, Core.sumElems(processMat.submat(leftRect)).val[0],
-                Core.sumElems(processMat.submat(centRect)).val[0],
-                Core.sumElems(processMat.submat(rightRect)).val[0]);
+//        Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
+//        Core.inRange(processMat, bLowerBound, bUpperBound, processMat);
+//
+//        evaluateFrame(false, Core.sumElems(processMat.submat(leftRect)).val[0],
+//                Core.sumElems(processMat.submat(centRect)).val[0],
+//                Core.sumElems(processMat.submat(rightRect)).val[0]);
 
         // RED
         Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);

@@ -16,9 +16,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedCloseTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
+import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
@@ -31,7 +32,7 @@ public class AutoRedCloseTruss extends LinearOpMode {
     List<Trajectory> trajectories;
 
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetection teamPropDetectionRed;
+    private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
@@ -43,7 +44,7 @@ public class AutoRedCloseTruss extends LinearOpMode {
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetectionRed= new TeamPropDetection(true);
+        teamPropDetection = new TeamPropDetectionRed(true);
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -51,7 +52,7 @@ public class AutoRedCloseTruss extends LinearOpMode {
         visionPortalTeamProp = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(1920, 1080))
-                .addProcessor(teamPropDetectionRed)
+                .addProcessor(teamPropDetection)
                 .setLiveViewContainerId(portalId)
                 .build();
 
@@ -77,8 +78,10 @@ public class AutoRedCloseTruss extends LinearOpMode {
         }
 
         while(!isStarted()){
-            readFromCamera=teamPropDetectionRed.getTeamProp();
+            readFromCamera = teamPropDetection.getTeamProp();
             telemetry.addData("Case", readFromCamera);
+            telemetry.addData("ID", teamPropDetection.getID());
+            telemetry.addData("Max", teamPropDetection.getMax());
             telemetry.update();
         }
 
@@ -125,6 +128,7 @@ public class AutoRedCloseTruss extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
         robot.drive.setPoseEstimate(TrajectoryRedCloseTruss.START_POSE);
+        robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 

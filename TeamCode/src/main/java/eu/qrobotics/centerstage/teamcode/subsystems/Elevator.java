@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionState;
+import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -58,6 +59,10 @@ public class Elevator implements Subsystem {
     public double groundPositionOffset;
     public double heightCap = 910;
     public double manualOffset;
+
+//    InterpLUT pCoeffs = new InterpLUT();
+//    InterpLUT iCoeffs = new InterpLUT();
+//    InterpLUT dCoeffs = new InterpLUT();
 
     public double manualPower;
 

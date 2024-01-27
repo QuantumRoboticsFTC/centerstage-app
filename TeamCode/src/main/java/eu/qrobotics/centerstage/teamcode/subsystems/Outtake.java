@@ -72,11 +72,11 @@ public class Outtake implements Subsystem {
     public static double CLAW_OPEN_POS = 0.2;
     public static double CLAW_CLOSE_POS = 0.8;
 
-    public static double ROTATE_TRANSFER_POS = 0.33;
-    public static double ROTATE_LEFT_POS = 0;
-    public static double ROTATE_LEFT45_POS = 0.495; //idk dc tudor vrea asa
-    public static double ROTATE_RIGHT_POS = 0.665;
-    public static double ROTATE_RIGHT45_POS = 0.165; // idk
+    public static double ROTATE_TRANSFER_POS = 0.315;
+    public static double ROTATE_LEFT_POS = 0.665;
+    public static double ROTATE_LEFT45_POS = 0.495;
+    public static double ROTATE_RIGHT_POS = 0;
+    public static double ROTATE_RIGHT45_POS = 0.165;
     public static double rotateGain = 1.3154; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual shit

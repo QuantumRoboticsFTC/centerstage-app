@@ -16,9 +16,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetection;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionBlue;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryBlueFarTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
+import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
@@ -30,7 +31,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
     List<Trajectory> trajectoriesLeft, trajectoriesCenter, trajectoriesRight;
     List<Trajectory> trajectories;
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetection teamPropDetectionRed;
+    private TeamPropDetectionBlue teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
@@ -42,7 +43,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetectionRed= new TeamPropDetection(true);
+        teamPropDetection = new TeamPropDetectionBlue(true);
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -50,7 +51,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
         visionPortalTeamProp = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(1920, 1080))
-                .addProcessor(teamPropDetectionRed)
+                .addProcessor(teamPropDetection)
                 .setLiveViewContainerId(portalId)
                 .build();
 
@@ -76,9 +77,10 @@ public class AutoBlueFarTruss extends LinearOpMode {
         }
 
         while(!isStarted()){
-            readFromCamera=teamPropDetectionRed.getTeamProp();
+            readFromCamera= teamPropDetection.getTeamProp();
             telemetry.addData("Case", readFromCamera);
-            telemetry.addData("Max", teamPropDetectionRed.getMax());
+            telemetry.addData("ID", teamPropDetection.getID());
+            telemetry.addData("Max", teamPropDetection.getMax());
             telemetry.update();
         }
 
@@ -99,12 +101,12 @@ public class AutoBlueFarTruss extends LinearOpMode {
         robot.sleep(0.3);
 
         // TODO: place pixelussy
-        if (teamProp == 2) {
-            robot.intake.intakeMode = Intake.IntakeMode.OUT;
+        if (teamProp != 1) {
+            robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
         } else {
             robot.intake.intakeMode = Intake.IntakeMode.OUT;
         }
-        robot.sleep(1);
+        robot.sleep(0.5);
     }
 
     void placePixel(boolean goToBackboard) {
@@ -114,21 +116,22 @@ public class AutoBlueFarTruss extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
-        robot.sleep(0.35);
+        robot.sleep(0.27);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.35);
+        robot.sleep(0.27);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
         robot.drive.setPoseEstimate(TrajectoryBlueFarTruss.START_POSE);
+        robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
-        trajectoriesLeft = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 1, true);
-        trajectoriesCenter = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 2, true);
-        trajectoriesRight = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 3, true);
+        trajectoriesLeft = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -163,10 +166,10 @@ public class AutoBlueFarTruss extends LinearOpMode {
         if (teamProp == 2) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0_CENTER;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        } else if (teamProp == 1) {
+        } else if (teamProp == 3) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
-        } else if (teamProp == 3) {
+        } else if (teamProp == 1) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
@@ -191,7 +194,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
                     robot.sleep(0.01);
                 }
                 // DOWN SI IN by now
-                robot.sleep(1.4);
+                robot.sleep(1.0);
                 robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 robot.intake.dropdownState = Intake.DropdownState.UP;
 
@@ -214,7 +217,12 @@ public class AutoBlueFarTruss extends LinearOpMode {
                 robot.sleep(0.01);
             }
             // DOWN SI IN by now
-            robot.sleep(1.4);
+            robot.sleep(1.0);
+
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -225,6 +233,13 @@ public class AutoBlueFarTruss extends LinearOpMode {
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
+            }
+
+            if (i != cycleCount) {
+                robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                    robot.sleep(0.01);
+                }
             }
         }
 

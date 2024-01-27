@@ -311,13 +311,13 @@ public class TeleOP extends OpMode {
                 if (stickyGamepad2.right_bumper) {
                     transferTimer.reset();
                 }
-                if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.35) {
+                if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.5) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.4 < transferTimer.seconds() && transferTimer.seconds() < 0.5) {
+                if (0.55 < transferTimer.seconds() && transferTimer.seconds() < 0.8) {
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
                 }
-                if (0.65 < transferTimer.seconds() && transferTimer.seconds() < 0.75) {
+                if (0.9 < transferTimer.seconds() && transferTimer.seconds() < 1.15) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
 
@@ -388,6 +388,7 @@ public class TeleOP extends OpMode {
                             break;
                         case ACTIVE:
                             robot.endgame.climbState = Endgame.ClimbState.ACTIVE;
+                            robot.intake.dropdownState = Intake.DropdownState.UP;
                             break;
                     }
                 }

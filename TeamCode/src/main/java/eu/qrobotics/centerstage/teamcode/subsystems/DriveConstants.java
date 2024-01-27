@@ -14,8 +14,8 @@ import java.util.Arrays;
 
 @Config
 public class DriveConstants {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(7, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1.7;
 
