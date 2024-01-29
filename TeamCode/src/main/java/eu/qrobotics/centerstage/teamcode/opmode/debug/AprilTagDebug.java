@@ -42,7 +42,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.concurrent.TimeUnit;
 
-import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
+import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedCloseCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
@@ -115,7 +115,7 @@ public class AprilTagDebug extends LinearOpMode {
     public static int DESIRED_TAG_ID = 3;     // Choose the tag you want to approach or set to -1 for ANY tag.
 
 
-    AprilDetector aprilDetector;
+    ATagDetector aprilDetector;
 
 
     @Override public void runOpMode()
@@ -132,10 +132,9 @@ public class AprilTagDebug extends LinearOpMode {
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
-        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
+        aprilDetector=new ATagDetector(robot, hardwareMap,portals[0]);
         setManualExposure(6,250);
-        robot.setTagDetector(aprilDetector);
-        aprilDetector.track=true;
+        robot.setATagDetector(aprilDetector, true);
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
@@ -168,7 +167,7 @@ public class AprilTagDebug extends LinearOpMode {
 
             telemetry.addData("Detected: ",aprilDetector.detected);
             if (gamepad1.left_bumper && aprilDetector.detected) {
-                Pose2d newPose=aprilDetector.pose2d;
+                Pose2d newPose=aprilDetector.estimatedPose;
 
                 telemetry.addData("X: ",newPose.getX());
                 telemetry.addData("Y: ",newPose.getY());

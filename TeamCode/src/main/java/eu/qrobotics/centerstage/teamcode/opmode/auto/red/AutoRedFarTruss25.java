@@ -15,7 +15,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
+import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.red.trajectories.TrajectoryRedFarTruss25;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
@@ -38,7 +38,7 @@ public class AutoRedFarTruss25 extends LinearOpMode {
     public static int cycleCount = 3;
     int trajectoryIdx = 0;
 
-    private AprilDetector aprilDetector;
+    private ATagDetector aprilDetector;
 
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;

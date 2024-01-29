@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
+import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 
 @Config
 public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarningSource {
@@ -40,7 +40,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
     public MovingStatistics top250, top100, top10;
     public Map<Subsystem, MovingStatistics> top100Subsystems = new HashMap<>();
 
-
     private boolean started;
 
     private static double getCurrentTime() {
@@ -57,9 +56,9 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
 //                hub1.getBulkData();
 //                hub2.getBulkData();
 
-                if(drive.aprilDetector!=null) {
+                // TODO: for now, leave it here. test cycle time
+                if (drive.aprilDetector != null) {
                     drive.aprilDetector.detect();
-
                 }
 
                 for (Subsystem subsystem : subsystems) { // Update all subsystems
@@ -100,8 +99,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
 
         hub1.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         hub2.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-
-
 
         //region Initialize subsystems
         subsystems = new ArrayList<>();
@@ -204,8 +201,8 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
         return RobotLog.combineGlobalWarnings(warnings);
     }
 
-    public void setTagDetector(AprilDetector aprilDetector){
-        drive.setTagDetector(aprilDetector);
+    public void setATagDetector(ATagDetector aprilDetector, boolean useATagDetector) {
+        drive.setATagDetector(aprilDetector, useATagDetector);
     }
 
     @Override

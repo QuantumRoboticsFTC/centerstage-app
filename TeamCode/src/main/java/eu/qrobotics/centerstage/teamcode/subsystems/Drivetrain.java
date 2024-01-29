@@ -20,8 +20,7 @@ import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.NanoClock;
 
-import eu.qrobotics.centerstage.teamcode.cv.AprilDetector;
-import eu.qrobotics.centerstage.teamcode.util.BNO055IMUUtil;
+import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -29,8 +28,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.hardware.bosch.BHI260IMU;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -41,15 +38,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import eu.qrobotics.centerstage.teamcode.util.AxesSigns;
-import eu.qrobotics.centerstage.teamcode.util.BNO055IMUUtil;
 import eu.qrobotics.centerstage.teamcode.util.DashboardUtil;
 import eu.qrobotics.centerstage.teamcode.util.MecanumUtil;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.*;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 
 @Config
 public class Drivetrain extends MecanumDrive implements Subsystem {
@@ -101,9 +95,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     public boolean fieldCentric = false;
 
-    public AprilDetector aprilDetector;
-
-
+    public ATagDetector aprilDetector;
+    public boolean useAprilTagDetector = false;
 
     Drivetrain(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -263,13 +256,6 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         if(IS_DISABLED) return;
 
         updatePoseEstimate();
-        //TODO:: Add april detection
-        if(aprilDetector!=null&&aprilDetector.track&&aprilDetector.detected){
-            Pose2d currentPose=getPoseEstimate();
-            Pose2d newPose=new Pose2d(aprilDetector.pose2d.getX(),aprilDetector.pose2d.getY(),currentPose.getHeading());//,aprilDetector.pose2d.getHeading());
-
-            setPoseEstimate(newPose);
-        }
 
         if (!isAutonomous) {
             setMotorPowers(motorPowers[0], motorPowers[1], motorPowers[2], motorPowers[3]);
@@ -298,11 +284,20 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         packet.put("yError", lastError.getY());
         packet.put("headingError (deg)", Math.toDegrees(lastError.getHeading()));
 
-        if(aprilDetector!=null){
-            packet.put("Debug april",aprilDetector.debugText);
-        }
-        else{
-            packet.put("Debug april","Is null");
+        if(useAprilTagDetector) {
+            if (aprilDetector != null) {
+                packet.put("Debug april",aprilDetector.debugText);
+                if (aprilDetector.detected) {
+                    Pose2d newPose = new Pose2d(aprilDetector.estimatedPose.getX(), aprilDetector.estimatedPose.getY(), currentPose.getHeading());//,aprilDetector.pose2d.getHeading());
+                    setPoseEstimate(newPose);
+
+                    packet.put("x", newPose.getX());
+                    packet.put("y", newPose.getY());
+                    packet.put("heading (deg)", Math.toDegrees(newPose.getHeading()));
+                }
+            }
+        } else {
+            packet.put("Debug april","not using");
         }
 
         switch (mode) {
@@ -372,8 +367,9 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         setMotorPowers(powers.get(0), powers.get(1), powers.get(2), powers.get(3));
     }
 
-    public void setTagDetector(AprilDetector aprilDetector){
-        this.aprilDetector=aprilDetector;
+    public void setATagDetector(ATagDetector aTagDetector, boolean useATagDetector) {
+        this.aprilDetector = aprilDetector;
+        this.useAprilTagDetector = useATagDetector;
     }
 
     @Override
