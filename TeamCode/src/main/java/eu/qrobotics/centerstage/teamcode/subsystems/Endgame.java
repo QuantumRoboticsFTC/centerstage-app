@@ -26,7 +26,7 @@ public class Endgame implements Subsystem {
     public ClimbState climbState;
     public DroneState droneState;
 
-    public static double CLIMB_PASSIVE_POSITION = 0.26;
+    public static double CLIMB_PASSIVE_POSITION = 0.33;
     public static double CLIMB_SHOOTER_POSITION = 0.5;
 
     public static double CLIMB_ACTIVE_POSITION = 0.7;
@@ -34,7 +34,7 @@ public class Endgame implements Subsystem {
     public static double shooterClimbPosition;
 
     public static double SHOOTER_PASSIVE_POSITION = 0.33;
-    public static double SHOOTER_ACTIVE_POSITION = 0.05;
+    public static double SHOOTER_ACTIVE_POSITION = 0.00; //0.05 era
 
     private CachingServoImplEx leftServo;
     private CachingServoImplEx rightServo;

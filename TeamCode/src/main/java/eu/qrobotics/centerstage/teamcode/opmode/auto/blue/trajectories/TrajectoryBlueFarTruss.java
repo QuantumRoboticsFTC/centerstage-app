@@ -125,7 +125,7 @@ public class TrajectoryBlueFarTruss {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 })
-                .addTemporalMarker(1.3, () -> {
+                .addTemporalMarker(1.65, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
                 .addTemporalMarker(1.75, () -> {
@@ -216,21 +216,21 @@ public class TrajectoryBlueFarTruss {
         // go to backboard
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(10, 60), Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(47.25, 46.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(47.25, 48), Math.toRadians(0))
                 .addTemporalMarker(0.5, () -> {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
                     robot.elevator.manualPower = -1;
                 })
-                .addTemporalMarker(1.1, () -> {
+                .addTemporalMarker(1.0, () -> {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 })
-                .addTemporalMarker(1.3, () -> {
+                .addTemporalMarker(1.6, () -> {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 })
-                .addTemporalMarker(1.8, () -> {
+                .addTemporalMarker(1.75, () -> {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
                     robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;

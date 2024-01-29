@@ -70,7 +70,7 @@ public class Outtake implements Subsystem {
     public static double FOURBAR_SCORE_ANGLED_POS = 0.63;
 
     public static double CLAW_OPEN_POS = 0.2;
-    public static double CLAW_CLOSE_POS = 0.8;
+    public static double CLAW_CLOSE_POS = 0.85;
 
     public static double ROTATE_TRANSFER_POS = 0.315;
     public static double ROTATE_LEFT_POS = 0.665;
