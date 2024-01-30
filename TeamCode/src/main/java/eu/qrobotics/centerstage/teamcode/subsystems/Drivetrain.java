@@ -95,8 +95,10 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     public boolean fieldCentric = false;
 
-    public ATagDetector aprilDetector;
+    public ATagDetector aTagDetector;
     public boolean useAprilTagDetector = false;
+    /* angle formal definition is: from robot heading to robot-camera line, measured trigonometrically */
+    public Pose2d cameraPose = new Pose2d(0, 0, Math.toRadians(0));
 
     Drivetrain(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -285,10 +287,10 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         packet.put("headingError (deg)", Math.toDegrees(lastError.getHeading()));
 
         if(useAprilTagDetector) {
-            if (aprilDetector != null) {
-                packet.put("Debug april",aprilDetector.debugText);
-                if (aprilDetector.detected) {
-                    Pose2d newPose = new Pose2d(aprilDetector.estimatedPose.getX(), aprilDetector.estimatedPose.getY(), currentPose.getHeading());//,aprilDetector.pose2d.getHeading());
+            if (aTagDetector != null) {
+                packet.put("Debug april", aTagDetector.debugText);
+                if (aTagDetector.detected) {
+                    Pose2d newPose = new Pose2d(aTagDetector.estimatedPose.vec().minus(cameraPose.vec().rotated(aTagDetector.estimatedPose.getHeading() - cameraPose.getHeading())), aTagDetector.estimatedPose.getHeading());
                     setPoseEstimate(newPose);
 
                     packet.put("x", newPose.getX());
@@ -368,7 +370,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     }
 
     public void setATagDetector(ATagDetector aTagDetector, boolean useATagDetector) {
-        this.aprilDetector = aprilDetector;
+        this.aTagDetector = this.aTagDetector;
         this.useAprilTagDetector = useATagDetector;
     }
 
