@@ -55,12 +55,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
 //                hub2.clearBulkCache();
 //                hub1.getBulkData();
 //                hub2.getBulkData();
-
-                // TODO: for now, leave it here. test cycle time
-                if (drive.aTagDetector != null) {
-                    drive.aTagDetector.detect();
-                }
-
                 for (Subsystem subsystem : subsystems) { // Update all subsystems
                     if (subsystem == null) continue;
                     try {

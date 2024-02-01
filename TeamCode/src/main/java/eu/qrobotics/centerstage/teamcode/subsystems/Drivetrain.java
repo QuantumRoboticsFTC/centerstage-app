@@ -98,7 +98,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public ATagDetector aTagDetector;
     public boolean useAprilTagDetector = false;
     /* angle formal definition is: from robot heading to robot-camera line, measured trigonometrically */
-    public Pose2d cameraPose = new Pose2d(0, 0, Math.toRadians(0));
+    public Pose2d cameraPose = new Pose2d(8, 0, Math.toRadians(0));
 
     Drivetrain(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
@@ -259,9 +259,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
         updatePoseEstimate();
 
-        if (!isAutonomous) {
-            setMotorPowers(motorPowers[0], motorPowers[1], motorPowers[2], motorPowers[3]);
-            return;
+        if (aTagDetector != null) {
+            aTagDetector.detect();
         }
 
         Pose2d currentPose = getPoseEstimate();
@@ -271,6 +270,30 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
         if (POSE_HISTORY_LIMIT > -1 && poseHistory.size() > POSE_HISTORY_LIMIT) {
             poseHistory.removeFirst();
+        }
+
+        if (!isAutonomous) {
+            setMotorPowers(motorPowers[0], motorPowers[1], motorPowers[2], motorPowers[3]);
+            TelemetryPacket packet = new TelemetryPacket();
+            Canvas fieldOverlay = packet.fieldOverlay();
+
+            packet.put("x", currentPose.getX());
+            packet.put("y", currentPose.getY());
+            packet.put("heading (deg)", Math.toDegrees(currentPose.getHeading()));
+
+            Pose2d newPose = new Pose2d(aTagDetector.estimatedPose.vec().minus(cameraPose.vec().rotated(aTagDetector.estimatedPose.getHeading() - cameraPose.getHeading())), aTagDetector.estimatedPose.getHeading());
+            setPoseEstimate(newPose);
+            setPoseEstimate(newPose);
+
+            packet.put("ATag x", newPose.getX());
+            packet.put("ATag y", newPose.getY());
+            packet.put("ATag heading (deg)", Math.toDegrees(newPose.getHeading()));
+
+            fieldOverlay.setStroke("#3F51B5");
+            DashboardUtil.drawRobot(fieldOverlay, newPose);
+            dashboard.sendTelemetryPacket(packet);
+
+            return;
         }
 
         TelemetryPacket packet = new TelemetryPacket();
@@ -355,9 +378,9 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public void setDriveSignal(DriveSignal driveSignal) {
         List<Double> velocities = MecanumKinematics.robotToWheelVelocities(
                 driveSignal.getVel(),
-               TRACK_WIDTH,
                 TRACK_WIDTH,
-               LATERAL_MULTIPLIER
+                TRACK_WIDTH,
+                LATERAL_MULTIPLIER
         );
         List<Double> accelerations = MecanumKinematics.robotToWheelAccelerations(
                 driveSignal.getAccel(),
@@ -370,7 +393,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     }
 
     public void setATagDetector(ATagDetector aTagDetector, boolean useATagDetector) {
-        this.aTagDetector = this.aTagDetector;
+        this.aTagDetector = aTagDetector;
         this.useAprilTagDetector = useATagDetector;
     }
 

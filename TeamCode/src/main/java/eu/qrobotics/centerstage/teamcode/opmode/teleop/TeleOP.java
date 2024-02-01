@@ -471,6 +471,7 @@ public class TeleOP extends OpMode {
         }
 
         addStatistics();
+
         telemetry.update();
         if (gamepad2.left_trigger > 0.2) {
             left_trigger_pressed = true;
