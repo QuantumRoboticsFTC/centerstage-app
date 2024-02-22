@@ -195,10 +195,6 @@ public class Robot implements OpModeManagerNotifier.Notifications, GlobalWarning
         return RobotLog.combineGlobalWarnings(warnings);
     }
 
-    public void setATagDetector(ATagDetector aprilDetector, boolean useATagDetector) {
-        drive.setATagDetector(aprilDetector, useATagDetector);
-    }
-
     @Override
     public boolean shouldTriggerWarningSound() {
         return false;

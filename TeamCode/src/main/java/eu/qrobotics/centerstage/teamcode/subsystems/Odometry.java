@@ -33,7 +33,7 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
     public static double LATERAL_DISTANCE = 11.17;
-    public static double FORWARD_OFFSET = 7;
+    public static double FORWARD_OFFSET = -7;
 
     public static Pose2d LEFT_POSE = new Pose2d(0,  LATERAL_DISTANCE / 2, 0);
     public static Pose2d RIGHT_POSE = new Pose2d(0, -LATERAL_DISTANCE / 2, 0);

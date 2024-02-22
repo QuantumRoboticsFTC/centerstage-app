@@ -29,7 +29,6 @@ public class Elevator implements Subsystem {
         FIRST_LINE,
         SECOND_LINE,
         THIRD_LINE,
-        AUTO_HEIGHT0_CENTER,
         AUTO_HEIGHT0,
         AUTO_HEIGHT1,
         AUTO_HEIGHT2
@@ -44,7 +43,6 @@ public class Elevator implements Subsystem {
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
 
-    public static double AUTO_HEIGHT0_CENTER = 100; // preload
     public static double AUTO_HEIGHT0 = 390; // preload
     public static double AUTO_HEIGHT1 = 520; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
@@ -119,8 +117,6 @@ public class Elevator implements Subsystem {
                 return SECOND_POSITION + manualOffset + groundPositionOffset + diffyValue;
             case THIRD_LINE:
                 return THIRD_POSITION + manualOffset + groundPositionOffset + diffyValue;
-            case AUTO_HEIGHT0_CENTER:
-                return AUTO_HEIGHT0_CENTER;
             case AUTO_HEIGHT0:
                 return AUTO_HEIGHT0;
             case AUTO_HEIGHT1:

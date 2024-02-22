@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.blue;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.blue;
 
 import android.util.Size;
 
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionBlue;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryBlueCloseCS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.blue.trajectories.TrajectoryBlueCloseCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;

@@ -59,6 +59,12 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         IDLE
     }
 
+    public enum Localization {
+        ODOMETRY,
+        ATAG,
+        APRILODO
+    }
+
     private FtcDashboard dashboard;
     private NanoClock clock;
 
@@ -100,6 +106,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     /* angle formal definition is: from robot heading to robot-camera line, measured trigonometrically */
     public Pose2d cameraPose = new Pose2d(8, 0, Math.toRadians(0));
 
+    public Localization localization;
+
     Drivetrain(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
         this.robot = robot;
@@ -109,6 +117,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         clock = NanoClock.system();
 
         mode = Mode.IDLE;
+        localization = Localization.ODOMETRY;
 
         // Initialize autonomous specific stuff
         turnController = new PIDFController(HEADING_PID);
@@ -146,11 +155,6 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
-//        INTAKEI NFRONT
-//        leftFront = hardwareMap.get(DcMotorEx.class, "rightRear");
-//        leftRear = hardwareMap.get(DcMotorEx.class, "rightFront");
-//        rightRear = hardwareMap.get(DcMotorEx.class, "leftFront");
-//        rightFront = hardwareMap.get(DcMotorEx.class, "leftRear");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
@@ -281,18 +285,23 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
             packet.put("y", currentPose.getY());
             packet.put("heading (deg)", Math.toDegrees(currentPose.getHeading()));
 
-            Pose2d newPose = new Pose2d(aTagDetector.estimatedPose.vec().minus(cameraPose.vec().rotated(aTagDetector.estimatedPose.getHeading() - cameraPose.getHeading())), aTagDetector.estimatedPose.getHeading());
-            setPoseEstimate(newPose);
-            setPoseEstimate(newPose);
+            if (useAprilTagDetector) {
+                Pose2d newPose = new Pose2d(aTagDetector.estimatedPose.vec().minus(cameraPose.vec().rotated(aTagDetector.estimatedPose.getHeading() - cameraPose.getHeading())), aTagDetector.estimatedPose.getHeading());
+                setPoseEstimate(newPose);
+                setPoseEstimate(newPose);
 
-            packet.put("ATag x", newPose.getX());
-            packet.put("ATag y", newPose.getY());
-            packet.put("ATag heading (deg)", Math.toDegrees(newPose.getHeading()));
+                packet.put("ATag x", newPose.getX());
+                packet.put("ATag y", newPose.getY());
+                packet.put("ATag heading (deg)", Math.toDegrees(newPose.getHeading()));
 
-            fieldOverlay.setStroke("#3F51B5");
-            DashboardUtil.drawRobot(fieldOverlay, newPose);
-            dashboard.sendTelemetryPacket(packet);
-
+                fieldOverlay.setStroke("#3F51B5");
+                DashboardUtil.drawRobot(fieldOverlay, newPose);
+                dashboard.sendTelemetryPacket(packet);
+            } else {
+                fieldOverlay.setStroke("#3F51B5");
+                DashboardUtil.drawRobot(fieldOverlay, currentPose);
+                dashboard.sendTelemetryPacket(packet);
+            }
             return;
         }
 

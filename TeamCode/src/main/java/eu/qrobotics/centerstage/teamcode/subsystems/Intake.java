@@ -2,8 +2,10 @@ package eu.qrobotics.centerstage.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
@@ -15,6 +17,7 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingCRServo;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServoImplEx;
+import eu.qrobotics.centerstage.teamcode.hardware.OPColorSensor;
 
 @Config
 public class Intake implements Subsystem {
@@ -57,6 +60,12 @@ public class Intake implements Subsystem {
     public static double INTAKE_DROPDOWN_2 = 0.72;
     public static double manualPosition;
 
+    private OPColorSensor sensor1; // shallow (close to intake)
+    private OPColorSensor sensor2; // deep (close to outtake)
+    private boolean isPixel1 = false;
+    private boolean isPixel2 = false;
+    private double sensorThreshold = 10;
+
     private CachingDcMotorEx motor;
     private CachingServo servo;
     private Robot robot;
@@ -69,11 +78,27 @@ public class Intake implements Subsystem {
         return motor.getVelocity(AngleUnit.DEGREES);
     }
 
+    public boolean isPixel1() {
+        return isPixel1;
+    }
+
+    public boolean isPixel2() {
+        return isPixel2;
+    }
+
+    public int pixelCount() {
+        if (isPixel1 && isPixel2) return 2;
+        else if (isPixel1 || isPixel2) return 1;
+        return 0;
+    }
+
     public Intake(HardwareMap hardwareMap, Robot robot) {
         this.robot = robot;
 
         motor = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "intakeMotor"));
         servo = new CachingServo(hardwareMap.get(Servo.class, "intakeServo"));
+        sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
+        sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
 
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -89,6 +114,11 @@ public class Intake implements Subsystem {
     @Override
     public void update() {
         if (IS_DISABLED) return;
+        sensor1.update();
+        sensor2.update();
+
+        isPixel1 = (sensor1.getDistance() < sensorThreshold);
+        isPixel2 = (sensor2.getDistance() < sensorThreshold);
 
         switch (intakeMode) {
             case IN:

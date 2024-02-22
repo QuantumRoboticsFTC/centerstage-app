@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.blue.trajectories;
 
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
 import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;

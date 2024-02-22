@@ -121,14 +121,6 @@ public class TeleOP extends OpMode {
         }
 
         // INTAKE
-        if (robot.intake.intakeMode == Intake.IntakeMode.IN && Intake.blockedThreshold <= robot.intake.getVelocity()) {
-            robot.intake.intakeMode = Intake.IntakeMode.OUT;
-            blockedIntake.reset();
-        }
-        if (0.35 <= blockedIntake.seconds() && blockedIntake.seconds() <= 0.5 && robot.intake.intakeMode == Intake.IntakeMode.OUT) {
-            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
-        }
-
         if (stickyGamepad1.b) {
             robot.intake.dropdownState = Intake.DropdownState.UP;
             robot.intake.intakeMode = Intake.IntakeMode.IDLE;

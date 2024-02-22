@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.blue;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.red;
 
 import android.util.Size;
 
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionBlue;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryBlueFarTruss;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.red.trajectories.TrajectoryRedFarCS;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
@@ -25,13 +25,14 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "04 AutoBlueFarTruss", group = "Blue")
-public class AutoBlueFarTruss extends LinearOpMode {
+@Autonomous(name = "03 AutoRedFarCS", group = "Red")
+public class AutoRedFarCS extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectoriesLeft, trajectoriesCenter, trajectoriesRight;
     List<Trajectory> trajectories;
+
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetectionBlue teamPropDetection;
+    private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
@@ -43,7 +44,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetection = new TeamPropDetectionBlue(true);
+        teamPropDetection = new TeamPropDetectionRed(true);
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -77,7 +78,7 @@ public class AutoBlueFarTruss extends LinearOpMode {
         }
 
         while(!isStarted()){
-            readFromCamera= teamPropDetection.getTeamProp();
+            readFromCamera = teamPropDetection.getTeamProp();
             telemetry.addData("Case", readFromCamera);
             telemetry.addData("ID", teamPropDetection.getID());
             telemetry.addData("Max", teamPropDetection.getMax());
@@ -98,15 +99,18 @@ public class AutoBlueFarTruss extends LinearOpMode {
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
         }
-        robot.sleep(0.3);
+        robot.sleep(0.1);
 
         // TODO: place pixelussy
-        if (teamProp != 1) {
-            robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
-        } else {
-            robot.intake.intakeMode = Intake.IntakeMode.OUT;
-        }
+        robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
+        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+        robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
         robot.sleep(0.5);
+        if (teamProp != 2) {
+            robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
+        }
+        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
     }
 
     void placePixel(boolean goToBackboard) {
@@ -116,22 +120,21 @@ public class AutoBlueFarTruss extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
-        robot.sleep(0.27);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.27);
+        robot.sleep(0.2);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryBlueFarTruss.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedFarCS.START_POSE);
         robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectoriesLeft = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryBlueFarTruss.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryRedFarCS.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -163,16 +166,6 @@ public class AutoBlueFarTruss extends LinearOpMode {
         }
 
         trajectoryIdx = 2;
-        if (teamProp == 2) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0_CENTER;
-            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        } else if (teamProp == 3) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
-            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
-        } else if (teamProp == 1) {
-            robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
-            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
-        }
         // TODO: *cica* cycles
         for (int i = 1; i <= cycleCount; i++) {
 //            if (i == 1) {
@@ -187,42 +180,38 @@ public class AutoBlueFarTruss extends LinearOpMode {
                     robot.sleep(0.01);
                 }
                 robot.intake.dropdownState = Intake.DropdownState.STACK_4;
-                robot.sleep(0.3);
-
-                robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
-                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                    robot.sleep(0.01);
-                }
-                // DOWN SI IN by now
-                robot.sleep(1.0);
-                robot.intake.intakeMode = Intake.IntakeMode.IDLE;
-                robot.intake.dropdownState = Intake.DropdownState.UP;
-
-                robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
-                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                    robot.sleep(0.01);
-                }
+                robot.sleep(0.2);
             }
-
-            robot.sleep(0.3);
-            if (i == 1) {
-                robot.intake.dropdownState = Intake.DropdownState.STACK_5;
-            } else {
-                robot.intake.dropdownState = Intake.DropdownState.STACK_3;
-            }
-            robot.sleep(0.3);
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
             // DOWN SI IN by now
-            robot.sleep(1.0);
+            robot.sleep(0.7);
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+            robot.intake.dropdownState = Intake.DropdownState.UP;
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
+            if (i == 1) {
+                robot.intake.dropdownState = Intake.DropdownState.STACK_5;
+            } else {
+                robot.intake.dropdownState = Intake.DropdownState.STACK_3;
+            }
+            robot.sleep(0.2);
+
+            robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
+            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+            // DOWN SI IN by now
+            robot.sleep(0.7);
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+            robot.intake.dropdownState = Intake.DropdownState.UP;
+            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -233,13 +222,6 @@ public class AutoBlueFarTruss extends LinearOpMode {
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
-            }
-
-            if (i != cycleCount) {
-                robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
-                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                    robot.sleep(0.01);
-                }
             }
         }
 

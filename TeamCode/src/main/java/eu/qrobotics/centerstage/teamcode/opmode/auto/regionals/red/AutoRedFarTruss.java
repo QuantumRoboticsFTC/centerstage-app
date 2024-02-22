@@ -1,4 +1,4 @@
-package eu.qrobotics.centerstage.teamcode.opmode.auto.blue;
+package eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.red;
 
 import android.util.Size;
 
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionBlue;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.blue.trajectories.TrajectoryBlueFarTruss25;
+import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.regionals.red.trajectories.TrajectoryRedFarTruss;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
@@ -25,17 +25,17 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "05 AutoBlueFarTruss 2+5 :hehe:", group = "Blue")
-public class AutoBlueFarTruss25 extends LinearOpMode {
+@Autonomous(name = "04 AutoRedFarTruss", group = "Red")
+public class AutoRedFarTruss extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectoriesLeft, trajectoriesCenter, trajectoriesRight;
     List<Trajectory> trajectories;
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetectionBlue teamPropDetection;
+    private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
-    public static int cycleCount = 3;
+    public static int cycleCount = 2;
     int trajectoryIdx = 0;
 
     private ATagDetector aprilDetector;
@@ -43,7 +43,7 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetection = new TeamPropDetectionBlue(true);
+        teamPropDetection = new TeamPropDetectionRed(true);
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -77,7 +77,7 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
         }
 
         while(!isStarted()){
-            readFromCamera= teamPropDetection.getTeamProp();
+            readFromCamera = teamPropDetection.getTeamProp();
             telemetry.addData("Case", readFromCamera);
             telemetry.addData("ID", teamPropDetection.getID());
             telemetry.addData("Max", teamPropDetection.getMax());
@@ -106,7 +106,7 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
         } else {
             robot.intake.intakeMode = Intake.IntakeMode.OUT;
         }
-        robot.sleep(0.6);
+        robot.sleep(1);
     }
 
     void placePixel(boolean goToBackboard) {
@@ -116,22 +116,22 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
         }
 
         // TODO: place pixelussy and retract outtake
-        robot.sleep(0.3);
+        robot.sleep(0.35);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.3);
+        robot.sleep(0.35);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryBlueFarTruss25.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRedFarTruss.START_POSE);
         robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
-        trajectoriesLeft = TrajectoryBlueFarTruss25.getTrajectories(robot, cycleCount, 1, true);
-        trajectoriesCenter = TrajectoryBlueFarTruss25.getTrajectories(robot, cycleCount, 2, true);
-        trajectoriesRight = TrajectoryBlueFarTruss25.getTrajectories(robot, cycleCount, 3, true);
+        trajectoriesLeft = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 1, true);
+        trajectoriesCenter = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 2, true);
+        trajectoriesRight = TrajectoryRedFarTruss.getTrajectories(robot, cycleCount, 3, true);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -166,10 +166,10 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
         if (teamProp == 2) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0_CENTER;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        } else if (teamProp == 3) {
+        } else if (teamProp == 1) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
-        } else if (teamProp == 1) {
+        } else if (teamProp == 3) {
             robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
@@ -194,7 +194,7 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
                     robot.sleep(0.01);
                 }
                 // DOWN SI IN by now
-                robot.sleep(0.6);
+                robot.sleep(1.4);
                 robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 robot.intake.dropdownState = Intake.DropdownState.UP;
 
@@ -217,7 +217,7 @@ public class AutoBlueFarTruss25 extends LinearOpMode {
                 robot.sleep(0.01);
             }
             // DOWN SI IN by now
-            robot.sleep(0.6);
+            robot.sleep(1.4);
 
             robot.drive.followTrajectory(trajectories.get(trajectoryIdx++));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
