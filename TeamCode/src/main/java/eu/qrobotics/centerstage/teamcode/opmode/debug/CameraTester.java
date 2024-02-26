@@ -57,14 +57,13 @@ public class CameraTester extends LinearOpMode {
                 telemetry.addData("Y ",newPose.getY());
                 telemetry.addData("Heading",newPose.getHeading());
                 telemetry.addLine();
-                newPose=aprilDetector.secondPose;
-                telemetry.addData("Second X ",newPose.getX());
-                telemetry.addData("Second Y ",newPose.getY());
-                telemetry.addData("Second Heading",newPose.getHeading());
-                telemetry.addLine();
-                telemetry.addData("Yaw ",aprilDetector.yaw);
-                telemetry.addData("Bearing ",aprilDetector.bearing);
-                telemetry.addData("Range ",aprilDetector.range);
+//                newPose=aprilDetector.secondPose;
+//                telemetry.addData("Dist X ",newPose.getX());
+//                telemetry.addData("Dist Y ",newPose.getY());
+//                telemetry.addLine();
+//                telemetry.addData("Yaw ",aprilDetector.yaw);
+//                telemetry.addData("Bearing ",aprilDetector.bearing);
+//                telemetry.addData("Range ",aprilDetector.range);
             }
             switch (controllerId){
                 case 0:
