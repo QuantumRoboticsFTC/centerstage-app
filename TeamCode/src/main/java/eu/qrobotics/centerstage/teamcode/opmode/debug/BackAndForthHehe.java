@@ -32,16 +32,7 @@ public class BackAndForthHehe extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
-            if (normal) {
-                robot.drive.setWeightedDrivePower(
-                        new Pose2d(
-                                -gamepad1.left_stick_y,
-                                -gamepad1.left_stick_x,
-                                -gamepad1.right_stick_x
-                        )
-                );
-                msgString = "Normal";
-            } else if (fataSpate) {
+            if (Math.abs(gamepad1.left_stick_y)>Math.abs(gamepad1.left_stick_x)) {
                 robot.drive.setWeightedDrivePower(
                         new Pose2d(
                                 -gamepad1.left_stick_y,
@@ -53,18 +44,14 @@ public class BackAndForthHehe extends LinearOpMode {
             } else {
                 robot.drive.setWeightedDrivePower(
                         new Pose2d(
-                                -gamepad1.left_stick_y,
                                 0,
+                                -gamepad1.left_stick_x,
                                 0
                         )
                 );
                 msgString = "Strafer";
             }
 
-            Pose2d poseEstimate = robot.drive.getPoseEstimate();
-            telemetry.addData("x", poseEstimate.getX());
-            telemetry.addData("y", poseEstimate.getY());
-            telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.addData("robotul merge", msgString);
             telemetry.update();
         }

@@ -69,6 +69,8 @@ public class ATagDetector {
         double xRobot = 0, yRobot = 0, hRobot = 0;
         int batchSize=Math.min(detectionAvgOf,detections.size());
 
+        detections.sort((april1, april2) -> (april1.ftcPose.range < april2.ftcPose.range ? 1 : 0));
+
         for (int i = 0; i < batchSize; i++) {
             AprilTagDetection aTag = detections.get(i);
             Pose2d aTagPose = AprilPoses.aprilPoses.get(aTag.id);
