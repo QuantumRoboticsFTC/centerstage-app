@@ -132,21 +132,21 @@ public class TeleOP extends OpMode {
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.dropdownState = Intake.DropdownState.MANUAL;
             if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
-                robot.intake.manualPosition = Intake.INTAKE_DROPDOWN_UP;
+                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
             }
             if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
-                robot.intake.manualPosition = Intake.INTAKE_DROPDOWN_DOWN;
+                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
             }
-            robot.intake.manualPosition += gamepad1.right_trigger * 0.02;
+            robot.intake.manualPower = gamepad1.right_trigger * 0.02;
         } else if (gamepad1.left_trigger > 0.1) {
             robot.intake.dropdownState = Intake.DropdownState.MANUAL;
             if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
-                robot.intake.manualPosition = Intake.INTAKE_DROPDOWN_UP;
+                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
             }
             if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
-                robot.intake.manualPosition = Intake.INTAKE_DROPDOWN_DOWN;
+                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
             }
-            robot.intake.manualPosition += -gamepad1.left_trigger * 0.02;
+            robot.intake.manualPower = -gamepad1.left_trigger * 0.02;
         }
 
         if (0.5 < blockedIntake.seconds()) {
