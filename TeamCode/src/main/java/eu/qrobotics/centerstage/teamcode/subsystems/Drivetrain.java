@@ -320,14 +320,14 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
         if(useAprilTagDetector) {
             if (aTagDetector != null) {
-                packet.put("Debug april", aTagDetector.debugText);
+                packet.put("Debug ATag", aTagDetector.debugText);
                 if (aTagDetector.detected) {
                     Pose2d newPose = new Pose2d(aTagDetector.estimatedPose.vec().minus(cameraPose.vec().rotated(aTagDetector.estimatedPose.getHeading() - cameraPose.getHeading())), aTagDetector.estimatedPose.getHeading());
                     setPoseEstimate(newPose);
 
-                    packet.put("x", newPose.getX());
-                    packet.put("y", newPose.getY());
-                    packet.put("heading (deg)", Math.toDegrees(newPose.getHeading()));
+                    packet.put("ATag x", newPose.getX());
+                    packet.put("ATag y", newPose.getY());
+                    packet.put("ATag heading (deg)", Math.toDegrees(newPose.getHeading()));
                 }
             }
         } else {
