@@ -114,8 +114,8 @@ public class Intake implements Subsystem {
         motor = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "intakeMotor"));
         servo = new AxonPlusServo(hardwareMap.get(CRServo.class, "intakeServo"),
                 hardwareMap.get(AnalogInput.class, "intakeEncoder"));
-        sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
-        sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
+        //sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
+        //sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
 
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -133,11 +133,17 @@ public class Intake implements Subsystem {
     public void update() {
         if (IS_DISABLED) return;
         servo.update();
-        sensor1.update();
-        sensor2.update();
 
-        isPixel1 = (sensor1.getDistance() < sensorThreshold);
-        isPixel2 = (sensor2.getDistance() < sensorThreshold);
+        if(sensor1!=null)
+            sensor1.update();
+
+        if(sensor2!=null)
+            sensor2.update();
+
+        if(sensor1!=null)
+            isPixel1 = (sensor1.getDistance() < sensorThreshold);
+        if(sensor2!=null)
+            isPixel2 = (sensor2.getDistance() < sensorThreshold);
 
         switch (intakeMode) {
             case IN:
@@ -189,7 +195,7 @@ public class Intake implements Subsystem {
             }
 
             pidfController.setTargetPosition(targetPosition);
-            servo.setPower(pidfController.update(servo.getAbsolutePosition()));
+            //servo.setPower(pidfController.update(servo.getAbsolutePosition()));
         }
         lastDropdownState = dropdownState;
     }

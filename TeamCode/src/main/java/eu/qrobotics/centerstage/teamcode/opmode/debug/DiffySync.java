@@ -79,6 +79,8 @@ public class DiffySync extends OpMode {
         telemetry.addData("rightpos", rightPos);
         telemetry.addData("vdiffy", (leftPos + rightPos) / 2.0);
         telemetry.addData("hdiffy", (leftPos - rightPos) / 2.0);
+        telemetry.addData("left_stick_y", gamepad1.left_stick_y);
+        telemetry.addData("left_stick_x", gamepad1.left_stick_x);
 
         telemetry.update();
     }

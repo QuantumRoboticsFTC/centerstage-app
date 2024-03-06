@@ -44,13 +44,15 @@ public class Outtake implements Subsystem {
     public OuttakeState lastOuttakeState;
 
     // DIFFy
-    public static double VDIFFY_TRANSFER_PREP_POS = 0.245;
-    public static double VDIFFY_TRANSFER_POS = 0.21; //0.215
-    public static double VDIFFY_SCORE_POS = 0.56;
+    public static double VDIFFY_OFFSET=-0.00329;
+    public static double VDIFFY_TRANSFER_PREP_POS = 0.245+VDIFFY_OFFSET;
+    public static double VDIFFY_TRANSFER_POS = 0.21+VDIFFY_OFFSET; //0.215
+    public static double VDIFFY_SCORE_POS = 0.56+VDIFFY_OFFSET;
 
-    public static double HDIFFY_LEFT_POS = -0.13;
-    public static double HDIFFY_CENTER_POS = 0.115;
-    public static double HDIFFY_RIGHT_POS = 0.36;
+    public static double HDIFFY_OFFSET=-0.0945;
+    public static double HDIFFY_LEFT_POS = -0.13+HDIFFY_OFFSET;
+    public static double HDIFFY_CENTER_POS = 0.115+HDIFFY_OFFSET;
+    public static double HDIFFY_RIGHT_POS = 0.36+HDIFFY_OFFSET;
 
     public static double vDiffyThresholdVS = 0.4; // vertical speed
     public static double vDiffyThresholdH = 0.55; // horizontal moving
@@ -73,11 +75,11 @@ public class Outtake implements Subsystem {
     public static double CLAW_OPEN_POS = 0.2;
     public static double CLAW_CLOSE_POS = 0.85;
 
-    public static double ROTATE_TRANSFER_POS = 0.315;
-    public static double ROTATE_LEFT_POS = 0.665;
-    public static double ROTATE_LEFT45_POS = 0.495;
-    public static double ROTATE_RIGHT_POS = 0;
-    public static double ROTATE_RIGHT45_POS = 0.165;
+    public static double ROTATE_TRANSFER_POS =0.33;
+    public static double ROTATE_LEFT_POS = 0.665+0.015;
+    public static double ROTATE_LEFT45_POS = 0.495+0.015;
+    public static double ROTATE_RIGHT_POS = 0+0.015;
+    public static double ROTATE_RIGHT45_POS = 0.165+0.015;
     public static double rotateGain = 1.3154; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual stuff
