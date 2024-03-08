@@ -99,14 +99,14 @@ public class TeleOP extends OpMode {
         }
 
         if (leaveBackboardTimer.seconds() < 0.4) {
-            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
+            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
         } else if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, false, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
                     break;
                 case SLOW:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, false, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
                     break;
             }
         }
@@ -131,22 +131,27 @@ public class TeleOP extends OpMode {
 
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.dropdownState = Intake.DropdownState.MANUAL;
-            if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
-                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
-            }
-            if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
-                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
-            }
-            robot.intake.manualPower = gamepad1.right_trigger * 0.02;
+//            if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
+//                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
+//            }
+//            if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
+//                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
+//            }
+//            robot.intake.manualPower = gamepad1.right_trigger * 0.02;
+            robot.intake.manualPower = gamepad1.right_trigger * 1;
         } else if (gamepad1.left_trigger > 0.1) {
             robot.intake.dropdownState = Intake.DropdownState.MANUAL;
-            if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
-                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
-            }
-            if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
-                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
-            }
-            robot.intake.manualPower = -gamepad1.left_trigger * 0.02;
+//            if (robot.intake.lastDropdownState == Intake.DropdownState.UP) {
+//                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_UP);
+//            }
+//            if (robot.intake.lastDropdownState == Intake.DropdownState.DOWN) {
+//                robot.intake.setPosition(Intake.INTAKE_DROPDOWN_DOWN);
+//            }
+//            robot.intake.manualPower = -gamepad1.left_trigger * 0.02;
+            robot.intake.manualPower = -gamepad1.left_trigger * 1;
+        } else {
+            robot.intake.dropdownState = Intake.DropdownState.MANUAL;
+            robot.intake.manualPower = 0;
         }
 
         if (0.5 < blockedIntake.seconds()) {
@@ -192,10 +197,10 @@ public class TeleOP extends OpMode {
         // ELEVATOR
         if (gamepad2.right_trigger > 0.1) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-            robot.elevator.manualPower = (gamepad2.right_trigger + Elevator.IDLE_POWER);
+            robot.elevator.manualPower = gamepad2.right_trigger;
         } else if (gamepad2.left_trigger > 0.1) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
-            robot.elevator.manualPower = Elevator.IDLE_POWER - gamepad2.left_trigger;
+            robot.elevator.manualPower = -gamepad2.left_trigger;
         } else if (robot.elevator.elevatorState == Elevator.ElevatorState.MANUAL &&
                 (left_trigger_pressed ||
                 right_trigger_pressed)) {
@@ -257,38 +262,25 @@ public class TeleOP extends OpMode {
         }
 
         switch (robot.outtake.outtakeState) {
-            case TRANSFER_PREP:
+            case TRANSFER:
                 if (stickyGamepad2.right_bumper) {
                     transferTimer.reset();
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
-                }
-                break;
-            case TRANSFER:
-                if (0.45 < transferTimer.seconds() && transferTimer.seconds() < 0.65) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.75 < transferTimer.seconds() && transferTimer.seconds() < 0.95) {
+                if (0.4 < transferTimer.seconds() && transferTimer.seconds() < 0.6) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.POST_TRANSFER;
-                }
-                if (stickyGamepad2.right_bumper) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
                 break;
             case POST_TRANSFER:
-                if (1.0 < transferTimer.seconds() && transferTimer.seconds() < 1.2) {
+                if (0.8 < transferTimer.seconds() && transferTimer.seconds() < 1.0) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                }
-                if (stickyGamepad2.right_bumper) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-                    robot.outtake.outtakeState  = Outtake.OuttakeState.SCORE;
                 }
                 break;
             case SCORE:
                 if (stickyGamepad2.left_bumper) {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 }
@@ -306,10 +298,7 @@ public class TeleOP extends OpMode {
                 if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.5) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.55 < transferTimer.seconds() && transferTimer.seconds() < 0.8) {
-                    robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
-                }
-                if (0.9 < transferTimer.seconds() && transferTimer.seconds() < 1.15) {
+                if (0.55 < transferTimer.seconds() && transferTimer.seconds() < 0.75) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
 
@@ -320,19 +309,19 @@ public class TeleOP extends OpMode {
 
                 if (stickyGamepad2.left_bumper) {
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                 }
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
+            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
             robot.outtake.rotateState = Outtake.RotateState.CENTER;
-            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
             robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         }
@@ -407,6 +396,7 @@ public class TeleOP extends OpMode {
         if (intakeTelemetry) {
             telemetry.addData("intake_motor_velocity_deg", robot.intake.getVelocity());
             telemetry.addData("intake_mode", robot.intake.intakeMode);
+            telemetry.addData("pixel count", robot.intake.pixelCount());
 //            if (debugTelemetry) {
 //                telemetry.addData("intake_motor_amps", robot.intake.getCurrent());
 //            }
@@ -415,8 +405,10 @@ public class TeleOP extends OpMode {
         if (outtakeTelemetry) {
             telemetry.addData("outtake_state", robot.outtake.outtakeState);
             telemetry.addData("horizontal state", robot.outtake.diffyHState);
-            telemetry.addData("diffy_horizontal", robot.outtake.getDiffyHorizontal());
-            telemetry.addData("diffy_vertical", robot.outtake.getDiffyVertical());
+            telemetry.addData("diffy target vertical", robot.outtake.getDiffyTargetVertical());
+            telemetry.addData("diffy true vertical", robot.outtake.getDiffyTrueVertical());
+            telemetry.addData("diffy target horizontal", robot.outtake.getDiffyTargetHorizontal());
+            telemetry.addData("diffy true horizontal", robot.outtake.getDiffyTrueHorizontal());
             telemetry.addData("diffy H state", robot.outtake.diffyHState);
             telemetry.addData("rotate state", robot.outtake.rotateState);
             telemetry.addData("rotate value", robot.outtake.getRotatePosition());

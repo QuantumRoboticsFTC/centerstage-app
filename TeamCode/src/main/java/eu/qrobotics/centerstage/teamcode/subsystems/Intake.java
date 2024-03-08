@@ -1,6 +1,7 @@
 package eu.qrobotics.centerstage.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -49,12 +50,11 @@ public class Intake implements Subsystem {
 
     public static double blockedThreshold = 100000;
 
-    public static double INTAKE_IN_QUICK_SPEED = -1;
-    public static double INTAKE_IN_SPEED = -0.8;
+    public static double INTAKE_IN_SPEED = 1;
     public static double INTAKE_IDLE_SPEED = 0;
-    public static double INTAKE_OUT_SPEED = 1;
-    public static double INTAKE_OUT_SLOW_SPEED = 0.5;
-    public static double INTAKE_IN_SLOW_SPEED = -0.225;
+    public static double INTAKE_OUT_SPEED = -1;
+    public static double INTAKE_OUT_SLOW_SPEED = -0.5;
+    public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 0.38;
     public static double INTAKE_DROPDOWN_DOWN = 0.754;
@@ -114,14 +114,15 @@ public class Intake implements Subsystem {
         motor = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "intakeMotor"));
         servo = new AxonPlusServo(hardwareMap.get(CRServo.class, "intakeServo"),
                 hardwareMap.get(AnalogInput.class, "intakeEncoder"));
-        //sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
-        //sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
+//        sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
+//        sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
 
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         setPosition(INTAKE_DROPDOWN_UP);
         manualPower = 0;
+        servo.setAbsolutePosition(servo.getRelativePosition());
 
         intakeMode = IntakeMode.IDLE;
         dropdownState = DropdownState.UP;
@@ -134,15 +135,15 @@ public class Intake implements Subsystem {
         if (IS_DISABLED) return;
         servo.update();
 
-        if(sensor1!=null)
+        if (sensor1 != null)
             sensor1.update();
 
-        if(sensor2!=null)
+        if (sensor2 != null)
             sensor2.update();
 
-        if(sensor1!=null)
+        if (sensor1 != null)
             isPixel1 = (sensor1.getDistance() < sensorThreshold);
-        if(sensor2!=null)
+        if (sensor2 != null)
             isPixel2 = (sensor2.getDistance() < sensorThreshold);
 
         switch (intakeMode) {
@@ -151,9 +152,6 @@ public class Intake implements Subsystem {
                 break;
             case IN_SLOW:
                 motor.setPower(INTAKE_IN_SLOW_SPEED);
-                break;
-            case IN_QUICK:
-                motor.setPower(INTAKE_IN_QUICK_SPEED);
                 break;
             case IDLE:
                 motor.setPower(INTAKE_IDLE_SPEED);
@@ -167,34 +165,34 @@ public class Intake implements Subsystem {
         }
 
         if (dropdownState == DropdownState.MANUAL) {
-            setPower(manualPower);
+            setPower(-manualPower);
         } else {
             if (lastDropdownState == DropdownState.MANUAL) {
                 manualPower = 0;
             }
 
-            switch (dropdownState) {
-                case UP:
-                    setPosition(INTAKE_DROPDOWN_UP);
-                    break;
-                case DOWN:
-                    setPosition(INTAKE_DROPDOWN_DOWN);
-                    break;
-                case STACK_5:
-                    setPosition(INTAKE_DROPDOWN_5);
-                    break;
-                case STACK_4:
-                    setPosition(INTAKE_DROPDOWN_4);
-                    break;
-                case STACK_3:
-                    setPosition(INTAKE_DROPDOWN_3);
-                    break;
-                case STACK_2:
-                    setPosition(INTAKE_DROPDOWN_2);
-                    break;
-            }
+//            switch (dropdownState) {
+//                case UP:
+//                    setPosition(INTAKE_DROPDOWN_UP);
+//                    break;
+//                case DOWN:
+//                    setPosition(INTAKE_DROPDOWN_DOWN);
+//                    break;
+//                case STACK_5:
+//                    setPosition(INTAKE_DROPDOWN_5);
+//                    break;
+//                case STACK_4:
+//                    setPosition(INTAKE_DROPDOWN_4);
+//                    break;
+//                case STACK_3:
+//                    setPosition(INTAKE_DROPDOWN_3);
+//                    break;
+//                case STACK_2:
+//                    setPosition(INTAKE_DROPDOWN_2);
+//                    break;
+//            }
 
-            pidfController.setTargetPosition(targetPosition);
+//            pidfController.setTargetPosition(targetPosition);
             //servo.setPower(pidfController.update(servo.getAbsolutePosition()));
         }
         lastDropdownState = dropdownState;

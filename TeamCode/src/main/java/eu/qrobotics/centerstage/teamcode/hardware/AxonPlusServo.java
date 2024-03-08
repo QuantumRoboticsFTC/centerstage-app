@@ -1,5 +1,6 @@
 package eu.qrobotics.centerstage.teamcode.hardware;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -16,63 +17,109 @@ import eu.qrobotics.centerstage.teamcode.util.Encoder;
 public class AxonPlusServo implements CRServo {
     private CRServo delegateServo;
     public AnalogInput delegateEncoder;
-    private boolean reverse=false;
+    private boolean reverse = true;
+    MultipleTelemetry telem;
 
-    private double angleOffset=400;
     private double cachedPower = 0;
+    private double lastNonNullPower = 0;
     private double cachedPosition = 0;
+    private double absolutePosition = 0;
     public double rotations = 0;
+    private double epsilon = 4;
 
-    public double averageAngle = 0;
-    private double angleSum = 0;
-    private double entryCount = 0;
+    public double diff = 0;
 
-    private double timerLimit = 0.7;
-    private ElapsedTime timer;
+    public double iterationLimitUp = 45;
+    public double iterationLimitDown = 20;
 
+    private  List<String> changes = new ArrayList<String>();
+    private  List<String> positions = new ArrayList<String>();
 
-
+//    public AxonPlusServo(CRServo servo, AnalogInput encoder, MultipleTelemetry _telem) {
     public AxonPlusServo(CRServo servo, AnalogInput encoder) {
         delegateServo = servo;
         delegateEncoder = encoder;
-        timer=new ElapsedTime();
+        setAbsolutePosition(getRelativePosition());
+//        telem = _telem;
     }
 
-    public double getVoltage(){ return delegateEncoder.getVoltage();}
+    public double getVoltage() {
+        return delegateEncoder.getVoltage();
+    }
+
     public double getRelativePosition() {
-        int pose=(int)(delegateEncoder.getVoltage() / 2.354 * 360);
-        return pose;
+        return delegateEncoder.getVoltage() / 3.3 * 360;
+    }
+
+    public double getCachedPosition() {
+        return cachedPosition;
     }
 
     public double getAbsolutePosition() {
-        return rotations * 360 + cachedPosition-angleOffset;
+        return absolutePosition;
+    }
+
+    public void setAbsolutePosition(double _absolutePosition) {
+        absolutePosition = _absolutePosition;
+        cachedPosition = _absolutePosition % 360;
     }
 
     public void update() {
         double newPosition = getRelativePosition();
-        if(angleOffset==400){
-            angleOffset=newPosition;
+        if (newPosition > cachedPosition + 3.0 ||
+                newPosition < cachedPosition - 3.0) {
+            changes.add("pos" + String.valueOf(newPosition));
         }
-        if (timer.seconds() < timerLimit) {
-            angleSum = angleSum +
-                    newPosition;
-            entryCount++;
-        } else {
-            averageAngle = angleSum / entryCount;
-            timer.reset();
-            angleSum = 0;
-            entryCount = 0;
-        }
-        if (cachedPower > 0) {
-            if (averageAngle < cachedPosition) {
+
+        if (lastNonNullPower < 0) {
+            if ((0 <= 360 - cachedPosition + newPosition &&
+                    360 - cachedPosition + newPosition <= iterationLimitUp) &&
+                    newPosition + epsilon < cachedPosition) {
                 rotations++;
+                absolutePosition = absolutePosition +
+                        (360 - cachedPosition + newPosition);
+                diff = (360 - cachedPosition + newPosition);
+                cachedPosition = newPosition;
+            } else if ((0 <= newPosition - cachedPosition &&
+                    newPosition - cachedPosition <= iterationLimitUp)) {
+                absolutePosition = absolutePosition +
+                        (newPosition - cachedPosition);
+                diff = (newPosition - cachedPosition);
+                cachedPosition = newPosition;
             }
-        } else if (cachedPower < 0) {
-            if (cachedPosition < averageAngle) {
+        } else if (lastNonNullPower > 0) {
+            if ((0 <= 360 - newPosition + cachedPosition &&
+                    360 - newPosition + cachedPosition <= iterationLimitDown) &&
+                    cachedPosition + epsilon < newPosition) {
                 rotations--;
+                absolutePosition = absolutePosition -
+                        (360 - newPosition + cachedPosition);
+                diff = (360 - newPosition + cachedPosition);
+                cachedPosition = newPosition;
+            } else if ((0 <= cachedPosition - newPosition &&
+                    cachedPosition - newPosition <= iterationLimitDown)) {
+                absolutePosition = absolutePosition -
+                        (cachedPosition - newPosition);
+                diff = cachedPosition - newPosition;
+                cachedPosition = newPosition;
             }
         }
-        cachedPosition =averageAngle;
+        if(changes.size()>=10){
+            changes.remove(0);
+        }
+        if(positions.size()>=10){
+            positions.remove(0);
+        }
+
+//        telem.addData("diff ", diff);
+//        telem.addLine("Changes:");
+//        for(String change:changes){
+//            telem.addLine(change);
+//        }
+//        telem.addLine("cachedpos:");
+//        for(String pos:positions){
+//            telem.addLine(pos);
+//        }
     }
 
     @Override
@@ -90,16 +137,19 @@ public class AxonPlusServo implements CRServo {
         delegateServo.setDirection(direction);
     }
 
-    public  void reverseServo(){
-        reverse=true;
-    }
+//    public  void reverseServo() {
+//        reverse = true;
+//    }
 
     @Override
     public void setPower(double power) {
         if (power != cachedPower) {
+            if (reverse) {
+                power = -power;
+            }
             cachedPower = power;
-            if(reverse){
-                power=-power;
+            if (power != 0) {
+                lastNonNullPower = power;
             }
             delegateServo.setPower(power);
         }
@@ -108,6 +158,14 @@ public class AxonPlusServo implements CRServo {
     @Override
     public double getPower() {
         return delegateServo.getPower();
+    }
+
+    public double getCachedPower() {
+        return cachedPower;
+    }
+
+    public double getLastNonNullPower() {
+        return lastNonNullPower;
     }
 
     @Override

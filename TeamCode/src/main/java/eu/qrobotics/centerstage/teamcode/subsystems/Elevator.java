@@ -58,21 +58,13 @@ public class Elevator implements Subsystem {
     public double heightCap = 910;
     public double manualOffset;
 
-//    InterpLUT pCoeffs = new InterpLUT();
-//    InterpLUT iCoeffs = new InterpLUT();
-//    InterpLUT dCoeffs = new InterpLUT();
-
     public double manualPower;
 
     private ElapsedTime elapsedTime = new ElapsedTime(0);
 
-    private static double maxVelocity = 75;
-    private static double maxAcceleration = 15;
-    private static double maxJerk = 2;
-    private MotionProfile mp;
-    public static PIDCoefficients coefs = new PIDCoefficients(0.0095, 0.0005, 0.0005);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.00375, 0.00003, 0.0000);
     private PIDFController controller = new PIDFController(coefs);
-    public static double ff1 = 0.1;
+    public static double ff1 = 0.07;
 
     private CachingDcMotorEx motorLeft;
     private CachingDcMotorEx motorRight;
@@ -89,13 +81,6 @@ public class Elevator implements Subsystem {
         targetHeight = height;
 
         elapsedTime.reset();
-
-//        mp = MotionProfileGenerator.generateSimpleMotionProfile(
-//            new MotionState(getCurrentPosition(), 0, 0),
-//            new MotionState(getTargetPosition(height), 0, 0),
-//            maxVelocity,
-//            maxAcceleration,
-//            maxJerk);
     }
 
     public void setPower(double power) {
@@ -118,11 +103,11 @@ public class Elevator implements Subsystem {
             case THIRD_LINE:
                 return THIRD_POSITION + manualOffset + groundPositionOffset + diffyValue;
             case AUTO_HEIGHT0:
-                return AUTO_HEIGHT0;
+                return AUTO_HEIGHT0 + diffyValue;
             case AUTO_HEIGHT1:
-                return AUTO_HEIGHT1;
+                return AUTO_HEIGHT1 + diffyValue;
             case AUTO_HEIGHT2:
-                return AUTO_HEIGHT2;
+                return AUTO_HEIGHT2 + diffyValue;
         }
         return 0;
     }
@@ -152,15 +137,7 @@ public class Elevator implements Subsystem {
     }
 
     public double getCurrentPosition() {
-        return motorRight.getCurrentPosition();
-    }
-
-    public double getCurrentLeft() {
-        return motorLeft.getCurrent(CurrentUnit.AMPS);
-    }
-
-    public double getCurrentRight() {
-        return motorRight.getCurrent(CurrentUnit.AMPS);
+        return motorLeft.getCurrentPosition();
     }
 
     public Elevator(HardwareMap hardwareMap, Robot robot) {
@@ -169,7 +146,7 @@ public class Elevator implements Subsystem {
         motorLeft = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderLeft"));
         motorRight = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderRight"));
 
-        motorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -178,7 +155,6 @@ public class Elevator implements Subsystem {
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         manualOffset = 0;
-//        groundPositionOffset = -getCurrentPosition();
         groundPositionOffset = 0;
 
         elevatorState = lastState = ElevatorState.TRANSFER;
@@ -209,7 +185,6 @@ public class Elevator implements Subsystem {
             diffyValue = 0;
         }
 
-        // TODO: THIS IS EASY **PID TUNER**
         if (elevatorState == ElevatorState.LINES ||
             elevatorState == ElevatorState.TRANSFER) {
             controller.setTargetPosition(getTargetPosition());
@@ -221,26 +196,5 @@ public class Elevator implements Subsystem {
             controller.setTargetPosition(climbedPosition);
             setPower(controller.update(getCurrentPosition()) + ff1);
         }
-
-        // TODO: MP IN PID
-//        switch (elevatorState) {
-//            case AUTOMATIC:
-//                updateBasedOnPID();
-//                break;
-//            case MANUAL:
-//                setPower(manualPower);
-//                break;
-//        }
-    }
-
-    private void updateBasedOnPID() {
-        MotionState state = mp.get(elapsedTime.seconds());
-
-        controller.setTargetPosition(state.getX());
-        controller.setTargetVelocity(state.getV());
-        controller.setTargetAcceleration(state.getA());
-
-        double power = controller.update(getCurrentPosition()) + ff1;
-        setPower(power);
     }
 }

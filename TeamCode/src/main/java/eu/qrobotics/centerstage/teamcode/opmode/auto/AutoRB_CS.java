@@ -117,7 +117,7 @@ public class AutoRB_CS extends LinearOpMode {
         // TODO: place pixelussy
 //        robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
         robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.outtake.manualFourbarPos = Outtake.FOURBAR_POST_TRANSFER_POS;
+        robot.outtake.manualFourbarPos = Outtake.FOURBAR_TRANSFER_POS;
 //        robot.sleep(0.5);
         if (teamProp != 2) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
@@ -193,7 +193,7 @@ public class AutoRB_CS extends LinearOpMode {
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (trajectoryTimer.seconds() > 0.2) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.elevatorState = Elevator.ElevatorState.TRANSFER;
                 }
