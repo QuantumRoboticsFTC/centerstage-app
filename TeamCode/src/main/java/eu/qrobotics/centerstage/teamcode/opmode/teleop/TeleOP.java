@@ -33,7 +33,9 @@ public class TeleOP extends OpMode {
 
     // Timers
     private ElapsedTime blockedIntake = new ElapsedTime(0);
-    private ElapsedTime transferTimer = new ElapsedTime(0);
+    private ElapsedTime transferDeployTimer = new ElapsedTime(0);
+    private ElapsedTime transferRetractCenteredTimer = new ElapsedTime(0);
+    private ElapsedTime transferRetractSideTimer = new ElapsedTime(0);
     private ElapsedTime scoreTimer = new ElapsedTime(0);
     private ElapsedTime leaveBackboardTimer = new ElapsedTime(0);
 
@@ -264,25 +266,42 @@ public class TeleOP extends OpMode {
         switch (robot.outtake.outtakeState) {
             case TRANSFER:
                 if (stickyGamepad2.right_bumper) {
-                    transferTimer.reset();
+                    transferDeployTimer.reset();
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.4 < transferTimer.seconds() && transferTimer.seconds() < 0.6) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.POST_TRANSFER;
+                if (0.4 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.6) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
                 break;
-            case POST_TRANSFER:
-                if (0.8 < transferTimer.seconds() && transferTimer.seconds() < 1.0) {
+            case ABOVE_TRANSFER:
+                if (0.8 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.0) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                }
+
+                if (0.4 < transferRetractCenteredTimer.seconds() && transferRetractCenteredTimer.seconds() < 0.6) {
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
                 break;
             case SCORE:
                 if (stickyGamepad2.left_bumper) {
+                    if (robot.outtake.diffyHState == Outtake.DiffyHorizontalState.CENTER) {
+                        robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                        transferRetractCenteredTimer.reset();
+                    } else {
+                        transferRetractSideTimer.reset();
+                    }
+
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                }
+
+                if (0.5 < transferRetractSideTimer.seconds() &&
+                        transferRetractSideTimer.seconds() < 0.7) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    transferRetractCenteredTimer.reset();
                 }
 
                 // SCORING OPTIONS
@@ -293,13 +312,13 @@ public class TeleOP extends OpMode {
                 break;
             case MANUAL:
                 if (stickyGamepad2.right_bumper) {
-                    transferTimer.reset();
+                    transferDeployTimer.reset();
                 }
-                if (0.25 < transferTimer.seconds() && transferTimer.seconds() < 0.5) {
+                if (0.1 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.3) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.55 < transferTimer.seconds() && transferTimer.seconds() < 0.75) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                if (0.4 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.6) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
 
                 if (stickyGamepad2.a) {
@@ -308,10 +327,22 @@ public class TeleOP extends OpMode {
                 }
 
                 if (stickyGamepad2.left_bumper) {
+                    if (robot.outtake.diffyHState == Outtake.DiffyHorizontalState.CENTER) {
+                        robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                        transferRetractCenteredTimer.reset();
+                    } else {
+                        transferRetractSideTimer.reset();
+                    }
+
                     robot.outtake.rotateState = Outtake.RotateState.CENTER;
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                }
+
+                if (0.5 < transferRetractSideTimer.seconds() &&
+                        transferRetractSideTimer.seconds() < 0.7) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    transferRetractCenteredTimer.reset();
                 }
                 break;
         }
@@ -320,10 +351,21 @@ public class TeleOP extends OpMode {
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
+            if (robot.outtake.diffyHState == Outtake.DiffyHorizontalState.CENTER) {
+                robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                transferRetractCenteredTimer.reset();
+            } else {
+                transferRetractSideTimer.reset();
+            }
+
             robot.outtake.rotateState = Outtake.RotateState.CENTER;
-            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
             robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+        }
+        if (0.5 < transferRetractSideTimer.seconds() &&
+                transferRetractSideTimer.seconds() < 0.7) {
+            robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+            transferRetractCenteredTimer.reset();
         }
 
         // manual
