@@ -8,16 +8,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class OPColorSensor {
-    private ColorRangeSensor delegate;
+    public ColorRangeSensor delegate;
     private double averageDistance = 0;
     private double distanceSum = 0;
     private double entryCount = 0;
 
-    private double timerLimit = 1.0;
+    private double timerLimit = 0.6;
     private ElapsedTime timer;
 
     public OPColorSensor(ColorRangeSensor sensor) {
         delegate = sensor;
+        timer=new ElapsedTime();
     }
 
     public double getDistance() {

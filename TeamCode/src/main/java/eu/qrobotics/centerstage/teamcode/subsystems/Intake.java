@@ -114,8 +114,8 @@ public class Intake implements Subsystem {
         motor = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "intakeMotor"));
         servo = new AxonPlusServo(hardwareMap.get(CRServo.class, "intakeServo"),
                 hardwareMap.get(AnalogInput.class, "intakeEncoder"));
-//        sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
-//        sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
+        sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
+        sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
 
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -135,16 +135,12 @@ public class Intake implements Subsystem {
         if (IS_DISABLED) return;
         servo.update();
 
-        if (sensor1 != null)
-            sensor1.update();
+        sensor1.update();
 
-        if (sensor2 != null)
-            sensor2.update();
+        sensor2.update();
 
-        if (sensor1 != null)
-            isPixel1 = (sensor1.getDistance() < sensorThreshold);
-        if (sensor2 != null)
-            isPixel2 = (sensor2.getDistance() < sensorThreshold);
+        isPixel1 = (sensor1.getDistance() < sensorThreshold);
+        isPixel2 = (sensor2.getDistance() < sensorThreshold);
 
         switch (intakeMode) {
             case IN:
