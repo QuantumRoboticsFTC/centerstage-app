@@ -164,7 +164,11 @@ public class AutoRA_TR extends LinearOpMode {
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
 //        setManualExposure(6,250);
 //        robot.setTagDetector(aprilDetector);
-        teamProp = cameraTeamProp(portals[1]);
+
+        //teamProp = cameraTeamProp(portals[1]);
+        teamProp=1;
+        waitForStart();
+
 //        aprilDetector.track=false;
 
         robot.start();
@@ -180,6 +184,7 @@ public class AutoRA_TR extends LinearOpMode {
         // 3 - go to stack
         robot.drive.followTrajectory(trajectories.get(3));
         trajectoryTimer.reset();
+        /*
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             if (trajectoryTimer.seconds() > 0.2) {
                 robot.intake.dropdownState = Intake.DropdownState.STACK_5;
@@ -187,6 +192,7 @@ public class AutoRA_TR extends LinearOpMode {
             }
             robot.sleep(0.01);
         }
+        */
         robot.sleep(0.1);
 
         // TODO: *cica* cycles
@@ -195,6 +201,7 @@ public class AutoRA_TR extends LinearOpMode {
                 // 6 -> go to lane
                 robot.drive.followTrajectory(trajectories.get(8));
                 trajectoryTimer.reset();
+                /*
                 while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                     if (trajectoryTimer.seconds() > 0.2) {
                         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
@@ -203,9 +210,12 @@ public class AutoRA_TR extends LinearOpMode {
                     }
                     robot.sleep(0.01);
                 }
+                */
                 robot.sleep(0.1);
+
                 // 7 -> go to stack
                 robot.drive.followTrajectory(trajectories.get(9));
+                /*
                 while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                     if (robot.drive.getPoseEstimate().getX() < -15 &&
                             -20 < robot.drive.getPoseEstimate().getX()) {
@@ -218,22 +228,28 @@ public class AutoRA_TR extends LinearOpMode {
                     }
                     robot.sleep(0.01);
                 }
+                */
                 intakeTimer.reset();
                 while (robot.intake.pixelCount() < 1 && intakeTimer.seconds() < intakeTimerLimit) {
                     robot.sleep(0.1);
                 }
 
+                /*
                 if (i == 1) {
                     robot.intake.dropdownState = Intake.DropdownState.STACK_4;
                 } else {
                     robot.intake.dropdownState = Intake.DropdownState.STACK_2;
                 }
+
+                 */
             }
             intakeTimer.reset();
             while (robot.intake.pixelCount() < 2 && intakeTimer.seconds() < intakeTimerLimit) {
                 robot.sleep(0.1);
             }
+            /*
             robot.intake.intakeMode = Intake.IntakeMode.IN_SLOW;
+            */
 
             // 4 -> go to lane
             robot.drive.followTrajectory(trajectories.get(6));
@@ -245,6 +261,7 @@ public class AutoRA_TR extends LinearOpMode {
             // 5 -> go to backdrop
             robot.drive.followTrajectory(trajectories.get(7));
             trajectoryTimer.reset();
+            /*
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (trajectoryTimer.seconds() > 0.15) {
                     robot.intake.dropdownState = Intake.DropdownState.DOWN;
@@ -279,6 +296,8 @@ public class AutoRA_TR extends LinearOpMode {
                 placePixel();
                 retry = false;
             }
+
+             */
         }
 
         // 8 -> park

@@ -14,17 +14,19 @@ import java.util.Arrays;
 
 @Config
 public class DriveConstants {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(7, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 0);
+    //    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 0.5);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8,0,0.2);
+    //    public static PIDCoefficients HEADING_PID = new PIDCoefficients(9, 0, 0.75);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0.2);
 
-    public static double LATERAL_MULTIPLIER = 1.7;
+    public static double LATERAL_MULTIPLIER = 1.85853;
 
     public static double WHEEL_RADIUS = 3.780 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 15; // in
+    public static double TRACK_WIDTH = 12.57; // in
 
-    public static double MAX_ANG_VEL = Math.toRadians(180);
-    public static double MAX_ANG_ACCEL = Math.toRadians(180);
+    public static double MAX_ANG_VEL = Math.toRadians(270);
+    public static double MAX_ANG_ACCEL = Math.toRadians(270);
     public static double MAX_VEL = 40;
     public static double MAX_ACCEL = 40;
 
@@ -37,8 +39,8 @@ public class DriveConstants {
     public static TrajectoryVelocityConstraint NORMAL_VEL_CONSTRAINT = new MecanumVelocityConstraint(40, TRACK_WIDTH, LATERAL_MULTIPLIER);
     public static TrajectoryAccelerationConstraint NORMAL_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(40);
 
-    public static TrajectoryVelocityConstraint SLOW_VEL_CONSTRAINT = new MecanumVelocityConstraint(25, TRACK_WIDTH, LATERAL_MULTIPLIER);
-    public static TrajectoryAccelerationConstraint SLOW_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(33);
+    public static TrajectoryVelocityConstraint SLOW_VEL_CONSTRAINT = new MecanumVelocityConstraint(7, TRACK_WIDTH, LATERAL_MULTIPLIER);
+    public static TrajectoryAccelerationConstraint SLOW_ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(30);
 
     public static final double TICKS_PER_REV = 384.5;
     public static final double MAX_RPM = 435;
@@ -47,9 +49,9 @@ public class DriveConstants {
     public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
             getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
-    public static double kV = 0.0125; //0.013
-    public static double kA = 0.004; //0.004
-    public static double kStatic = 0.04; //0.0001
+    public static double kV =0.01231;
+    public static double kA = 0.0033;
+    public static double kStatic = 0.05;
 
     public static double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;

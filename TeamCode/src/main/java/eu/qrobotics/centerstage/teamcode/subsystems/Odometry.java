@@ -32,15 +32,15 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = 1.89 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 11.17;
-    public static double FORWARD_OFFSET = -7;
+    public static double LATERAL_DISTANCE = 10.94;
+    public static double FORWARD_OFFSET = 6;
 
     public static Pose2d LEFT_POSE = new Pose2d(0,  LATERAL_DISTANCE / 2, 0);
     public static Pose2d RIGHT_POSE = new Pose2d(0, -LATERAL_DISTANCE / 2, 0);
-    public static Pose2d REAR_POSE = new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90));
+    public static Pose2d REAR_POSE = new Pose2d(-FORWARD_OFFSET, 0, Math.toRadians(90));
 
-    public static double X_MULTIPLIER = 1;
-    public static double Y_MULTIPLIER = 1;
+    public static double X_MULTIPLIER = 0.98308;
+    public static double Y_MULTIPLIER = 0.98077;
 
     private Encoder leftEncoder, rightEncoder, rearEncoder;
 
@@ -52,12 +52,12 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
         ));
 
         // TOOD: astea ar tb schimbate
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
-        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
+        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
 
-//        rightEncoder.setDirection(Encoder.Direction.REVERSE);
-        rearEncoder.setDirection(Encoder.Direction.REVERSE);
+        //rightEncoder.setDirection(Encoder.Direction.REVERSE);
+        //rearEncoder.setDirection(Encoder.Direction.REVERSE);
         leftEncoder.setDirection(Encoder.Direction.REVERSE);
     }
 
