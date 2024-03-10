@@ -12,7 +12,7 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
 @Config
-@TeleOp(name="ServoPoseConfig")
+@TeleOp(name = "ServoPoseConfig", group = "debug")
 public class ServoPoseConfig extends LinearOpMode {
 
     private CachingServo servo;

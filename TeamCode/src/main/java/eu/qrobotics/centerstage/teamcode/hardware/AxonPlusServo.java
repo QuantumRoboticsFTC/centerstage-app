@@ -25,12 +25,11 @@ public class AxonPlusServo implements CRServo {
     private double cachedPosition = 0;
     private double absolutePosition = 0;
     public double rotations = 0;
-    private double epsilon = 4;
 
     public double diff = 0;
 
-    public double iterationLimitUp = 45;
-    public double iterationLimitDown = 20;
+    public double iterationLimitUp = 360; //45
+    public double iterationLimitDown = 360; //20
 
     private  List<String> changes = new ArrayList<String>();
     private  List<String> positions = new ArrayList<String>();
@@ -72,32 +71,30 @@ public class AxonPlusServo implements CRServo {
         }
 
         if (lastNonNullPower < 0) {
-            if ((0 <= 360 - cachedPosition + newPosition &&
-                    360 - cachedPosition + newPosition <= iterationLimitUp) &&
-                    newPosition + epsilon < cachedPosition) {
+            if (0 <= 360 - cachedPosition + newPosition &&
+                    Math.abs(360 - cachedPosition + newPosition) < Math.abs(newPosition - cachedPosition)) {
                 rotations++;
                 absolutePosition = absolutePosition +
                         (360 - cachedPosition + newPosition);
                 diff = (360 - cachedPosition + newPosition);
                 cachedPosition = newPosition;
-            } else if ((0 <= newPosition - cachedPosition &&
-                    newPosition - cachedPosition <= iterationLimitUp)) {
+            } else if (0 <= newPosition - cachedPosition &&
+                    Math.abs(newPosition - cachedPosition) <= Math.abs(360 - cachedPosition + newPosition)) {
                 absolutePosition = absolutePosition +
                         (newPosition - cachedPosition);
                 diff = (newPosition - cachedPosition);
                 cachedPosition = newPosition;
             }
         } else if (lastNonNullPower > 0) {
-            if ((0 <= 360 - newPosition + cachedPosition &&
-                    360 - newPosition + cachedPosition <= iterationLimitDown) &&
-                    cachedPosition + epsilon < newPosition) {
+            if (0 <= 360 - newPosition + cachedPosition &&
+                    Math.abs(360 - newPosition + cachedPosition) < Math.abs(cachedPosition - newPosition)) {
                 rotations--;
                 absolutePosition = absolutePosition -
                         (360 - newPosition + cachedPosition);
                 diff = (360 - newPosition + cachedPosition);
                 cachedPosition = newPosition;
-            } else if ((0 <= cachedPosition - newPosition &&
-                    cachedPosition - newPosition <= iterationLimitDown)) {
+            } else if (0 <= cachedPosition - newPosition &&
+                    Math.abs(cachedPosition - newPosition) <= Math.abs(360 - newPosition + cachedPosition)) {
                 absolutePosition = absolutePosition -
                         (cachedPosition - newPosition);
                 diff = cachedPosition - newPosition;

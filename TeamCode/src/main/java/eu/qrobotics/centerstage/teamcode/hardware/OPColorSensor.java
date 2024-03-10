@@ -18,7 +18,7 @@ public class OPColorSensor {
 
     public OPColorSensor(ColorRangeSensor sensor) {
         delegate = sensor;
-        timer=new ElapsedTime();
+        timer = new ElapsedTime();
     }
 
     public double getDistance() {

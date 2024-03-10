@@ -18,9 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
 import eu.qrobotics.centerstage.teamcode.hardware.OPColorSensor;
 
-
 @Config
-@TeleOp(name = "ElevatorTuner")
+@TeleOp(name = "ElevatorTuner", group = "debug")
 public class ElevatorTuner extends LinearOpMode {
 
     public static PIDCoefficients coefficients=new PIDCoefficients(0.00375, 0.00003, 0.0000);

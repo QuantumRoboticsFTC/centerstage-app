@@ -15,7 +15,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
 @Config
-@TeleOp(name = "ClimberTester")
+@TeleOp(name = "ClimberTester", group = "debug")
 public class ClimberDebug extends LinearOpMode {
 
     Endgame endgame;

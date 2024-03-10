@@ -21,7 +21,6 @@ import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRA_TR;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
-import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
@@ -133,7 +132,7 @@ public class AutoRA_TR extends LinearOpMode {
 
     void retractOuttake() {
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
         robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(1.25);
@@ -156,7 +155,7 @@ public class AutoRA_TR extends LinearOpMode {
         robot.drive.setPoseEstimate(TrajectoryRA_TR.START_POSE);
         robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
 
         trajectories = TrajectoryRA_TR.getTrajectories(robot, cycleCount, false);
 

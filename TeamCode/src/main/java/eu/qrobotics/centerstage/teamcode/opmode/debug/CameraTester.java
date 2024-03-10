@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
-@TeleOp(name = "CameraTester",group = "Concept")
+@TeleOp(name = "CameraTester", group = "Concept")
 public class CameraTester extends LinearOpMode {
     private ATagDetector aprilDetector;
     private int controllerId=0;

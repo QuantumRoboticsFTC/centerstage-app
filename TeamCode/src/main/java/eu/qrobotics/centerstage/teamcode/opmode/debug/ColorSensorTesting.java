@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import eu.qrobotics.centerstage.teamcode.hardware.OPColorSensor;
 
-@TeleOp(name = "ColorSensorTesting")
+@TeleOp(name = "ColorSensorTesting", group = "debug")
 public class ColorSensorTesting extends LinearOpMode {
 
     private OPColorSensor sensor1;

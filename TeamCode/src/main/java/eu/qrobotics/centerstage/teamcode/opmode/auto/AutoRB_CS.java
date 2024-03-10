@@ -36,7 +36,7 @@ public class AutoRB_CS extends LinearOpMode {
     private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
-    int teamProp = -1;
+    int teamProp = 1; // TODO: atentie e -1 defapt dra na n avem camera
     public static int cycleCount = 2;
     int trajectoryIdx = 0;
 
@@ -109,15 +109,17 @@ public class AutoRB_CS extends LinearOpMode {
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
             robot.drive.followTrajectory(trajectories.get(1));
         }
+        trajectoryTimer.reset();
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
+            if (0.15 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.25) {
+                robot.outtake.clawState = Outtake.ClawState.CLOSED;
+            }
         }
         robot.sleep(0.1);
 
         // TODO: place pixelussy
-//        robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
-        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.outtake.manualFourbarPos = Outtake.FOURBAR_TRANSFER_POS;
+        robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
 //        robot.sleep(0.5);
         if (teamProp != 2) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
@@ -133,7 +135,7 @@ public class AutoRB_CS extends LinearOpMode {
 
     void retractOuttake() {
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
         robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.sleep(1.25);
@@ -178,9 +180,13 @@ public class AutoRB_CS extends LinearOpMode {
         robot.sleep(0.2);
 
         // 3 -> go to backdrop
+        trajectoryTimer.reset();
         robot.drive.followTrajectory(trajectories.get(3));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
+            if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.25) {
+                robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+            }
         }
         robot.sleep(0.1);
         placePixel();
@@ -193,9 +199,14 @@ public class AutoRB_CS extends LinearOpMode {
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (trajectoryTimer.seconds() > 0.2) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.elevatorState = Elevator.ElevatorState.TRANSFER;
+                    if (i == 1) {
+                        robot.intake.dropdownState = Intake.DropdownState.STACK_5;
+                    } else {
+                        robot.intake.dropdownState = Intake.DropdownState.STACK_3;
+                    }
                 }
                 robot.sleep(0.01);
             }
@@ -205,11 +216,6 @@ public class AutoRB_CS extends LinearOpMode {
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (robot.drive.getPoseEstimate().getX() < -15 &&
                     -20 < robot.drive.getPoseEstimate().getX()) {
-                    if (i == 1) {
-                        robot.intake.dropdownState = Intake.DropdownState.STACK_5;
-                    } else {
-                        robot.intake.dropdownState = Intake.DropdownState.STACK_3;
-                    }
                     robot.intake.intakeMode = Intake.IntakeMode.IN;
                 }
                 robot.sleep(0.01);
@@ -234,17 +240,18 @@ public class AutoRB_CS extends LinearOpMode {
             robot.drive.followTrajectory(trajectories.get(6));
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                if (trajectoryTimer.seconds() > 0.15) {
-                    robot.intake.dropdownState = Intake.DropdownState.DOWN;
-                }
-                if (trajectoryTimer.seconds() > 0.2) {
+                if (0.15 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.25) {
                     robot.intake.dropdownState = Intake.DropdownState.UP;
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
 
-                if (trajectoryTimer.seconds() > 0.35) {
+                if (0.25 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.35) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                }
+
+                if (0.4 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.5) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
 
                 if (robot.drive.getPoseEstimate().getX() > 5) {
@@ -270,9 +277,17 @@ public class AutoRB_CS extends LinearOpMode {
         }
 
         // 7 -> park
+        trajectoryTimer.reset();
         robot.drive.followTrajectory(trajectories.get(7));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             robot.sleep(0.01);
+            if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.25) {
+                robot.outtake.rotateState = Outtake.RotateState.CENTER;
+                robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
+                robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                robot.outtake.clawState = Outtake.ClawState.OPEN;
+            }
         }
         robot.sleep(1);
 

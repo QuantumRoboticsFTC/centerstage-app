@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import eu.qrobotics.centerstage.teamcode.hardware.AxonPlusServo;
 
 @Config
-@TeleOp(name = "ServoTester")
-public class ServoTester extends LinearOpMode {
+@TeleOp(name = "IntakeTester", group = "debug")
+public class IntakeTester extends LinearOpMode {
     private AxonPlusServo axon;
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.01, 0, 0.000025);
@@ -24,7 +24,7 @@ public class ServoTester extends LinearOpMode {
     public static double UP_POSITION = 800;
     public static double DOWN_POSITION = 0;
 
-    public static double INITIAL_TARGET = 180;
+    public static double INITIAL_TARGET = 160;
 
     public static double targetPos = UP_POSITION;
     public static double epsilon = 2;

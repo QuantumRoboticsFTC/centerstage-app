@@ -47,7 +47,6 @@ public class Elevator implements Subsystem {
     public static double AUTO_HEIGHT1 = 520; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
     public static double NEUTRAL_SIDE_THRESHOLD_LOW = 60; // no global coordinates below this point
-    public static double NEUTRAL_SIDE_THRESHOLD_HIGH = 550; // no global coordinates below this point
     public static double diffyHOffset = 230;
     public static double diffyValue = 0;
     public static double IDLE_POWER = 0.13;
@@ -178,7 +177,6 @@ public class Elevator implements Subsystem {
         diffyValue = 0;
         if (robot.outtake.diffyHState != Outtake.DiffyHorizontalState.CENTER &&
             NEUTRAL_SIDE_THRESHOLD_LOW <= getTargetPosition() &&
-            getTargetPosition() <= NEUTRAL_SIDE_THRESHOLD_HIGH &&
             robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
             diffyValue = diffyHOffset;
         } else {
@@ -189,12 +187,12 @@ public class Elevator implements Subsystem {
             elevatorState == ElevatorState.TRANSFER) {
             controller.setTargetPosition(getTargetPosition());
             setPower(controller.update(getCurrentPosition()) + ff1);
-        } else if (elevatorState == ElevatorState.MANUAL) {
-            setPower(manualPower);
         } else if (elevatorState == ElevatorState.CLIMBED) {
             updateClimbedPosition();
             controller.setTargetPosition(climbedPosition);
             setPower(controller.update(getCurrentPosition()) + ff1);
+        } else if (elevatorState == ElevatorState.MANUAL) {
+            setPower(manualPower);
         }
     }
 }

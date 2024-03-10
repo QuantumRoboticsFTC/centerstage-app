@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
-@TeleOp
+@TeleOp(group = "debug")
 public class DiffySync extends OpMode {
 
     private CachingServo diffyLeft;

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config
-@TeleOp(name = "ImuAcce")
+@TeleOp(name = "ImuAcce", group = "debug")
 public class ImuAcce extends LinearOpMode {
 
     private IMU imuEhub;
