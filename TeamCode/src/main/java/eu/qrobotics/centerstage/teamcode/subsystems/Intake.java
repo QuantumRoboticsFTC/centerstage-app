@@ -22,7 +22,6 @@ public class Intake implements Subsystem {
     public enum IntakeMode {
         IN,
         IN_SLOW,
-        IN_QUICK,
         IDLE,
         OUT,
         OUT_SLOW
@@ -52,7 +51,7 @@ public class Intake implements Subsystem {
     public static double INTAKE_IN_SPEED = 1;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = -1;
-    public static double INTAKE_OUT_SLOW_SPEED = -0.5;
+    public static double INTAKE_OUT_SLOW_SPEED = -0.3;
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 800;
