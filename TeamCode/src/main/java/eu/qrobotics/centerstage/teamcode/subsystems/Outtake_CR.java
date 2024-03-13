@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -16,7 +15,7 @@ import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.hardware.OPDistanceSensor;
 
 @Config
-public class Outtake implements Subsystem {
+public class Outtake_CR implements Subsystem {
     public enum OuttakeState {
         TRANSFER_PREP,
         TRANSFER,
@@ -61,9 +60,9 @@ public class Outtake implements Subsystem {
     public static double VDIFFY_TRANSFER_POS = 0.222;
     public static double VDIFFY_SCORE_POS = 0.556;
 
-    public static double HDIFFY_LEFT_POS = -0.254;
-    public static double HDIFFY_CENTER_POS = -0.01;
-    public static double HDIFFY_RIGHT_POS = 0.235;
+    public static double HDIFFY_LEFT_POS = -0.224;
+    public static double HDIFFY_CENTER_POS = 0.02;
+    public static double HDIFFY_RIGHT_POS = 0.265;
 
     public static double rotateThresh = 0.52; // rotate thresh
     public static double vDiffyThresholdVS = 0.45; // vertical speed
@@ -101,15 +100,13 @@ public class Outtake implements Subsystem {
     public double manualVDiffy;
     public double manualHDiffy;
 
-    public static double yawControlFourbarPos = 0.0;
-    public static double yawControlGain = 0.0017;
-    public static double sensorRelevanceThresh = 200;
-    public static double deltaLimit = 0;
+    public double yawControlFourbarPos = 0.0;
+    public double yawControlGain = 0.25;
 
     public ElapsedTime timer = new ElapsedTime(0);
 
-    private CachingServo diffyLeftServo;
-    private CachingServo diffyRightServo;
+    private AxonPlusServo diffyLeftServo;
+    private AxonPlusServo diffyRightServo;
     private CachingServo fourBarServo;
     private CachingServo rotateServo;
     private CachingServo clawServo;
@@ -149,6 +146,7 @@ public class Outtake implements Subsystem {
                 }
             }
         }
+
         // MOVE to target position
         if (vDiffyThresholdH < currVDiffy) {
             if (diffyHPosition < currHDiffy &&
@@ -184,6 +182,7 @@ public class Outtake implements Subsystem {
                 currVDiffy = Math.min(currVDiffy + gainVDiffyOutside, diffyVPosition);
             }
         }
+
         // Do NOT break servo
         if (Math.min(currVDiffy - currHDiffy, currVDiffy + currHDiffy) < 0 ||
                 Math.max(currVDiffy - currHDiffy, currVDiffy + currHDiffy) > 1) {
@@ -191,8 +190,10 @@ public class Outtake implements Subsystem {
             diffyHPosition = lastHDiffy;
             return false;
         }
-        diffyLeftServo.setPosition(currVDiffy + currHDiffy);
-        diffyRightServo.setPosition(currVDiffy - currHDiffy);
+        pidfControllerLeft.setTargetPosition((currVDiffy + currHDiffy)*360);
+        diffyLeftServo.setPower(ff + pidfControllerLeft.update(diffyLeftServo.getAbsolutePosition()));
+        pidfControllerLeft.setTargetPosition((currVDiffy - currHDiffy) * 360);
+        diffyRightServo.setPower(ff + pidfControllerRight.update(diffyRightServo.getAbsolutePosition()));
         lastVDiffy = currVDiffy;
         lastHDiffy = currHDiffy;
         return true;
@@ -238,14 +239,6 @@ public class Outtake implements Subsystem {
         return (sensorUp.getDistance() + sensorDown.getDistance()) * 0.5;
     }
 
-    public double getSensorUp() {
-        return sensorUp.getDistance();
-    }
-
-    public double getSensorDown() {
-        return sensorDown.getDistance();
-    }
-
     public double getDiffyTargetVertical() { return diffyVPosition; }
 
     public double getDiffyTargetHorizontal() { return diffyHPosition; }
@@ -254,30 +247,38 @@ public class Outtake implements Subsystem {
 
     public double getDiffyTrueHorizontal() { return currHDiffy; }
 
-    public Outtake(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
+    public double getDiffyLeftEncoder() {
+        return diffyLeftServo.getAbsolutePosition();
+    }
+
+    public double getDiffyRightEncoder() {
+        return diffyRightServo.getAbsolutePosition();
+    }
+
+    public Outtake_CR(HardwareMap hardwareMap, Robot robot, boolean isAutonomous) {
         this.robot = robot;
 
-        diffyLeftServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "diffyLeft"));
-        diffyRightServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "diffyRight"));
+        diffyLeftServo = new AxonPlusServo(hardwareMap.get(CRServo.class, "diffyLeft"),
+                hardwareMap.get(AnalogInput.class, "diffyLeftEncoder"));
+        diffyRightServo = new AxonPlusServo(hardwareMap.get(CRServo.class, "diffyRight"),
+                hardwareMap.get(AnalogInput.class, "diffyRightEncoder"));
         fourBarServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "outtakeFourBar"));
         rotateServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "outtakeRotate"));
         clawServo = new CachingServo(hardwareMap.get(ServoImplEx.class, "outtakeClaw"));
         sensorUp = new OPDistanceSensor(hardwareMap.get(DistanceSensor.class, "sensorUp"));
         sensorDown = new OPDistanceSensor(hardwareMap.get(DistanceSensor.class, "sensorDown"));
 
-        diffyLeftServo.setDirection(Servo.Direction.REVERSE);
+        currVDiffy = lastVDiffy = diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
+        currHDiffy = lastHDiffy = diffyHPosition = HDIFFY_CENTER_POS;
 
-        lastVDiffy = diffyVPosition = VDIFFY_ABOVE_TRANSFER_POS;
-        lastHDiffy = diffyHPosition = 0;
-
-        outtakeState = OuttakeState.TRANSFER_PREP;
-        lastOuttakeState = OuttakeState.TRANSFER_PREP;
+        outtakeState = OuttakeState.TRANSFER;
+        lastOuttakeState = OuttakeState.TRANSFER;
         clawState = ClawState.OPEN;
         rotateState = RotateState.CENTER;
         diffyHState = DiffyHorizontalState.CENTER;
 
-        currVDiffy = VDIFFY_ABOVE_TRANSFER_POS;
-        currHDiffy = HDIFFY_CENTER_POS;
+        diffyLeftServo.setAbsolutePosition((VDIFFY_TRANSFER_POS + HDIFFY_CENTER_POS) * 360);
+        diffyRightServo.setAbsolutePosition((VDIFFY_TRANSFER_POS - HDIFFY_CENTER_POS) * 360);
     }
 
     public static boolean IS_DISABLED = false;
@@ -285,8 +286,14 @@ public class Outtake implements Subsystem {
     @Override
     public void update() {
         if (IS_DISABLED) return;
-        sensorUp.update();
-        sensorDown.update();
+
+        // DEBUG SECTION
+//        clawServo.setPosition(CLAW_CLOSE_POS);
+//        rotateServo.setPosition(ROTATE_TRANSFER_POS);
+//        fourBarServo.setPosition(FOURBAR_TRANSFER_POS);
+//
+//        diffyLeftServo.setPosition(DIFFYV + DIFFYH);
+//        diffyRightServo.setPosition(DIFFYV - DIFFYH);
 
         if (lastOuttakeState != outtakeState) {
             timer.reset();
@@ -328,17 +335,12 @@ public class Outtake implements Subsystem {
                 }
 
                 if (currVDiffy == diffyVPosition &&
-                    currHDiffy == diffyHPosition &&
-                    diffyHState != DiffyHorizontalState.CENTER &&
-                    rotateState != RotateState.CENTER &&
-                    getMeanSensorDistance() <= sensorRelevanceThresh) {
-                    if (sensorUp.getDistance() + deltaLimit < sensorDown.getDistance()) {
-                        yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS + (sensorDown.getDistance() - sensorUp.getDistance()) * yawControlGain;
-                    } else if (sensorDown.getDistance() + deltaLimit < sensorUp.getDistance()) {
-                        yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS - (sensorUp.getDistance() - sensorDown.getDistance()) * yawControlGain;
+                        currHDiffy == diffyHPosition) {
+                    if (sensorUp.getDistance() < sensorDown.getDistance()) {
+                        yawControlFourbarPos -= yawControlGain;
+                    } else if (sensorDown.getDistance() < sensorUp.getDistance()) {
+                        yawControlFourbarPos += yawControlGain;
                     }
-                } else {
-                    yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS;
                 }
                 fourBarServo.setPosition(yawControlFourbarPos);
                 break;

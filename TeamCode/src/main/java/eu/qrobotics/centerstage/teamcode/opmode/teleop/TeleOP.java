@@ -31,6 +31,8 @@ public class TeleOP extends OpMode {
     // Subsystems
     private Endgame.ClimbState lastClimbState;
 
+    public static double TOO_CLOSE_BACKDROP = 0;
+
     // Timers
     private ElapsedTime blockedIntake = new ElapsedTime(100);
     private ElapsedTime transferDeployTimer = new ElapsedTime(100);
@@ -99,6 +101,17 @@ public class TeleOP extends OpMode {
 
         if (leaveBackboardTimer.seconds() < 0.4) {
             robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+//        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
+//            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
+////          TODO: this
+//            switch (driveMode) {
+//                case NORMAL:
+//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
+//                    break;
+//                case SLOW:
+//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
+//                    break;
+//            }
         } else if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
@@ -453,6 +466,10 @@ public class TeleOP extends OpMode {
         if (outtakeTelemetry) {
             telemetry.addData("outtake_state", robot.outtake.outtakeState);
             telemetry.addData("horizontal state", robot.outtake.diffyHState);
+            telemetry.addData("sensor up", robot.outtake.getSensorUp());
+            telemetry.addData("sensor down", robot.outtake.getSensorDown());
+//            telemetry.addData("diffy left encoder", robot.outtake.getDiffyLeftEncoder() / 360.0);
+//            telemetry.addData("diffy right encoder", robot.outtake.getDiffyRightEncoder() / 360.0);
             telemetry.addData("diffy target vertical", robot.outtake.getDiffyTargetVertical());
             telemetry.addData("diffy true vertical", robot.outtake.getDiffyTrueVertical());
             telemetry.addData("diffy target horizontal", robot.outtake.getDiffyTargetHorizontal());

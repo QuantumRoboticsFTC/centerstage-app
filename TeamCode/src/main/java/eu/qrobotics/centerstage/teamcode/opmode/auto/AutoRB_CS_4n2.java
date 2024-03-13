@@ -27,7 +27,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Backboard Centerstage
 @Config
-@Autonomous(name = "01 AutoRBCS Full 5 // Red Backboard Centerstage", group = "Red")
+@Autonomous(name = "01 AutoRBCS 4n2 // Red Backboard Centerstage", group = "Red")
 public class AutoRB_CS_4n2 extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectories;
@@ -308,6 +308,15 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
+
+            intakeTimer.reset();
+            while (robot.intake.pixelCount() < 1 && intakeTimer.seconds() < intakeTimerLimit
+                    && opModeIsActive() && !isStopRequested()) {
+                robot.sleep(0.01);
+            }
+
+            robot.intake.dropdownState = Intake.DropdownState.STACK_4;
+            robot.sleep(0.1);
 
             intakeTimer.reset();
             while (robot.intake.pixelCount() < 2 && intakeTimer.seconds() < intakeTimerLimit

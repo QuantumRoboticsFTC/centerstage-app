@@ -17,13 +17,13 @@ import eu.qrobotics.centerstage.teamcode.util.Encoder;
 public class AxonPlusServo implements CRServo {
     private CRServo delegateServo;
     public AnalogInput delegateEncoder;
-    private boolean reverse = true;
     MultipleTelemetry telem;
 
     private double cachedPower = 0;
     private double lastNonNullPower = 0;
     private double cachedPosition = 0;
     private double absolutePosition = 0;
+    private int direction = 1;
     public double rotations = 0;
 
     public double diff = 0;
@@ -55,12 +55,11 @@ public class AxonPlusServo implements CRServo {
     }
 
     public double getAbsolutePosition() {
-        return absolutePosition;
+        return -absolutePosition;
     }
 
     public void setAbsolutePosition(double _absolutePosition) {
         absolutePosition = _absolutePosition;
-        cachedPosition = _absolutePosition % 360;
     }
 
     public void update() {
@@ -70,37 +69,48 @@ public class AxonPlusServo implements CRServo {
             changes.add("pos" + String.valueOf(newPosition));
         }
 
-        if (lastNonNullPower < 0) {
-            if (0 <= 360 - cachedPosition + newPosition &&
-                    Math.abs(360 - cachedPosition + newPosition) < Math.abs(newPosition - cachedPosition)) {
-                rotations++;
-                absolutePosition = absolutePosition +
-                        (360 - cachedPosition + newPosition);
-                diff = (360 - cachedPosition + newPosition);
-                cachedPosition = newPosition;
-            } else if (0 <= newPosition - cachedPosition &&
-                    Math.abs(newPosition - cachedPosition) <= Math.abs(360 - cachedPosition + newPosition)) {
-                absolutePosition = absolutePosition +
-                        (newPosition - cachedPosition);
-                diff = (newPosition - cachedPosition);
-                cachedPosition = newPosition;
-            }
-        } else if (lastNonNullPower > 0) {
-            if (0 <= 360 - newPosition + cachedPosition &&
-                    Math.abs(360 - newPosition + cachedPosition) < Math.abs(cachedPosition - newPosition)) {
-                rotations--;
-                absolutePosition = absolutePosition -
-                        (360 - newPosition + cachedPosition);
-                diff = (360 - newPosition + cachedPosition);
-                cachedPosition = newPosition;
-            } else if (0 <= cachedPosition - newPosition &&
-                    Math.abs(cachedPosition - newPosition) <= Math.abs(360 - newPosition + cachedPosition)) {
-                absolutePosition = absolutePosition -
-                        (cachedPosition - newPosition);
-                diff = cachedPosition - newPosition;
-                cachedPosition = newPosition;
-            }
+        double val1 = 360 - cachedPosition + newPosition;
+        double val2 = newPosition - cachedPosition;
+        double val3 = 360 - newPosition + cachedPosition;
+        double val4 = cachedPosition - newPosition;
+
+        if (0 <= val1 &&
+                (val1 < val2 || val2 < 0) &&
+                (val1 < val3 || val3 < 0) &&
+                (val1 < val4 || val4 < 0)) {
+            rotations++;
+            absolutePosition = absolutePosition +
+                    val1;
+            diff = val1;
+            cachedPosition = newPosition;
+        } else if (0 <= val2 &&
+                    (val2 < val1 || val1 < 0) &&
+                    (val2 < val3 || val3 < 0) &&
+                    (val2 < val4 || val4 < 0)) {
+            absolutePosition = absolutePosition +
+                    val2;
+            diff = val2;
+            cachedPosition = newPosition;
         }
+        if (0 <= val3 &&
+                (val3 < val1 || val1 < 0) &&
+                (val3 < val2 || val2 < 0) &&
+                (val3 < val4 || val4 < 0)) {
+            rotations--;
+            absolutePosition = absolutePosition -
+                    val3;
+            diff = val3;
+            cachedPosition = newPosition;
+        } else if (0 <= val4 &&
+                (val4 < val1 || val1 < 0) &&
+                (val4 < val2 || val2 < 0) &&
+                (val4 < val3 || val3 < 0)) {
+            absolutePosition = absolutePosition -
+                    val4;
+            diff = val4;
+            cachedPosition = newPosition;
+        }
+
         if(changes.size()>=10){
             changes.remove(0);
         }
@@ -134,16 +144,14 @@ public class AxonPlusServo implements CRServo {
         delegateServo.setDirection(direction);
     }
 
-//    public  void reverseServo() {
-//        reverse = true;
-//    }
+    public void setDirection(int dir) {
+        direction = dir;
+    }
 
     @Override
     public void setPower(double power) {
         if (power != cachedPower) {
-            if (reverse) {
-                power = -power;
-            }
+            power = power * direction;
             cachedPower = power;
             if (power != 0) {
                 lastNonNullPower = power;

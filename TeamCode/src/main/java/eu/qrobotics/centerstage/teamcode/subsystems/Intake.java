@@ -55,12 +55,12 @@ public class Intake implements Subsystem {
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 800;
-    public static double INTAKE_DROPDOWN_DOWN = 40;
+    public static double INTAKE_DROPDOWN_DOWN = -170;
     public static double INTAKE_DROPDOWN_5 = 185;
     public static double INTAKE_DROPDOWN_4 = 162;
     public static double INTAKE_DROPDOWN_3 = 110;
     public static double INTAKE_DROPDOWN_2 = 92;
-    public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;
+    public static double INTAKE_DDOWN_INITIAL_ANGLE = 340;
     public static double epsilon = 5;
     public double manualPower;
 
@@ -70,9 +70,9 @@ public class Intake implements Subsystem {
     private boolean isPixel2 = false;
     private double sensorThreshold = 10;
 
-    public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.012, 0, 0.000025);
+    public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.005, 0.00001, 0.000015);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
-    public static double ff = 0.05;
+    public static double ff = 0.025;
     public static double targetPosition = 0.0;
 
     private CachingDcMotorEx motor;
@@ -176,10 +176,10 @@ public class Intake implements Subsystem {
 
         switch (dropdownMode) {
             case INIT:
-                pidfController.setTargetPosition(targetPosition);
+                pidfController.setTargetPosition(INTAKE_DDOWN_INITIAL_ANGLE);
                 servo.setPower(ff + pidfController.update(servo.getAbsolutePosition()));
 
-                if (Math.abs(targetPosition - servo.getRelativePosition()) <= epsilon) {
+                if (Math.abs(INTAKE_DDOWN_INITIAL_ANGLE - servo.getRelativePosition()) <= epsilon) {
                     targetPosition = INTAKE_DROPDOWN_UP;
                     servo.setAbsolutePosition(INTAKE_DROPDOWN_UP);
                     dropdownMode = DropdownMode.FUNCTIONAL;
