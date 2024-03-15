@@ -62,9 +62,9 @@ public class DiffySync extends OpMode {
                 leftPos = newLeftPos;
                 rightPos = newRightPos;
             }
-        } else if (gamepad1.left_stick_x != 0) {
-            newLeftPos += gamepad1.left_stick_x * multiplier;
-            newRightPos -= gamepad1.left_stick_x * multiplier;
+        } else if (gamepad1.right_stick_y != 0) {
+            newLeftPos += gamepad1.right_stick_y * multiplier;
+            newRightPos -= gamepad1.right_stick_y * multiplier;
             if ((0.0 <= newLeftPos && newLeftPos <= 1.0) &&
                     (0.0 <= newRightPos && newRightPos <= 1.0)) {
                 leftPos = newLeftPos;

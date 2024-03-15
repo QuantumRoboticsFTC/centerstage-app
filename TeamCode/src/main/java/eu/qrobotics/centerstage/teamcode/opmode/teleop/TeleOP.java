@@ -49,6 +49,8 @@ public class TeleOP extends OpMode {
     public static boolean extraTelemetry = true;
     public static boolean debugTelemetry = false;
 
+    public static double yawMultiplier = 0.01;
+
     Robot robot;
     DriveMode driveMode;
     StickyGamepad stickyGamepad1 = null;
@@ -100,7 +102,7 @@ public class TeleOP extends OpMode {
         }
 
         if (leaveBackboardTimer.seconds() < 0.4) {
-            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+//            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
 //        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
 //            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
 ////          TODO: this
@@ -133,10 +135,10 @@ public class TeleOP extends OpMode {
         }
 
         // INTAKE
-//        if (stickyGamepad1.b) {
-//            robot.intake.dropdownState = Intake.DropdownState.UP;
-//            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
-//        }
+        if (stickyGamepad1.b) {
+            robot.intake.dropdownState = Intake.DropdownState.UP;
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+        }
         if (stickyGamepad1.a) {
             robot.intake.dropdownState = Intake.DropdownState.DOWN;
         }
@@ -208,11 +210,11 @@ public class TeleOP extends OpMode {
 
         // ELEVATOR
         if (gamepad2.right_trigger > 0.1) {
-            robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
             robot.elevator.manualPower = gamepad2.right_trigger;
-        } else if (gamepad2.left_trigger > 0.1) {
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
+        } else if (gamepad2.left_trigger > 0.1) {
             robot.elevator.manualPower = -gamepad2.left_trigger;
+            robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
         } else if (robot.elevator.elevatorState == Elevator.ElevatorState.MANUAL) {
             if (robot.elevator.lastState == Elevator.ElevatorState.TRANSFER) {
                 robot.elevator.groundPositionOffset += robot.elevator.getCurrentPosition() - robot.elevator.getTargetPosition(robot.elevator.lastState, robot.elevator.targetHeight);
@@ -271,14 +273,20 @@ public class TeleOP extends OpMode {
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
 
+        if (stickyGamepad2.right_bumper) {
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+        }
+
         switch (robot.outtake.outtakeState) {
             case TRANSFER_PREP:
+                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
                 if (stickyGamepad2.right_bumper) {
                     transferDeployTimer.reset();
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
                 break;
             case TRANSFER:
+                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
                 if (0.25 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.45) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
@@ -287,6 +295,7 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case ABOVE_TRANSFER:
+                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
                 if (1.0 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.2) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
@@ -387,22 +396,24 @@ public class TeleOP extends OpMode {
             robot.outtake.getManualValues();
             robot.outtake.manualHDiffy += gamepad2.left_stick_y * 0.005;
         }
-        if (gamepad2.right_stick_y != 0) {
+        if (gamepad2.left_stick_x != 0) {
             robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
             robot.outtake.getManualValues();
             robot.outtake.manualVDiffy += gamepad2.right_stick_y * -0.005;
         }
+
 //        if (gamepad2.left_stick_y != 0) {
 //            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
 //            robot.outtake.getManualValues();
 //            robot.outtake.manualFourbarPos += gamepad2.left_stick_y * 0.005;
 //        }
 
-//        if (gamepad2.right_stick_x != 0) {
+        if (gamepad2.right_stick_x != 0) {
 //            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
-//            robot.outtake.getManualValues();
-//            robot.outtake.manualFourbarPos += gamepad2.right_stick_x;
-//        }
+            robot.outtake.fourBarState = Outtake.FourBarState.MANUAL;
+            robot.outtake.getManualValues();
+            robot.outtake.manualFourbarPos += -gamepad2.right_stick_x * yawMultiplier;
+        }
 
         // Endgame State Machine
         if (stickyGamepad1.dpad_down) {
@@ -495,6 +506,7 @@ public class TeleOP extends OpMode {
             telemetry.addData("liftTargetHeightState", robot.elevator.targetHeight);
             telemetry.addData("liftTargetHeightPos", robot.elevator.getTargetPosition());
             telemetry.addData("elevator_encoder", robot.elevator.getCurrentPosition());
+            telemetry.addData("manual power", robot.elevator.manualPower);
             telemetry.addData("manual offset", robot.elevator.manualOffset);
             telemetry.addData("ground offset", robot.elevator.groundPositionOffset);
             telemetry.addData("left trigger", gamepad2.left_trigger);

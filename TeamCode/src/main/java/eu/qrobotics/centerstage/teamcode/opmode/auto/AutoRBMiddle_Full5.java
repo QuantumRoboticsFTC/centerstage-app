@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRB_CS_Full5;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRBMiddle_Full5;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
@@ -27,8 +27,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Backboard Centerstage
 @Config
-@Autonomous(name = "01 AutoRBCS 4n2 // Red Backboard Centerstage", group = "Red")
-public class AutoRB_CS_4n2 extends LinearOpMode {
+@Autonomous(name = "01 AutoRBMiddle Full 5 // Red Backdrop Middle", group = "Red")
+public class AutoRBMiddle_Full5 extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectories;
 
@@ -145,12 +145,12 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryRB_CS_Full5.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRBMiddle_Full5.START_POSE);
         robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectories = TrajectoryRB_CS_Full5.getTrajectories(robot, cycleCount, false);
+        trajectories = TrajectoryRBMiddle_Full5.getTrajectories(robot, cycleCount, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
@@ -193,7 +193,7 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
         robot.sleep(0.2);
 
         // TODO: *cica* cycles
-        for (int i = 1; i <= Math.min(cycleCount, 2); i++) {
+        for (int i = 1; i <= cycleCount; i++) {
             if (i == 1) {
                 // 4 -> initial go to lane
                 robot.drive.followTrajectory(trajectories.get(4));
@@ -296,27 +296,11 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
             }
         }
         if (cycleCount == 3) {
-            // 10 -> go to lane before stack
+            // 10 -> go to second stack
             robot.drive.followTrajectory(trajectories.get(10));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
-            robot.sleep(0.1);
-
-            // 11 -> go to stack
-            robot.drive.followTrajectory(trajectories.get(11));
-            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                robot.sleep(0.01);
-            }
-
-            intakeTimer.reset();
-            while (robot.intake.pixelCount() < 1 && intakeTimer.seconds() < intakeTimerLimit
-                    && opModeIsActive() && !isStopRequested()) {
-                robot.sleep(0.01);
-            }
-
-            robot.intake.dropdownState = Intake.DropdownState.STACK_4;
-            robot.sleep(0.1);
 
             intakeTimer.reset();
             while (robot.intake.pixelCount() < 2 && intakeTimer.seconds() < intakeTimerLimit
@@ -327,8 +311,8 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
 
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-            // 12 -> go to lane after stack
-            robot.drive.followTrajectory(trajectories.get(12));
+            // 11 -> go to lane (on stack side)
+            robot.drive.followTrajectory(trajectories.get(11));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
                     robot.intake.dropdownState = Intake.DropdownState.DOWN;
@@ -342,8 +326,8 @@ public class AutoRB_CS_4n2 extends LinearOpMode {
                 robot.sleep(0.01);
             }
 
-            // 13 -> go to backdrop (from lane)
-            robot.drive.followTrajectory(trajectories.get(13));
+            // 12 -> go to backdrop (from lane)
+            robot.drive.followTrajectory(trajectories.get(12));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (0.35 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.45) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;

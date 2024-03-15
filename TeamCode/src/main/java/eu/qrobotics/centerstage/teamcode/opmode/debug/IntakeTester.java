@@ -46,9 +46,10 @@ public class IntakeTester extends LinearOpMode {
         axon = new AxonPlusServo(hardwareMap.get(CRServo.class, "intakeServo"),
                                 hardwareMap.get(AnalogInput.class, "intakeEncoder"));
 
-        waitForStart();
-
+        axon.setDirection(-1);
         axon.setAbsolutePosition(axon.getRelativePosition());
+
+        waitForStart();
 
         while (!isStopRequested()) {
             axon.update();

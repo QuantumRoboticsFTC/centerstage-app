@@ -18,7 +18,7 @@ import java.util.List;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Backboard Centerstage
-public class TrajectoryRB_CS_Full5 {
+public class TrajectoryRBMiddle_4n2 {
     public static Pose2d START_POSE = new Pose2d(14.1, -63.5, Math.toRadians(90));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
@@ -96,32 +96,36 @@ public class TrajectoryRB_CS_Full5 {
         );
 
         // 9 -> dummy
-//        // 5 -> go to stack
+//        // 7 -> go to lane
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-58, -13))
+                .lineToConstantHeading(new Vector2d(40, -12))
                 .build()
         );
 
-        // 10 -> go to 2nd stack
+        // 10 -> go to lane before stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-45, -15))
-                .splineToConstantHeading(new Vector2d(-59.5, -25), Math.toRadians(90))
+                .lineToConstantHeading(new Vector2d(-42, -12))
                 .build()
         );
 
-        // 11 -> go to lane (on stack side)
+        // 11 -> go to stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-15, -12))
+                .lineToSplineHeading(new Pose2d(-58.5, -23.5, Math.toRadians(190)))
                 .build()
         );
 
-        // 12 -> go to backdrop (from lane)
+        // 12 -> go to lane after stack
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(190), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                .lineToLinearHeading(new Pose2d(-40, -12, Math.toRadians(180)))
+                .build()
+        );
+
+        // 6/13 -> go to backdrop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(30, -12))
-                .splineToConstantHeading(new Vector2d(48, -21.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(48, -17), Math.toRadians(0))
                 .build()
         );
-
         return trajectories;
     }
 }

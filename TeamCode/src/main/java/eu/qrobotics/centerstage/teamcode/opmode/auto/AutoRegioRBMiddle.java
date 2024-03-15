@@ -1,21 +1,9 @@
 package eu.qrobotics.centerstage.teamcode.opmode.auto;
 
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_ACCEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.BASE_VEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL_ACCEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.NORMAL_VEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.ZOOM_ACCEL_CONSTRAINT;
-import static eu.qrobotics.centerstage.teamcode.subsystems.DriveConstants.ZOOM_VEL_CONSTRAINT;
-
 import android.util.Size;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -24,13 +12,12 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
-import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRegioRB_CS;
+import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRegioRBMiddle;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
 import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
@@ -38,8 +25,8 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 @Config
-@Autonomous(name = "#?? AutoRedCloseCS", group = "Red")
-public class AutoRegioRB_CS extends LinearOpMode {
+@Autonomous(name = "#?? AutoRedCloseMiddle - REGIO", group = "Red")
+public class AutoRegioRBMiddle extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectoriesLeft, trajectoriesCenter, trajectoriesRight;
     List<Trajectory> trajectories;
@@ -144,14 +131,14 @@ public class AutoRegioRB_CS extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(this, true);
-        robot.drive.setPoseEstimate(TrajectoryRegioRB_CS.START_POSE);
+        robot.drive.setPoseEstimate(TrajectoryRegioRBMiddle.START_POSE);
         robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
-        trajectoriesLeft = TrajectoryRegioRB_CS.getTrajectories(robot, cycleCount, 1, false);
-        trajectoriesCenter = TrajectoryRegioRB_CS.getTrajectories(robot, cycleCount, 2, false);
-        trajectoriesRight = TrajectoryRegioRB_CS.getTrajectories(robot, cycleCount, 3, false);
+        trajectoriesLeft = TrajectoryRegioRBMiddle.getTrajectories(robot, cycleCount, 1, false);
+        trajectoriesCenter = TrajectoryRegioRBMiddle.getTrajectories(robot, cycleCount, 2, false);
+        trajectoriesRight = TrajectoryRegioRBMiddle.getTrajectories(robot, cycleCount, 3, false);
 
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        aprilDetector=new AprilDetector(hardwareMap,portals[0]);

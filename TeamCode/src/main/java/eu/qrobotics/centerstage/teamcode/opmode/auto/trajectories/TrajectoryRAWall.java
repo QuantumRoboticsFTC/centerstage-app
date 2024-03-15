@@ -16,7 +16,7 @@ import java.util.List;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Audience Centerstage
-public class TrajectoryRA_TR {
+public class TrajectoryRAWall {
     public static Pose2d START_POSE = new Pose2d(-38.1, -63.5, Math.toRadians(90));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {

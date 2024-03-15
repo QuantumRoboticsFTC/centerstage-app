@@ -55,12 +55,12 @@ public class Intake implements Subsystem {
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 800;
-    public static double INTAKE_DROPDOWN_DOWN = -170;
-    public static double INTAKE_DROPDOWN_5 = 185;
-    public static double INTAKE_DROPDOWN_4 = 162;
-    public static double INTAKE_DROPDOWN_3 = 110;
-    public static double INTAKE_DROPDOWN_2 = 92;
-    public static double INTAKE_DDOWN_INITIAL_ANGLE = 340;
+    public static double INTAKE_DROPDOWN_DOWN = -62; //-170
+    public static double INTAKE_DROPDOWN_5 = 100;
+    public static double INTAKE_DROPDOWN_4 = 55;
+    public static double INTAKE_DROPDOWN_3 = 0;
+    public static double INTAKE_DROPDOWN_2 = -25;
+    public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;
     public static double epsilon = 5;
     public double manualPower;
 
@@ -134,6 +134,7 @@ public class Intake implements Subsystem {
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         manualPower = 0;
+        servo.setDirection(-1);
         servo.setAbsolutePosition(servo.getRelativePosition());
         setPosition(INTAKE_DDOWN_INITIAL_ANGLE);
 

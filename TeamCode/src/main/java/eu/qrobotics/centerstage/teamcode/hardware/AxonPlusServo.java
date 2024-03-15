@@ -38,6 +38,7 @@ public class AxonPlusServo implements CRServo {
     public AxonPlusServo(CRServo servo, AnalogInput encoder) {
         delegateServo = servo;
         delegateEncoder = encoder;
+        cachedPosition = delegateEncoder.getVoltage() / 3.3 * 360;
         setAbsolutePosition(getRelativePosition());
 //        telem = _telem;
     }
@@ -55,7 +56,7 @@ public class AxonPlusServo implements CRServo {
     }
 
     public double getAbsolutePosition() {
-        return -absolutePosition;
+        return absolutePosition;
     }
 
     public void setAbsolutePosition(double _absolutePosition) {

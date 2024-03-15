@@ -1,17 +1,12 @@
 package eu.qrobotics.centerstage.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
-import com.acmerobotics.roadrunner.control.PIDFController;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import eu.qrobotics.centerstage.teamcode.hardware.AxonPlusServo;
 import eu.qrobotics.centerstage.teamcode.hardware.CachingServo;
 import eu.qrobotics.centerstage.teamcode.hardware.OPDistanceSensor;
 
@@ -33,6 +28,11 @@ public class Outtake implements Subsystem {
         RIGHT45
     }
 
+    public enum FourBarState {
+        TARGET,
+        MANUAL
+    }
+
     public enum ClawState {
         OPEN,
         CLOSED
@@ -47,23 +47,19 @@ public class Outtake implements Subsystem {
     public ClawState clawState;
     public RotateState rotateState;
     public DiffyHorizontalState diffyHState;
+    public FourBarState fourBarState;
     public OuttakeState outtakeState;
     public OuttakeState lastOuttakeState;
 
     // DIFFy
-    public static PIDCoefficients pidCoefficients = new PIDCoefficients(0, 0, 0);
-    private PIDFController pidfControllerLeft = new PIDFController(pidCoefficients);
-    private PIDFController pidfControllerRight = new PIDFController(pidCoefficients);
-    public static double ff = 0.05;
-
     public static double VDIFFY_ABOVE_TRANSFER_POS = 0.35;
     public static double VDIFFY_TRANSFER_PREP_POS = 0.2275;
     public static double VDIFFY_TRANSFER_POS = 0.222;
-    public static double VDIFFY_SCORE_POS = 0.556;
+    public static double VDIFFY_SCORE_POS = 0.565;
 
-    public static double HDIFFY_LEFT_POS = -0.254;
-    public static double HDIFFY_CENTER_POS = -0.01;
-    public static double HDIFFY_RIGHT_POS = 0.235;
+    public static double HDIFFY_LEFT_POS = -0.261;
+    public static double HDIFFY_CENTER_POS = -0.017;
+    public static double HDIFFY_RIGHT_POS = 0.228;
 
     public static double rotateThresh = 0.52; // rotate thresh
     public static double vDiffyThresholdVS = 0.45; // vertical speed
@@ -74,16 +70,19 @@ public class Outtake implements Subsystem {
     public static double currVDiffy;
     public static double currHDiffy;
 
-    public static double gainVDiffyInside = 0.02;
-    public static double gainVDiffyOutside = 0.04;
-    public static double gainHDiffy = 0.0275;
+    public static double gainVDiffyInsideUp = 0.018;
+    public static double gainVDiffyOutsideUp = 0.04;
+
+    public static double gainVDiffyInsideDown = 0.025;
+    public static double gainVDiffyOutsideDown = 0.05;
+    public static double gainHDiffy = 0.05;
 
     // Other Outtake Servo Values
-    public static double FOURBAR_TRANSFER_PREP_POS = 0.13;
-    public static double FOURBAR_TRANSFER_POS = 0.115;
-    public static double FOURBAR_ABOVE_TRANSFER_POS = 0.09;
-    public static double FOURBAR_SCORE_POS = 0.66;
-    public static double FOURBAR_SCORE_ANGLED_POS = 0.68;
+    public static double FOURBAR_TRANSFER_PREP_POS = 0.11;
+    public static double FOURBAR_TRANSFER_POS = 0.095;
+    public static double FOURBAR_ABOVE_TRANSFER_POS = 0.07;
+    public static double FOURBAR_SCORE_POS = 0.64; // -0.02
+    public static double FOURBAR_SCORE_ANGLED_POS = 0.665;
 
     public static double CLAW_OPEN_POS = 1;
     public static double CLAW_CLOSE_POS = 0.4;
@@ -149,6 +148,7 @@ public class Outtake implements Subsystem {
                 }
             }
         }
+
         // MOVE to target position
         if (vDiffyThresholdH < currVDiffy) {
             if (diffyHPosition < currHDiffy &&
@@ -172,18 +172,19 @@ public class Outtake implements Subsystem {
         if (diffyVPosition < currVDiffy &&
                 currHDiffy == diffyHPosition) {
             if (currVDiffy <= vDiffyThresholdVS) {
-                currVDiffy = Math.max(currVDiffy - gainVDiffyInside, diffyVPosition);
+                currVDiffy = Math.max(currVDiffy - gainVDiffyInsideDown, diffyVPosition);
             } else {
-                currVDiffy = Math.max(currVDiffy - gainVDiffyOutside, diffyVPosition);
+                currVDiffy = Math.max(currVDiffy - gainVDiffyOutsideDown, diffyVPosition);
             }
         }
         if (currVDiffy <= diffyVPosition) {
             if (currVDiffy <= vDiffyThresholdVS) {
-                currVDiffy = Math.min(currVDiffy + gainVDiffyInside, diffyVPosition);
+                currVDiffy = Math.min(currVDiffy + gainVDiffyInsideUp, diffyVPosition);
             } else {
-                currVDiffy = Math.min(currVDiffy + gainVDiffyOutside, diffyVPosition);
+                currVDiffy = Math.min(currVDiffy + gainVDiffyOutsideUp, diffyVPosition);
             }
         }
+
         // Do NOT break servo
         if (Math.min(currVDiffy - currHDiffy, currVDiffy + currHDiffy) < 0 ||
                 Math.max(currVDiffy - currHDiffy, currVDiffy + currHDiffy) > 1) {
@@ -270,6 +271,7 @@ public class Outtake implements Subsystem {
         lastVDiffy = diffyVPosition = VDIFFY_ABOVE_TRANSFER_POS;
         lastHDiffy = diffyHPosition = 0;
 
+        fourBarState = FourBarState.TARGET;
         outtakeState = OuttakeState.TRANSFER_PREP;
         lastOuttakeState = OuttakeState.TRANSFER_PREP;
         clawState = ClawState.OPEN;
@@ -285,8 +287,14 @@ public class Outtake implements Subsystem {
     @Override
     public void update() {
         if (IS_DISABLED) return;
-        sensorUp.update();
-        sensorDown.update();
+
+        // DEBUG SECTION
+//        clawServo.setPosition(CLAW_CLOSE_POS);
+//        rotateServo.setPosition(ROTATE_TRANSFER_POS);
+//        fourBarServo.setPosition(FOURBAR_TRANSFER_POS);
+//
+//        diffyLeftServo.setPosition(DIFFYV + DIFFYH);
+//        diffyRightServo.setPosition(DIFFYV - DIFFYH);
 
         if (lastOuttakeState != outtakeState) {
             timer.reset();
@@ -318,7 +326,7 @@ public class Outtake implements Subsystem {
                         diffyHPosition = HDIFFY_LEFT_POS;
                         break;
                     case CENTER:
-                        yawControlFourbarPos = FOURBAR_SCORE_POS;
+                        yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS;
                         diffyHPosition = HDIFFY_CENTER_POS;
                         break;
                     case RIGHT:
@@ -328,19 +336,28 @@ public class Outtake implements Subsystem {
                 }
 
                 if (currVDiffy == diffyVPosition &&
-                    currHDiffy == diffyHPosition &&
-                    diffyHState != DiffyHorizontalState.CENTER &&
-                    rotateState != RotateState.CENTER &&
-                    getMeanSensorDistance() <= sensorRelevanceThresh) {
+                        currHDiffy == diffyHPosition &&
+                        diffyHState != DiffyHorizontalState.CENTER &&
+                        rotateState != RotateState.CENTER &&
+                        getMeanSensorDistance() <= sensorRelevanceThresh) {
                     if (sensorUp.getDistance() + deltaLimit < sensorDown.getDistance()) {
                         yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS + (sensorDown.getDistance() - sensorUp.getDistance()) * yawControlGain;
                     } else if (sensorDown.getDistance() + deltaLimit < sensorUp.getDistance()) {
                         yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS - (sensorUp.getDistance() - sensorDown.getDistance()) * yawControlGain;
                     }
                 } else {
-                    yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS;
+                    if (diffyHPosition == HDIFFY_CENTER_POS) {
+                        yawControlFourbarPos = FOURBAR_SCORE_POS;
+                    } else {
+                        yawControlFourbarPos = FOURBAR_SCORE_ANGLED_POS;
+                    }
                 }
-                fourBarServo.setPosition(yawControlFourbarPos);
+
+                if (fourBarState == FourBarState.TARGET) {
+                    fourBarServo.setPosition(yawControlFourbarPos);
+                } else {
+                    fourBarServo.setPosition(manualFourbarPos);
+                }
                 break;
             case MANUAL:
                 fourBarServo.setPosition(manualFourbarPos);

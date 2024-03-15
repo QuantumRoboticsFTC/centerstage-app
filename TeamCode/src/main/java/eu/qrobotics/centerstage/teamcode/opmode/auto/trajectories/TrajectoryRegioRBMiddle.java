@@ -22,7 +22,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Intake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
-public class TrajectoryRegioRB_CS {
+public class TrajectoryRegioRBMiddle {
     public static Pose2d START_POSE = new Pose2d(14.1, -63.5, Math.toRadians(90));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {

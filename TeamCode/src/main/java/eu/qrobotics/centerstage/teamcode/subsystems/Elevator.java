@@ -55,6 +55,7 @@ public class Elevator implements Subsystem {
 
     public double groundPositionOffset;
     public double heightCap = 910;
+    public double encoderValue;
     public double manualOffset;
 
     public double manualPower;
@@ -83,9 +84,9 @@ public class Elevator implements Subsystem {
     }
 
     public void setPower(double power) {
-        if ((motorRight.getCurrentPosition() > groundPositionOffset + heightCap && power > 0) ||
-            (motorRight.getCurrentPosition() < groundPositionOffset && power < 0))
+        if (encoderValue > groundPositionOffset + heightCap && power > 0)
             return;
+        
         motorLeft.setPower(power);
         motorRight.setPower(power);
     }
@@ -136,7 +137,7 @@ public class Elevator implements Subsystem {
     }
 
     public double getCurrentPosition() {
-        return motorLeft.getCurrentPosition();
+        return encoderValue;
     }
 
     public Elevator(HardwareMap hardwareMap, Robot robot) {
@@ -147,6 +148,9 @@ public class Elevator implements Subsystem {
 
         motorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
+//        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -155,6 +159,8 @@ public class Elevator implements Subsystem {
 
         manualOffset = 0;
         groundPositionOffset = 0;
+//        encoderValue = 0;
+        encoderValue = motorLeft.getCurrentPosition();
 
         elevatorState = lastState = ElevatorState.TRANSFER;
         targetHeight = TargetHeight.FIRST_LINE;
@@ -169,6 +175,7 @@ public class Elevator implements Subsystem {
     @Override
     public void update() {
         if (IS_DISABLED) return;
+        encoderValue = motorLeft.getCurrentPosition();
 
 //        if (elevatorState == ElevatorState.TRANSFER) {
 //            manualOffset = 0;
