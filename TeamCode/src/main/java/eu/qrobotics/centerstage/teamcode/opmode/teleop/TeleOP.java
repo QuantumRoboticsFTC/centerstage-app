@@ -40,6 +40,7 @@ public class TeleOP extends OpMode {
     private ElapsedTime transferRetractSideTimer = new ElapsedTime(100);
     private ElapsedTime scoreTimer = new ElapsedTime(100);
     private ElapsedTime leaveBackboardTimer = new ElapsedTime(100);
+    private ElapsedTime endgameDisablePWM = new ElapsedTime(100);
 
     // Telemetry Switches
     public static boolean intakeTelemetry = true;
@@ -287,16 +288,16 @@ public class TeleOP extends OpMode {
                 break;
             case TRANSFER:
                 robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (0.25 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.45) {
+                if (0.3 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.7 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.9) {
+                if (0.9 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.0) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
                 break;
             case ABOVE_TRANSFER:
                 robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (1.0 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.2) {
+                if (1.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.3) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
@@ -369,7 +370,7 @@ public class TeleOP extends OpMode {
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+//            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
@@ -441,6 +442,7 @@ public class TeleOP extends OpMode {
                 }
                 if (stickyGamepad1.dpad_left) {
                     robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
+                    endgameDisablePWM.reset();
                 }
                 break;
             case ACTIVE:
@@ -453,9 +455,9 @@ public class TeleOP extends OpMode {
                 break;
         }
 
-        // region Update Timers (powerplay bad alex radoo name)
-        // TODO: do I do? perhaps.
-        // endregion
+        if (0.6 < endgameDisablePWM.seconds() && endgameDisablePWM.seconds() < 0.7) {
+            robot.endgame.disableClimber();
+        }
 
         // region Telemetry
         // TODO: Telemetry

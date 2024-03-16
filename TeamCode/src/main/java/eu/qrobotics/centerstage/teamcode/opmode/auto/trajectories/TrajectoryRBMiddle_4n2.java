@@ -76,53 +76,58 @@ public class TrajectoryRBMiddle_4n2 {
                 .build()
         );
 
-        // 6 -> go to backdrop
+        // 6 -> go to lane in front of drop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(30, -12))
-                .splineToConstantHeading(new Vector2d(48, -21.5), Math.toRadians(0))
+                .lineToConstantHeading(new Vector2d(35, -12))
                 .build()
         );
 
-        // 7 -> go to lane
+        // 7 -> go to backdrop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(40, -12))
+                .lineToConstantHeading(new Vector2d(48, -21.5))
                 .build()
         );
 
-        // 8 -> park
+        // 8 -> go to lane after drop
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                .lineToConstantHeading(new Vector2d(35, -12))
+                .build()
+        );
+
+        // 9 -> park
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(58, -14), Math.toRadians(0))
                 .build()
         );
 
-        // 9 -> dummy
-//        // 7 -> go to lane
+        // 10 -> dummy
+//        // 7 -> go to lane after drop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(40, -12))
+                .lineToConstantHeading(new Vector2d(35, -12))
                 .build()
         );
 
-        // 10 -> go to lane before stack
+        // 11 -> go to lane before stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-42, -12))
                 .build()
         );
 
-        // 11 -> go to stack
+        // 12 -> go to stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToSplineHeading(new Pose2d(-58.5, -23.5, Math.toRadians(190)))
                 .build()
         );
 
-        // 12 -> go to lane after stack
+        // 13 -> go to lane after stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(190), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToLinearHeading(new Pose2d(-40, -12, Math.toRadians(180)))
                 .build()
         );
 
-        // 6/13 -> go to backdrop
+        // 7/14 -> go to backdrop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(30, -12))
+                .lineToConstantHeading(new Vector2d(35, -12))
                 .splineToConstantHeading(new Vector2d(48, -17), Math.toRadians(0))
                 .build()
         );

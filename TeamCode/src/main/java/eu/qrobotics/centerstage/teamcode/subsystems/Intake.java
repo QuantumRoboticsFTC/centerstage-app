@@ -35,11 +35,29 @@ public class Intake implements Subsystem {
     public enum DropdownState {
         DOWN,
         UP,
-        STACK_5,
-        STACK_4,
+        STACK_2 {
+            @Override
+            public DropdownState previous() {
+                return this;
+            }
+        },
         STACK_3,
-        STACK_2,
-        MANUAL
+        STACK_4,
+        STACK_5 {
+            @Override
+            public DropdownState next() {
+                return this;
+            }
+        },
+        MANUAL;
+
+        public DropdownState previous() {
+            return values()[ordinal() - 1];
+        }
+
+        public DropdownState next() {
+            return values()[ordinal() + 1];
+        }
     }
 
     public IntakeMode intakeMode;
@@ -50,14 +68,14 @@ public class Intake implements Subsystem {
 
     public static double INTAKE_IN_SPEED = 1;
     public static double INTAKE_IDLE_SPEED = 0;
-    public static double INTAKE_OUT_SPEED = -1;
+    public static double INTAKE_OUT_SPEED = -0.7;
     public static double INTAKE_OUT_SLOW_SPEED = -0.3;
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 800;
     public static double INTAKE_DROPDOWN_DOWN = -62; //-170
     public static double INTAKE_DROPDOWN_5 = 100;
-    public static double INTAKE_DROPDOWN_4 = 55;
+    public static double INTAKE_DROPDOWN_4 = 62;
     public static double INTAKE_DROPDOWN_3 = 0;
     public static double INTAKE_DROPDOWN_2 = -25;
     public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;

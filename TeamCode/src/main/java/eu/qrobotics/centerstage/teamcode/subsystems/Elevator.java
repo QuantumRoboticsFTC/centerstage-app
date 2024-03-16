@@ -62,7 +62,7 @@ public class Elevator implements Subsystem {
 
     private ElapsedTime elapsedTime = new ElapsedTime(0);
 
-    public static PIDCoefficients coefs = new PIDCoefficients(0.00375, 0.00003, 0.0000);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.0055, 0.000004, 0.00001);
     private PIDFController controller = new PIDFController(coefs);
     public static double ff1 = 0.07;
 
@@ -146,7 +146,7 @@ public class Elevator implements Subsystem {
         motorLeft = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderLeft"));
         motorRight = new CachingDcMotorEx(hardwareMap.get(DcMotorEx.class, "sliderRight"));
 
-        motorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
 //        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -158,9 +158,9 @@ public class Elevator implements Subsystem {
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         manualOffset = 0;
-        groundPositionOffset = 0;
+        groundPositionOffset = -motorLeft.getCurrentPosition();
 //        encoderValue = 0;
-        encoderValue = motorLeft.getCurrentPosition();
+        encoderValue = -motorLeft.getCurrentPosition();
 
         elevatorState = lastState = ElevatorState.TRANSFER;
         targetHeight = TargetHeight.FIRST_LINE;
@@ -175,7 +175,7 @@ public class Elevator implements Subsystem {
     @Override
     public void update() {
         if (IS_DISABLED) return;
-        encoderValue = motorLeft.getCurrentPosition();
+        encoderValue = -motorLeft.getCurrentPosition();
 
 //        if (elevatorState == ElevatorState.TRANSFER) {
 //            manualOffset = 0;

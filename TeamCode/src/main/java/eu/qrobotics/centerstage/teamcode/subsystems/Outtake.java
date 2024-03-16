@@ -52,18 +52,18 @@ public class Outtake implements Subsystem {
     public OuttakeState lastOuttakeState;
 
     // DIFFy
-    public static double VDIFFY_ABOVE_TRANSFER_POS = 0.35;
-    public static double VDIFFY_TRANSFER_PREP_POS = 0.2275;
-    public static double VDIFFY_TRANSFER_POS = 0.222;
-    public static double VDIFFY_SCORE_POS = 0.565;
+    public static double VDIFFY_ABOVE_TRANSFER_POS = 0.3;
+    public static double VDIFFY_TRANSFER_PREP_POS = 0.18; //0.2325
+    public static double VDIFFY_TRANSFER_POS = 0.175;
+    public static double VDIFFY_SCORE_POS = 0.5175;
 
-    public static double HDIFFY_LEFT_POS = -0.261;
-    public static double HDIFFY_CENTER_POS = -0.017;
-    public static double HDIFFY_RIGHT_POS = 0.228;
+    public static double HDIFFY_LEFT_POS = -0.35;
+    public static double HDIFFY_CENTER_POS = 0.0425; //-0.095
+    public static double HDIFFY_RIGHT_POS = 0.29;
 
-    public static double rotateThresh = 0.52; // rotate thresh
+    public static double rotateThresh = 0.5; // rotate thresh
     public static double vDiffyThresholdVS = 0.45; // vertical speed
-    public static double vDiffyThresholdH = 0.55; // horizontal moving
+    public static double vDiffyThresholdH = 0.51; // horizontal moving
     public static double hDiffyToleranceInside = 0.02;
     public static double hDiffyToleranceOutside = 0.27;
 
@@ -78,11 +78,11 @@ public class Outtake implements Subsystem {
     public static double gainHDiffy = 0.05;
 
     // Other Outtake Servo Values
-    public static double FOURBAR_TRANSFER_PREP_POS = 0.11;
-    public static double FOURBAR_TRANSFER_POS = 0.095;
+    public static double FOURBAR_TRANSFER_PREP_POS = 0.13;
+    public static double FOURBAR_TRANSFER_POS = 0.13; //0.095
     public static double FOURBAR_ABOVE_TRANSFER_POS = 0.07;
     public static double FOURBAR_SCORE_POS = 0.64; // -0.02
-    public static double FOURBAR_SCORE_ANGLED_POS = 0.665;
+    public static double FOURBAR_SCORE_ANGLED_POS = 0.68;
 
     public static double CLAW_OPEN_POS = 1;
     public static double CLAW_CLOSE_POS = 0.4;
@@ -92,7 +92,7 @@ public class Outtake implements Subsystem {
     public static double ROTATE_LEFT45_POS = 0.25;
     public static double ROTATE_RIGHT_POS = 0.665;
     public static double ROTATE_RIGHT45_POS = 0.53;
-    public static double rotateGain = 1.16; // per ? of hdiffy, rotateGain of rotate
+    public static double rotateGain = 1.08; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual stuff
     public double manualFourbarPos;
@@ -121,6 +121,9 @@ public class Outtake implements Subsystem {
     private double diffyHPosition;
     public double lastVDiffy;
     public double lastHDiffy;
+
+    public double sensorUpCached;
+    public double sensorDownCached;
 
     public void getManualValues() {
         if (lastOuttakeState == OuttakeState.MANUAL) return;
@@ -236,15 +239,15 @@ public class Outtake implements Subsystem {
     }
 
     public double getMeanSensorDistance() {
-        return (sensorUp.getDistance() + sensorDown.getDistance()) * 0.5;
+        return (sensorUpCached + sensorDownCached) * 0.5;
     }
 
     public double getSensorUp() {
-        return sensorUp.getDistance();
+        return sensorUpCached;
     }
 
     public double getSensorDown() {
-        return sensorDown.getDistance();
+        return sensorDownCached;
     }
 
     public double getDiffyTargetVertical() { return diffyVPosition; }
@@ -295,6 +298,9 @@ public class Outtake implements Subsystem {
 //
 //        diffyLeftServo.setPosition(DIFFYV + DIFFYH);
 //        diffyRightServo.setPosition(DIFFYV - DIFFYH);
+
+        sensorUpCached = sensorUp.getDistance();
+        sensorDownCached = sensorDown.getDistance();
 
         if (lastOuttakeState != outtakeState) {
             timer.reset();
