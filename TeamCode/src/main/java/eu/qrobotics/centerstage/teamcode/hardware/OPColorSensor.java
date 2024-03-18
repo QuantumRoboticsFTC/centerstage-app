@@ -9,33 +9,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class OPColorSensor {
     public ColorRangeSensor delegate;
-    private double averageDistance = 0;
-    private double distanceSum = 0;
-    private double entryCount = 0;
-
-    private double timerLimit = 0.2;
-    private ElapsedTime timer;
+    private double distance = 0;
 
     public OPColorSensor(ColorRangeSensor sensor) {
         delegate = sensor;
-        timer = new ElapsedTime();
     }
 
     public double getDistance() {
-        return averageDistance;
+        return distance;
     }
 
     public void update() {
-        if (timer.seconds() < timerLimit) {
-            distanceSum = distanceSum +
-                    delegate.getDistance(DistanceUnit.MM);
-            entryCount++;
-        } else {
-            averageDistance = distanceSum / entryCount;
-            timer.reset();
-            distanceSum = 0;
-            entryCount = 0;
-        }
+        distance = delegate.getDistance(DistanceUnit.MM);
     }
 
     public void close() {

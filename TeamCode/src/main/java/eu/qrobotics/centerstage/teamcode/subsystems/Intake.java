@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -34,6 +35,7 @@ public class Intake implements Subsystem {
 
     public enum DropdownState {
         DOWN,
+        ALMOST_UP,
         UP,
         STACK_2 {
             @Override
@@ -73,11 +75,12 @@ public class Intake implements Subsystem {
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
     public static double INTAKE_DROPDOWN_UP = 800;
+    public static double INTAKE_DROPDOWN_ALMOST_UP = 340;
     public static double INTAKE_DROPDOWN_DOWN = -62; //-170
-    public static double INTAKE_DROPDOWN_5 = 100;
-    public static double INTAKE_DROPDOWN_4 = 62;
-    public static double INTAKE_DROPDOWN_3 = 0;
-    public static double INTAKE_DROPDOWN_2 = -25;
+    public static double INTAKE_DROPDOWN_5 = 120; // min/max 100 / 120
+    public static double INTAKE_DROPDOWN_4 = 73; // min/max 73 / 60
+    public static double INTAKE_DROPDOWN_3 = 29; // min/max 29 / 0
+    public static double INTAKE_DROPDOWN_2 = -10; // min/max -10 / -25
     public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;
     public static double epsilon = 5;
     public double manualPower;
@@ -86,7 +89,13 @@ public class Intake implements Subsystem {
     private OPColorSensor sensor2; // deep (close to outtake)
     private boolean isPixel1 = false;
     private boolean isPixel2 = false;
-    private double sensorThreshold = 10;
+    private boolean bothPixels = false;
+    private boolean tryToAdvance = false; // trying to go to 2 pixels
+    private ElapsedTime timer = new ElapsedTime(10);
+    public static double timerThreshold = 0.1;
+    private double distance1 = 0.0;
+    private double distance2 = 0.0;
+    private double sensorThreshold = 6.9; // true limit 6.3575844
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
@@ -117,6 +126,14 @@ public class Intake implements Subsystem {
         return motor.getVelocity(AngleUnit.DEGREES);
     }
 
+    public double getDistance1() {
+        return distance1;
+    }
+
+    public double getDistance2() {
+        return distance2;
+    }
+
     public boolean isPixel1() {
         return isPixel1;
     }
@@ -126,7 +143,7 @@ public class Intake implements Subsystem {
     }
 
     public int pixelCount() {
-        if (isPixel1 && isPixel2) return 2;
+        if (bothPixels) return 2;
         else if (isPixel1 || isPixel2) return 1;
         return 0;
     }
@@ -173,11 +190,27 @@ public class Intake implements Subsystem {
         servo.update();
 
         sensor1.update();
-
+        distance1 = sensor1.getDistance();
         sensor2.update();
+        distance2 = sensor2.getDistance();
 
-        isPixel1 = (sensor1.getDistance() < sensorThreshold);
-        isPixel2 = (sensor2.getDistance() < sensorThreshold);
+        isPixel1 = (distance1 < sensorThreshold);
+        isPixel2 = (distance2 < sensorThreshold);
+        if (isPixel1 && isPixel2) {
+            if (!bothPixels) {
+                if (tryToAdvance &&
+                        timerThreshold < timer.seconds()) {
+                    tryToAdvance = false;
+                    bothPixels = true;
+                } else if (!tryToAdvance) {
+                    tryToAdvance = true;
+                    timer.reset();
+                }
+            }
+        } else {
+            tryToAdvance = false;
+            bothPixels = false;
+        }
 
         switch (intakeMode) {
             case IN:
@@ -219,6 +252,9 @@ public class Intake implements Subsystem {
                     }
 
                     switch (dropdownState) {
+                        case ALMOST_UP:
+                            setPosition(INTAKE_DROPDOWN_ALMOST_UP);
+                            break;
                         case UP:
                             setPosition(INTAKE_DROPDOWN_UP);
                             break;

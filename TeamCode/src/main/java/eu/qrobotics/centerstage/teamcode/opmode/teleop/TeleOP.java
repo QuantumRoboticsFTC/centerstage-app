@@ -26,7 +26,6 @@ public class TeleOP extends OpMode {
         SLOW
     }
 
-
     Gamepad.RumbleEffect rumbleEffectTransfer;
     private static Pose2d ENDGAME_POSITION = new Pose2d(72, 20, Math.toRadians(180));
 
@@ -109,8 +108,8 @@ public class TeleOP extends OpMode {
             }
         }
 
-//        if (leaveBackboardTimer.seconds() < 0.4) {
-//            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+        if (leaveBackboardTimer.seconds() < 0.4) {
+            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
 //        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
 //            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
 ////          TODO: this
@@ -122,14 +121,14 @@ public class TeleOP extends OpMode {
 //                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
 //                    break;
 //            }
-//        } else
+        } else
         if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, false, false);
                     break;
                 case SLOW:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, false, false);
                     break;
             }
         }
@@ -395,7 +394,7 @@ public class TeleOP extends OpMode {
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
@@ -485,6 +484,8 @@ public class TeleOP extends OpMode {
         // TODO: Telemetry
         telemetry.addLine("<----> INTAKE <---->");
         if (intakeTelemetry) {
+            telemetry.addData("distance 1", robot.intake.getDistance1());
+            telemetry.addData("distance 2", robot.intake.getDistance2());
             telemetry.addData("intake_motor_velocity_deg", robot.intake.getVelocity());
             telemetry.addData("intake mode", robot.intake.intakeMode);
             telemetry.addData("dropdown mode", robot.intake.dropdownMode);

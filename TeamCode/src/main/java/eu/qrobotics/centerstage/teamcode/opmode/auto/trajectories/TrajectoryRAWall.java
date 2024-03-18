@@ -17,7 +17,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Audience Centerstage
 public class TrajectoryRAWall {
-    public static Pose2d START_POSE = new Pose2d(-38.1, -63.5, Math.toRadians(90));
+    public static Pose2d START_POSE = new Pose2d(-38.1, -63.5, Math.toRadians(270));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
         if(trajectories.size() == 0)
@@ -41,56 +41,56 @@ public class TrajectoryRAWall {
         List<Trajectory> trajectories = new ArrayList<>();
 
         // 0 -> left
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-48, -34), Math.toRadians(90))
                 .build()
         );
         // 1 -> center
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-40, -35), Math.toRadians(90))
                 .build()
         );
         // 2 -> right
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-25, -36), Math.toRadians(0))
                 .build()
         );
 
         // 3 -> center2Stack
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(90), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(-37, -47), Math.toRadians(90))
-                .splineToSplineHeading(new Pose2d(-60, -36, Math.toRadians(180)), Math.toRadians(180))
+                .splineToSplineHeading(new Pose2d(-60, -36, Math.toRadians(180)), Math.toRadians(0))
                 .build()
         );
 
         // 4 -> go to lane
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-40, -60))
                 .build()
         );
 
         // 5 -> go to backboard
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(30, -60))
                 .splineToConstantHeading(new Vector2d(48, -55), Math.toRadians(0))
                 .build()
         );
 
         // 6 -> go to lane
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(40, -60))
                 .build()
         );
 
         // 7 -> go to stack
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-40, -60))
                 .splineToConstantHeading(new Vector2d(-60, -36), Math.toRadians(180))
                 .build()
         );
 
         // 8 -> park
-        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .splineToConstantHeading(new Vector2d(60, -60), Math.toRadians(0))
                 .build()
         );

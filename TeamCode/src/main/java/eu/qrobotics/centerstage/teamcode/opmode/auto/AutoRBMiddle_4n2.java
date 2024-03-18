@@ -238,6 +238,11 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    robot.outtake.rotateState = Outtake.RotateState.CENTER;
+                }
+
+                if (0.4 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.5) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
@@ -259,50 +264,48 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             // 5 -> go to stack
             robot.drive.followTrajectory(trajectories.get(5));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                if (robot.drive.getPoseEstimate().getX() < -10) {
+                if (robot.drive.getPoseEstimate().getX() < -15) {
                     robot.intake.intakeMode = Intake.IntakeMode.IN;
                 }
                 robot.sleep(0.01);
             }
 
+            robot.intake.dropdownState = robot.intake.dropdownState.previous();
             bigIntakeTimer.reset();
-            int currentTargetPixel = 1;
             while (robot.intake.pixelCount() < 2 && bigIntakeTimer.seconds() < bigIntakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
                 intakeTimer.reset();
-                while (robot.intake.pixelCount() < currentTargetPixel &&
+                while (robot.intake.pixelCount() < 2 &&
                         intakeTimer.seconds() < intakeTimerLimit
                         && opModeIsActive() && !isStopRequested()) {
                     robot.sleep(0.01);
                 }
-                robot.intake.dropdownState = robot.intake.dropdownState.previous();
-                if (currentTargetPixel == 1) currentTargetPixel = 2;
+                if (robot.intake.pixelCount() != 2) {
+                    robot.intake.dropdownState = robot.intake.dropdownState.previous();
+                }
             }
+            robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
             // 6 -> go to lane in front of drop
             robot.drive.followTrajectory(trajectories.get(6));
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
-                    robot.intake.dropdownState = Intake.DropdownState.DOWN;
-                }
-
-                if (0.25 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.35) {
+                    robot.intake.dropdownState = Intake.DropdownState.ALMOST_UP;
                     robot.intake.intakeMode = Intake.IntakeMode.OUT;
-                    robot.intake.dropdownState = Intake.DropdownState.UP;
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
 
                 if (0.4 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.5) {
+                    robot.intake.dropdownState = Intake.DropdownState.UP;
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+                    robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                }
+
+                if (0.7 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.8) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
                 robot.sleep(0.01);
             }
-            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
-            robot.outtake.clawState = Outtake.ClawState.CLOSED;
-            robot.sleep(0.4);
-            robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
-            robot.sleep(0.2);
 
             // 7 -> go to backdrop
             robot.drive.followTrajectory(trajectories.get(7));
@@ -316,20 +319,20 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
                     }
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+//                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                 }
 
                 robot.sleep(0.01);
             }
-//            robot.sleep(0.3);
             robot.sleep(0.1);
             placePixel();
-            boolean retry = false;
-            while (retry) {
-                retractOuttake();
-                placePixel();
-                retry = false;
-            }
+//            boolean retry = false;
+//            while (retry) {
+//                retractOuttake();
+//                placePixel();
+//                retry = false;
+//            }
         }
         if (cycleCount == 3) {
             // 11 -> go to lane before stack
@@ -345,26 +348,35 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
                 robot.sleep(0.01);
             }
-            robot.sleep(0.1);
 
+            robot.intake.dropdownState = robot.intake.dropdownState.previous();
             bigIntakeTimer.reset();
             while (robot.intake.pixelCount() < 2 && bigIntakeTimer.seconds() < bigIntakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
                 intakeTimer.reset();
-                while (intakeTimer.seconds() < intakeTimerLimit
+                while (robot.intake.pixelCount() < 2 &&
+                        intakeTimer.seconds() < intakeTimerLimit
                         && opModeIsActive() && !isStopRequested()) {
                     robot.sleep(0.01);
                 }
-                robot.intake.dropdownState = robot.intake.dropdownState.previous();
+                if (robot.intake.pixelCount() != 2) {
+                    robot.intake.dropdownState = robot.intake.dropdownState.previous();
+                }
             }
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
             // 13 -> go to lane after stack
+            trajectoryTimer.reset();
             robot.drive.followTrajectory(trajectories.get(13));
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.3) {
-                    robot.intake.dropdownState = Intake.DropdownState.UP;
+                if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
+                    robot.intake.dropdownState = Intake.DropdownState.ALMOST_UP;
                     robot.intake.intakeMode = Intake.IntakeMode.OUT;
+                }
+
+                if (0.3 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                    robot.intake.dropdownState = Intake.DropdownState.UP;
+                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
                 robot.sleep(0.01);
@@ -373,18 +385,17 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             if (timerLimit2 < autoTimer.seconds()) {
                 solveTimerLimit2();
             } else {
+                robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+
                 // 14 -> go to backdrop (from lane)
                 robot.drive.followTrajectory(trajectories.get(14));
                 while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
-                    if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
-                        robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
-                    }
-
                     if (robot.drive.getPoseEstimate().getX() > 5) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT2;
                         robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                         robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+//                        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+                        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
                     }
                     robot.sleep(0.01);
                 }
@@ -393,7 +404,10 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             }
         }
         robot.intake.dropdownState = Intake.DropdownState.UP;
-        robot.sleep(0.15);
+        if (robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
+            robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+        }
+        robot.sleep(0.2);
 
         robot.outtake.rotateState = Outtake.RotateState.CENTER;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;

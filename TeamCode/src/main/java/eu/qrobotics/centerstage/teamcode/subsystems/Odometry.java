@@ -8,10 +8,10 @@ import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import eu.qrobotics.centerstage.teamcode.util.Encoder;
+
 import java.util.Arrays;
 import java.util.List;
-
-import eu.qrobotics.centerstage.teamcode.util.Encoder;
 
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:
@@ -27,13 +27,14 @@ import eu.qrobotics.centerstage.teamcode.util.Encoder;
  *
  */
 @Config
-public class Odometry2DWIMU extends ThreeTrackingWheelLocalizer {
+public class Odometry extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 2000;
     public static double WHEEL_RADIUS = 1.89 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 10.94;
-    public static double FORWARD_OFFSET = 6;
+    public static double LATERAL_DISTANCE = 10.945;
+    // 6 cica idk
+    public static double FORWARD_OFFSET = -7;
 
     public static Pose2d LEFT_POSE = new Pose2d(0,  LATERAL_DISTANCE / 2, 0);
     public static Pose2d RIGHT_POSE = new Pose2d(0, -LATERAL_DISTANCE / 2, 0);
@@ -44,7 +45,7 @@ public class Odometry2DWIMU extends ThreeTrackingWheelLocalizer {
 
     private Encoder leftEncoder, rightEncoder, rearEncoder;
 
-    public Odometry2DWIMU(HardwareMap hardwareMap) {
+    public Odometry(HardwareMap hardwareMap) {
         super(Arrays.asList(
                 LEFT_POSE, // left
                 RIGHT_POSE, // right
@@ -52,12 +53,15 @@ public class Odometry2DWIMU extends ThreeTrackingWheelLocalizer {
         ));
 
         // TOOD: astea ar tb schimbate
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
-        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
+//        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftRear"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
+//        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightFront"));
+//        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "rightRear"));
+        rearEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
 
         //rightEncoder.setDirection(Encoder.Direction.REVERSE);
-        //rearEncoder.setDirection(Encoder.Direction.REVERSE);
+        rearEncoder.setDirection(Encoder.Direction.REVERSE);
         leftEncoder.setDirection(Encoder.Direction.REVERSE);
     }
 
