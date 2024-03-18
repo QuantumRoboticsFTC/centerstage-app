@@ -62,6 +62,21 @@ public class Elevator implements Subsystem {
 
     private ElapsedTime elapsedTime = new ElapsedTime(0);
 
+    public static double lowThreshold = 300.0;
+    public static double middleThreshold = 600.0;
+    InterpLUT pCoeffs = new InterpLUT();
+    double kpLow = 0.0;
+    double kpMid = 0.0;
+    double kpHigh = 0.0;
+    InterpLUT dCoeffs = new InterpLUT();
+    double kiLow = 0.0;
+    double kiMid = 0.0;
+    double kiHigh = 0.0;
+    InterpLUT iCoeffs = new InterpLUT();
+    double kdLow = 0.0;
+    double kdMid = 0.0;
+    double kdHigh = 0.0;
+
     public static PIDCoefficients coefs = new PIDCoefficients(0.0055, 0.000004, 0.00001);
     private PIDFController controller = new PIDFController(coefs);
     public static double ff1 = 0.07;
@@ -153,9 +168,23 @@ public class Elevator implements Subsystem {
 
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         motorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        pCoeffs.add(lowThreshold, kpLow);
+        pCoeffs.add(middleThreshold, kpMid);
+        pCoeffs.add(heightCap, kpHigh);
+        pCoeffs.createLUT();
+
+        iCoeffs.add(lowThreshold, kiLow);
+        iCoeffs.add(middleThreshold, kiMid);
+        iCoeffs.add(heightCap, kiHigh);
+        iCoeffs.createLUT();
+
+        dCoeffs.add(lowThreshold, kdLow);
+        dCoeffs.add(middleThreshold, kdMid);
+        dCoeffs.add(heightCap, kdHigh);
+        dCoeffs.createLUT();
 
         manualOffset = 0;
         groundPositionOffset = -motorLeft.getCurrentPosition();
@@ -189,6 +218,11 @@ public class Elevator implements Subsystem {
         } else {
             diffyValue = 0;
         }
+
+        PIDCoefficients customCoeffs = new PIDCoefficients(pCoeffs.get(encoderValue + groundPositionOffset),
+                                                            iCoeffs.get(encoderValue + groundPositionOffset),
+                                                            dCoeffs.get(encoderValue + groundPositionOffset));
+//        controller = new PIDFController(customCoeffs);
 
         if (elevatorState == ElevatorState.LINES ||
             elevatorState == ElevatorState.TRANSFER) {

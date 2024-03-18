@@ -66,7 +66,7 @@ public class Intake implements Subsystem {
 
     public static double blockedThreshold = 100000;
 
-    public static double INTAKE_IN_SPEED = 1;
+    public static double INTAKE_IN_SPEED = 0.8;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = -0.7;
     public static double INTAKE_OUT_SLOW_SPEED = -0.3;
@@ -88,7 +88,7 @@ public class Intake implements Subsystem {
     private boolean isPixel2 = false;
     private double sensorThreshold = 10;
 
-    public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.005, 0.00001, 0.000015);
+    public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
     public static double ff = 0.025;
     public static double targetPosition = 0.0;
@@ -96,6 +96,10 @@ public class Intake implements Subsystem {
     private CachingDcMotorEx motor;
     private AxonPlusServo servo;
     private Robot robot;
+
+    public void __setServoPosition(double target) {
+        servo.setAbsolutePosition(target);
+    }
 
     public void setPosition(double target) {
         targetPosition = target;

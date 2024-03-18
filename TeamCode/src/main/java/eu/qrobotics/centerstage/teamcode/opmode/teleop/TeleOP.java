@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.MovingStatistics;
@@ -25,6 +26,8 @@ public class TeleOP extends OpMode {
         SLOW
     }
 
+
+    Gamepad.RumbleEffect rumbleEffectTransfer;
     private static Pose2d ENDGAME_POSITION = new Pose2d(72, 20, Math.toRadians(180));
 
     // Previous State Region
@@ -70,6 +73,10 @@ public class TeleOP extends OpMode {
 
         batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
+        rumbleEffectTransfer = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 600)
+                .build();
+
         telemetry.log().add("Ready!");
 
         // TODO: Last States init
@@ -102,7 +109,7 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (leaveBackboardTimer.seconds() < 0.4) {
+//        if (leaveBackboardTimer.seconds() < 0.4) {
 //            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
 //        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
 //            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
@@ -115,7 +122,8 @@ public class TeleOP extends OpMode {
 //                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
 //                    break;
 //            }
-        } else if (!robot.drive.isBusy()) {
+//        } else
+        if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
                     robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
@@ -167,6 +175,10 @@ public class TeleOP extends OpMode {
         } else if (robot.intake.manualPower != 0) {
 //            robot.intake.dropdownState = robot.intake.lastDropdownState;
             robot.intake.manualPower = 0;
+        }
+
+        if (stickyGamepad1.dpad_down) {
+            robot.intake.__setServoPosition(Intake.INTAKE_DROPDOWN_UP);
         }
 
         if (0.5 < blockedIntake.seconds()) {
@@ -285,19 +297,32 @@ public class TeleOP extends OpMode {
                     transferDeployTimer.reset();
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
+                if (robot.intake.pixelCount() == 2) {
+                    gamepad1.runRumbleEffect(rumbleEffectTransfer);
+                    if (robot.intake.intakeMode == Intake.IntakeMode.IDLE) {
+                        gamepad2.runRumbleEffect(rumbleEffectTransfer);
+                        transferDeployTimer.reset();
+                        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+                    }
+                }
                 break;
             case TRANSFER:
                 robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (0.3 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
+                if (0.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.3) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
-                if (0.9 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.0) {
+                if (stickyGamepad2.right_bumper) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    transferDeployTimer.reset();
+                }
+                if (stickyGamepad2.left_bumper) {
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                 }
                 break;
             case ABOVE_TRANSFER:
                 robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (1.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 1.3) {
+                if (0.3 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                 }
@@ -370,7 +395,7 @@ public class TeleOP extends OpMode {
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-//            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
+            robot.drive.setMotorPowers(0.9, 0.9, 0.9, 0.9);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
@@ -417,9 +442,6 @@ public class TeleOP extends OpMode {
         }
 
         // Endgame State Machine
-        if (stickyGamepad1.dpad_down) {
-            robot.drive.setPoseEstimate(ENDGAME_POSITION);
-        }
         switch (robot.endgame.climbState) {
             case PASSIVE:
                 if (stickyGamepad1.dpad_right) {
@@ -437,18 +459,18 @@ public class TeleOP extends OpMode {
                         case ACTIVE:
                             robot.endgame.climbState = Endgame.ClimbState.ACTIVE;
                             robot.intake.dropdownState = Intake.DropdownState.UP;
+                            endgameDisablePWM.reset();
                             break;
                     }
                 }
                 if (stickyGamepad1.dpad_left) {
                     robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
-                    endgameDisablePWM.reset();
                 }
                 break;
             case ACTIVE:
                 if (stickyGamepad1.dpad_right) {
                     transferDeployTimer.reset();
-                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
                     robot.elevator.elevatorState = Elevator.ElevatorState.CLIMBED;
                 }

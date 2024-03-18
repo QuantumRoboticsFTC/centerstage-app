@@ -16,7 +16,7 @@ import java.util.Arrays;
 public class DriveConstants {
         public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8.5, 0, 0.5);
 //    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8,0,0.2);
-        public static PIDCoefficients HEADING_PID = new PIDCoefficients(8.5, 0, 0.75);
+        public static PIDCoefficients HEADING_PID = new PIDCoefficients(9, 0, 0.75);
 //    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0.2);
 
     public static double LATERAL_MULTIPLIER = 1.85853;
@@ -49,9 +49,9 @@ public class DriveConstants {
     public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
             getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
-    public static double kV =0.01231;
-    public static double kA = 0.0033;
-    public static double kStatic = 0.05;
+    public static double kV = 0.01225;
+    public static double kA = 0.00415;
+    public static double kStatic = 0.055;
 
     public static double encoderTicksToInches(double ticks) {
         return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;

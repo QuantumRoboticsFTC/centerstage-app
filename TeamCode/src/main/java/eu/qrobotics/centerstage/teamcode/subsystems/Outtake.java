@@ -57,9 +57,9 @@ public class Outtake implements Subsystem {
     public static double VDIFFY_TRANSFER_POS = 0.175;
     public static double VDIFFY_SCORE_POS = 0.5175;
 
-    public static double HDIFFY_LEFT_POS = -0.35;
+    public static double HDIFFY_LEFT_POS = -0.205;
     public static double HDIFFY_CENTER_POS = 0.0425; //-0.095
-    public static double HDIFFY_RIGHT_POS = 0.29;
+    public static double HDIFFY_RIGHT_POS = 0.3;
 
     public static double rotateThresh = 0.5; // rotate thresh
     public static double vDiffyThresholdVS = 0.45; // vertical speed
@@ -313,11 +313,11 @@ public class Outtake implements Subsystem {
                 diffyVPosition = VDIFFY_TRANSFER_POS;
                 break;
             case TRANSFER_PREP:
+                diffyHPosition = HDIFFY_CENTER_POS;
+                diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
                 if (currVDiffy == diffyVPosition) {
                     fourBarServo.setPosition(FOURBAR_TRANSFER_PREP_POS);
                 }
-                diffyHPosition = HDIFFY_CENTER_POS;
-                diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
                 break;
             case ABOVE_TRANSFER:
                 fourBarServo.setPosition(FOURBAR_ABOVE_TRANSFER_POS);

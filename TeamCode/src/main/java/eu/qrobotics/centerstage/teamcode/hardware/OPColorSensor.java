@@ -13,7 +13,7 @@ public class OPColorSensor {
     private double distanceSum = 0;
     private double entryCount = 0;
 
-    private double timerLimit = 0.6;
+    private double timerLimit = 0.2;
     private ElapsedTime timer;
 
     public OPColorSensor(ColorRangeSensor sensor) {

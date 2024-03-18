@@ -131,6 +131,21 @@ public class TrajectoryRBMiddle_4n2 {
                 .splineToConstantHeading(new Vector2d(48, -17), Math.toRadians(0))
                 .build()
         );
+
+        // 15 - dummy
+        // finish @ lane (near backdrop)
+        // 6 -> go to lane in front of drop
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
+                .lineToConstantHeading(new Vector2d(35, -12))
+                .build()
+        );
+
+        // 16 -> go directly to park (from lane)
+        trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(180), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
+                .lineToConstantHeading(new Vector2d(58, -14))
+                .build()
+        );
+
         return trajectories;
     }
 }

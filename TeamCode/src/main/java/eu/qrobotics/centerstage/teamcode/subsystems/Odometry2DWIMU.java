@@ -8,10 +8,10 @@ import com.acmerobotics.roadrunner.localization.ThreeTrackingWheelLocalizer;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import eu.qrobotics.centerstage.teamcode.util.Encoder;
-
 import java.util.Arrays;
 import java.util.List;
+
+import eu.qrobotics.centerstage.teamcode.util.Encoder;
 
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:
@@ -27,7 +27,7 @@ import java.util.List;
  *
  */
 @Config
-public class Odometry extends ThreeTrackingWheelLocalizer {
+public class Odometry2DWIMU extends ThreeTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 2000;
     public static double WHEEL_RADIUS = 1.89 / 2.0; // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
@@ -44,7 +44,7 @@ public class Odometry extends ThreeTrackingWheelLocalizer {
 
     private Encoder leftEncoder, rightEncoder, rearEncoder;
 
-    public Odometry(HardwareMap hardwareMap) {
+    public Odometry2DWIMU(HardwareMap hardwareMap) {
         super(Arrays.asList(
                 LEFT_POSE, // left
                 RIGHT_POSE, // right

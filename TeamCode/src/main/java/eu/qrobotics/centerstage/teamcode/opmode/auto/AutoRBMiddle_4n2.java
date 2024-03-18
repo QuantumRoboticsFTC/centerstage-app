@@ -42,13 +42,32 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
     int trajectoryIdx = 0;
     public static double MAX_DISTANCE = -100;
 
-    ElapsedTime bigIntakeTimer = new ElapsedTime(0);
-    ElapsedTime intakeTimer = new ElapsedTime(0);
-    ElapsedTime trajectoryTimer = new ElapsedTime(0);
+    ElapsedTime autoTimer = new ElapsedTime(10);
+    ElapsedTime bigIntakeTimer = new ElapsedTime(10);
+    ElapsedTime intakeTimer = new ElapsedTime(10);
+    ElapsedTime trajectoryTimer = new ElapsedTime(10);
+    double timerLimit1 = 28;
+    double timerLimit2 = 28;
     double intakeTimerLimit = 0.5;
     double bigIntakeTimerLimit = 1.2;
 
     private ATagDetector aprilDetector;
+
+    void solveTimerLimit2() {
+        robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+        robot.intake.dropdownState = Intake.DropdownState.UP;
+        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+        robot.outtake.clawState = Outtake.ClawState.OPEN;
+
+        // 16 -> go directly to park (from lane)
+        robot.drive.followTrajectory(trajectories.get(16));
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.1);
+
+    }
 
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
@@ -132,16 +151,16 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
         robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
         robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.sleep(1.25);
+        robot.sleep(0.7);
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
         robot.sleep(0.35);
-        robot.outtake.rotateState = Outtake.RotateState.LEFT;
+        robot.outtake.rotateState = Outtake.RotateState.RIGHT;
         robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
         robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
         robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
-        robot.sleep(0.65);
+        robot.sleep(0.6);
         robot.outtake.clawState = Outtake.ClawState.OPEN;
         robot.sleep(0.1);
     }
@@ -174,6 +193,7 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
 //        aprilDetector.track=false;
 
         robot.start();
+        autoTimer.reset();
 
         if (teamProp == -10) {
             robot.stop();
@@ -220,7 +240,7 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
                 if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-                    robot.elevator.elevatorState = Elevator.ElevatorState.TRANSFER;
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                     if (i == 1 || i == 3) {
                         robot.intake.dropdownState = Intake.DropdownState.STACK_5;
                     } else if (i == 2) {
@@ -350,24 +370,27 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
                 robot.sleep(0.01);
             }
             robot.sleep(0.1);
+            if (timerLimit2 < autoTimer.seconds()) {
+                solveTimerLimit2();
+            } else {
+                // 14 -> go to backdrop (from lane)
+                robot.drive.followTrajectory(trajectories.get(14));
+                while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
+                    if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
+                        robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    }
 
-            // 14 -> go to backdrop (from lane)
-            robot.drive.followTrajectory(trajectories.get(14));
-            while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
-                if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.2) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    if (robot.drive.getPoseEstimate().getX() > 5) {
+                        robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT2;
+                        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+                        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+                    }
+                    robot.sleep(0.01);
                 }
-
-                if (robot.drive.getPoseEstimate().getX() > 5) {
-                    robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT2;
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
-                }
-                robot.sleep(0.01);
+                robot.sleep(0.1);
+                placePixel();
             }
-            robot.sleep(0.1);
-            placePixel();
         }
         robot.intake.dropdownState = Intake.DropdownState.UP;
         robot.sleep(0.15);
