@@ -2,7 +2,6 @@ package eu.qrobotics.centerstage.teamcode.opmode.teleop;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -27,7 +26,6 @@ public class TeleOP extends OpMode {
     }
 
     Gamepad.RumbleEffect rumbleEffectTransfer;
-    private static Pose2d ENDGAME_POSITION = new Pose2d(72, 20, Math.toRadians(180));
 
     // Previous State Region
     // Subsystems
@@ -36,6 +34,8 @@ public class TeleOP extends OpMode {
     public static double TOO_CLOSE_BACKDROP = 0;
 
     // Timers
+    private ElapsedTime climbTimer = new ElapsedTime(100);
+    private ElapsedTime opModeTimer = new ElapsedTime(100);
     private ElapsedTime blockedIntake = new ElapsedTime(100);
     private ElapsedTime transferDeployTimer = new ElapsedTime(100);
     private ElapsedTime transferRetractCenteredTimer = new ElapsedTime(100);
@@ -53,6 +53,9 @@ public class TeleOP extends OpMode {
     public static boolean debugTelemetry = false;
 
     public static double yawMultiplier = 0.01;
+    public static double pwr = 0.75;
+    public static boolean activateClimber = false;
+    public static boolean firstOutsideBackstage = true;
 
     Robot robot;
     DriveMode driveMode;
@@ -89,6 +92,7 @@ public class TeleOP extends OpMode {
     @Override
     public void start() {
         robot.start();
+        opModeTimer.reset();
     }
 
     @Override
@@ -96,6 +100,21 @@ public class TeleOP extends OpMode {
         stickyGamepad1.update();
         stickyGamepad2.update();
         lastStateUpdate();
+
+        if (0.5 < opModeTimer.seconds() && opModeTimer.seconds() < 0.7) {
+            robot.endgame.disableClimber();
+        }
+
+//        if (0 < robot.drive.getPoseEstimate().getX() && robot.drive.getPoseEstimate().getX() < 10) {
+//            robot.intake.dropdownState = Intake.DropdownState.DOWN;
+//        }
+//        if (robot.drive.getPoseEstimate().getX() < 0 && robot.intake.getAbsolute() < 600 && firstOutsideBackstage) {
+//            robot.intake.intakeMode = Intake.IntakeMode.IN;
+//            firstOutsideBackstage = false;
+//        }
+//        if (robot.drive.getPoseEstimate().getX() > 0) {
+//            firstOutsideBackstage = true;
+//        }
 
         if (stickyGamepad1.dpad_up) {
             switch (driveMode) {
@@ -108,8 +127,10 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (leaveBackboardTimer.seconds() < 0.4) {
-            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
+        if (leaveBackboardTimer.seconds() < 0.3) {
+            robot.drive.setMotorPowers(-pwr, -pwr, -pwr, -pwr);
+        } else if (climbTimer.seconds() < 0.6) {
+            robot.drive.setMotorPowers(-1, -1, -1, -1);
 //        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
 //            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
 ////          TODO: this
@@ -177,10 +198,13 @@ public class TeleOP extends OpMode {
         }
 
         if (stickyGamepad1.dpad_down) {
-            robot.intake.__setServoPosition(Intake.INTAKE_DROPDOWN_UP);
+            robot.intake.resetServoPosition();
         }
 
-        if (0.5 < blockedIntake.seconds()) {
+        if (0.5 < blockedIntake.seconds() &&
+                robot.endgame.climbState != Endgame.ClimbState.SHOOTER &&
+                robot.endgame.climbState != Endgame.ClimbState.ACTIVE &&
+                robot.endgame.climbState != Endgame.ClimbState.CLIMBED) {
             switch (robot.intake.intakeMode) {
                 case IN:
                     if (stickyGamepad1.left_bumper) {
@@ -222,19 +246,19 @@ public class TeleOP extends OpMode {
 
         // ELEVATOR
         if (gamepad2.right_trigger > 0.1) {
+            robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
             robot.elevator.manualPower = gamepad2.right_trigger;
-            robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
         } else if (gamepad2.left_trigger > 0.1) {
-            robot.elevator.manualPower = -gamepad2.left_trigger;
             robot.elevator.setElevatorState(Elevator.ElevatorState.MANUAL);
+            robot.elevator.manualPower = -gamepad2.left_trigger;
         } else if (robot.elevator.elevatorState == Elevator.ElevatorState.MANUAL) {
             if (robot.elevator.lastState == Elevator.ElevatorState.TRANSFER) {
                 robot.elevator.groundPositionOffset += robot.elevator.getCurrentPosition() - robot.elevator.getTargetPosition(robot.elevator.lastState, robot.elevator.targetHeight);
-                robot.elevator.elevatorState = robot.elevator.lastState;
+                robot.elevator.setElevatorState(robot.elevator.lastState);
                 robot.elevator.manualPower = Elevator.IDLE_POWER;
             }  else if (robot.elevator.lastState == Elevator.ElevatorState.LINES) {
                 robot.elevator.manualOffset = robot.elevator.getCurrentPosition() - robot.elevator.getTargetPosition(robot.elevator.lastState, robot.elevator.targetHeight);
-                robot.elevator.elevatorState = robot.elevator.lastState;
+                robot.elevator.setElevatorState(robot.elevator.lastState);
                 robot.elevator.manualPower = Elevator.IDLE_POWER;
             }
         }
@@ -301,6 +325,7 @@ public class TeleOP extends OpMode {
                     if (robot.intake.intakeMode == Intake.IntakeMode.IDLE) {
                         gamepad2.runRumbleEffect(rumbleEffectTransfer);
                         transferDeployTimer.reset();
+                        robot.intake.intakeMode = Intake.IntakeMode.IN;
                         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                     }
                 }
@@ -309,6 +334,7 @@ public class TeleOP extends OpMode {
                 robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
                 if (0.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.3) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 }
                 if (stickyGamepad2.right_bumper) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
@@ -365,6 +391,7 @@ public class TeleOP extends OpMode {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                 }
                 if (0.4 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.6) {
+                    transferDeployTimer.reset();
                     robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 }
 
@@ -394,7 +421,7 @@ public class TeleOP extends OpMode {
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(-0.9, -0.9, -0.9, -0.9);
+            robot.drive.setMotorPowers(-pwr, -pwr, -pwr, -pwr);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
@@ -424,7 +451,7 @@ public class TeleOP extends OpMode {
         if (gamepad2.left_stick_x != 0) {
             robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
             robot.outtake.getManualValues();
-            robot.outtake.manualVDiffy += gamepad2.right_stick_y * -0.005;
+            robot.outtake.manualVDiffy += gamepad2.left_stick_x * -0.005;
         }
 
 //        if (gamepad2.left_stick_y != 0) {
@@ -441,6 +468,13 @@ public class TeleOP extends OpMode {
         }
 
         // Endgame State Machine
+        if (!activateClimber &&
+                (stickyGamepad1.dpad_left ||
+                stickyGamepad1.dpad_right)) {
+            activateClimber = true;
+            robot.endgame.enableClimber();
+        }
+
         switch (robot.endgame.climbState) {
             case PASSIVE:
                 if (stickyGamepad1.dpad_right) {
@@ -448,7 +482,7 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case SHOOTER:
-                if (stickyGamepad1.dpad_right) {
+                if (stickyGamepad1.right_bumper) {
                     switch (robot.endgame.droneState) {
                         case PASSIVE:
                             robot.endgame.droneState = Endgame.DroneState.ACTIVE;
@@ -462,18 +496,23 @@ public class TeleOP extends OpMode {
                             break;
                     }
                 }
-                if (stickyGamepad1.dpad_left) {
+                if (stickyGamepad1.dpad_left || stickyGamepad1.left_bumper) {
                     robot.endgame.climbState = Endgame.ClimbState.PASSIVE;
                 }
                 break;
             case ACTIVE:
-                if (stickyGamepad1.dpad_right) {
-                    transferDeployTimer.reset();
-                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                    robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
-                    robot.elevator.elevatorState = Elevator.ElevatorState.CLIMBED;
+                if (stickyGamepad1.dpad_right || stickyGamepad1.right_bumper) {
+                    climbTimer.reset();
+                    robot.drive.setMotorPowers(-1, -1, -1, -1);
                 }
                 break;
+        }
+
+        if (0.5 < climbTimer.seconds() && climbTimer.seconds() < 0.7) {
+            transferDeployTimer.reset();
+            robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+            robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
+            robot.elevator.setElevatorState(Elevator.ElevatorState.CLIMBED);
         }
 
         if (0.6 < endgameDisablePWM.seconds() && endgameDisablePWM.seconds() < 0.7) {
@@ -486,6 +525,8 @@ public class TeleOP extends OpMode {
         if (intakeTelemetry) {
             telemetry.addData("distance 1", robot.intake.getDistance1());
             telemetry.addData("distance 2", robot.intake.getDistance2());
+            telemetry.addData("distance 3", robot.intake.getDistance3());
+            telemetry.addData("transfer state", robot.intake.getTransferState());
             telemetry.addData("intake_motor_velocity_deg", robot.intake.getVelocity());
             telemetry.addData("intake mode", robot.intake.intakeMode);
             telemetry.addData("dropdown mode", robot.intake.dropdownMode);
@@ -531,6 +572,8 @@ public class TeleOP extends OpMode {
             telemetry.addData("liftTargetHeightState", robot.elevator.targetHeight);
             telemetry.addData("liftTargetHeightPos", robot.elevator.getTargetPosition());
             telemetry.addData("elevator_encoder", robot.elevator.getCurrentPosition());
+            telemetry.addData("power left", robot.elevator.getPowerLeft());
+            telemetry.addData("power right", robot.elevator.getPowerRight());
             telemetry.addData("manual power", robot.elevator.manualPower);
             telemetry.addData("manual offset", robot.elevator.manualOffset);
             telemetry.addData("ground offset", robot.elevator.groundPositionOffset);

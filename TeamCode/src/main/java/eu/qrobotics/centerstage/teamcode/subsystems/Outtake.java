@@ -84,8 +84,8 @@ public class Outtake implements Subsystem {
     public static double FOURBAR_SCORE_POS = 0.64; // -0.02
     public static double FOURBAR_SCORE_ANGLED_POS = 0.68;
 
-    public static double CLAW_OPEN_POS = 1;
-    public static double CLAW_CLOSE_POS = 0.4;
+    public static double CLAW_OPEN_POS = 0.64;
+    public static double CLAW_CLOSE_POS = 0.29;
 
     public static double ROTATE_TRANSFER_POS = 0.383;
     public static double ROTATE_LEFT_POS = 0.115;
@@ -271,7 +271,7 @@ public class Outtake implements Subsystem {
 
         diffyLeftServo.setDirection(Servo.Direction.REVERSE);
 
-        lastVDiffy = diffyVPosition = VDIFFY_ABOVE_TRANSFER_POS;
+        lastVDiffy = diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
         lastHDiffy = diffyHPosition = 0;
 
         fourBarState = FourBarState.TARGET;

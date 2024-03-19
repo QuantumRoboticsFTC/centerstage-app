@@ -3,16 +3,12 @@ package eu.qrobotics.centerstage.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
-import com.acmerobotics.roadrunner.profile.MotionProfile;
-import com.acmerobotics.roadrunner.profile.MotionState;
 import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import eu.qrobotics.centerstage.teamcode.hardware.CachingDcMotorEx;
 
@@ -46,15 +42,15 @@ public class Elevator implements Subsystem {
     public static double AUTO_HEIGHT0 = 390; // preload
     public static double AUTO_HEIGHT1 = 520; // first cycle
     public static double AUTO_HEIGHT2 = 590; // second cycle
-    public static double NEUTRAL_SIDE_THRESHOLD_LOW = 60; // no global coordinates below this point
+    public static double NEUTRAL_SIDE_THRESHOLD_LOW = 30; // no global coordinates below this point
     public static double diffyHOffset = 230;
     public static double diffyValue = 0;
-    public static double IDLE_POWER = 0.13;
+    public static double IDLE_POWER = 0.07;
     public static double climbedPosition;
     public static double imuPitchGain = 100;
 
     public double groundPositionOffset;
-    public double heightCap = 910;
+    public static double heightCap = 1380;
     public double encoderValue;
     public double manualOffset;
 
@@ -62,22 +58,7 @@ public class Elevator implements Subsystem {
 
     private ElapsedTime elapsedTime = new ElapsedTime(0);
 
-    public static double lowThreshold = 300.0;
-    public static double middleThreshold = 600.0;
-    InterpLUT pCoeffs = new InterpLUT();
-    double kpLow = 0.0;
-    double kpMid = 0.0;
-    double kpHigh = 0.0;
-    InterpLUT dCoeffs = new InterpLUT();
-    double kiLow = 0.0;
-    double kiMid = 0.0;
-    double kiHigh = 0.0;
-    InterpLUT iCoeffs = new InterpLUT();
-    double kdLow = 0.0;
-    double kdMid = 0.0;
-    double kdHigh = 0.0;
-
-    public static PIDCoefficients coefs = new PIDCoefficients(0.0055, 0.000004, 0.00001);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.0153, 0.000009, 0.00007);
     private PIDFController controller = new PIDFController(coefs);
     public static double ff1 = 0.07;
 
@@ -99,8 +80,11 @@ public class Elevator implements Subsystem {
     }
 
     public void setPower(double power) {
-        if (encoderValue > groundPositionOffset + heightCap && power > 0)
+        if (encoderValue > groundPositionOffset + heightCap && power > 0) {
+            motorLeft.setPower(IDLE_POWER);
+            motorRight.setPower(IDLE_POWER);
             return;
+        }
         
         motorLeft.setPower(power);
         motorRight.setPower(power);
@@ -151,6 +135,14 @@ public class Elevator implements Subsystem {
         return;
     }
 
+    public double getPowerLeft() {
+        return motorLeft.getPower();
+    }
+
+    public double getPowerRight() {
+        return motorRight.getPower();
+    }
+
     public double getCurrentPosition() {
         return encoderValue;
     }
@@ -163,28 +155,13 @@ public class Elevator implements Subsystem {
 
         motorRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-//        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        pCoeffs.add(lowThreshold, kpLow);
-        pCoeffs.add(middleThreshold, kpMid);
-        pCoeffs.add(heightCap, kpHigh);
-        pCoeffs.createLUT();
-
-        iCoeffs.add(lowThreshold, kiLow);
-        iCoeffs.add(middleThreshold, kiMid);
-        iCoeffs.add(heightCap, kiHigh);
-        iCoeffs.createLUT();
-
-        dCoeffs.add(lowThreshold, kdLow);
-        dCoeffs.add(middleThreshold, kdMid);
-        dCoeffs.add(heightCap, kdHigh);
-        dCoeffs.createLUT();
 
         manualOffset = 0;
         groundPositionOffset = -motorLeft.getCurrentPosition();
@@ -218,11 +195,6 @@ public class Elevator implements Subsystem {
         } else {
             diffyValue = 0;
         }
-
-        PIDCoefficients customCoeffs = new PIDCoefficients(pCoeffs.get(encoderValue + groundPositionOffset),
-                                                            iCoeffs.get(encoderValue + groundPositionOffset),
-                                                            dCoeffs.get(encoderValue + groundPositionOffset));
-//        controller = new PIDFController(customCoeffs);
 
         if (elevatorState == ElevatorState.LINES ||
             elevatorState == ElevatorState.TRANSFER) {

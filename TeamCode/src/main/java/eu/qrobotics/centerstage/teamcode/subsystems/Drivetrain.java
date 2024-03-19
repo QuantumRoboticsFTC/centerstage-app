@@ -24,6 +24,7 @@ import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import eu.qrobotics.centerstage.teamcode.hardware.OPColorSensor;
 import eu.qrobotics.centerstage.teamcode.util.DashboardUtil;
 import eu.qrobotics.centerstage.teamcode.util.MecanumUtil;
 
@@ -88,6 +90,9 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     private IMU imuEhub;
     public static double initPitchChub;
     public static double initPitchEhub;
+    private OPColorSensor sensorLeft;
+    private OPColorSensor sensorRight;
+    private double threshold = 10;
 
     private IMU.Parameters IMUParameters;
 
@@ -151,6 +156,9 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+//        sensorLeft = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorLeft"));
+//        sensorRight = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorRight"));
+
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
@@ -178,6 +186,22 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         }
 
         setLocalizer(new Odometry(hardwareMap));
+    }
+
+    public double getDistanceLeft() {
+        return sensorLeft.getDistance();
+    }
+
+    public double getDistanceRight() {
+        return sensorRight.getDistance();
+    }
+
+    public boolean lineLeft() {
+        return sensorLeft.alpha() <= threshold;
+    }
+
+    public boolean lineRight() {
+        return sensorRight.alpha() <= threshold;
     }
 
     public void turn(double angle) {

@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -62,13 +61,23 @@ public class Intake implements Subsystem {
         }
     }
 
+    public enum TransferBoxState {
+        EMPTY,
+        PIXEL1,
+        PIXEL2,
+        MIDDLE,
+        BOTH
+    }
+
+    TransferBoxState transfer;
+
     public IntakeMode intakeMode;
     public DropdownMode dropdownMode;
     public DropdownState dropdownState, lastDropdownState;
 
     public static double blockedThreshold = 100000;
 
-    public static double INTAKE_IN_SPEED = 0.8;
+    public static double INTAKE_IN_SPEED = 1;
     public static double INTAKE_IDLE_SPEED = 0;
     public static double INTAKE_OUT_SPEED = -0.7;
     public static double INTAKE_OUT_SLOW_SPEED = -0.3;
@@ -87,15 +96,13 @@ public class Intake implements Subsystem {
 
     private OPColorSensor sensor1; // shallow (close to intake)
     private OPColorSensor sensor2; // deep (close to outtake)
-    private boolean isPixel1 = false;
-    private boolean isPixel2 = false;
-    private boolean bothPixels = false;
-    private boolean tryToAdvance = false; // trying to go to 2 pixels
-    private ElapsedTime timer = new ElapsedTime(10);
-    public static double timerThreshold = 0.1;
+    private OPColorSensor sensor3; // horizontal
     private double distance1 = 0.0;
     private double distance2 = 0.0;
-    private double sensorThreshold = 6.9; // true limit 6.3575844
+    private double distance3 = 0.0;
+    public static double sensorThresholdVertical = 12.0; // true limit <-> 6.3575844
+    public static double sensorThresholdHorizontal = 12.0; // true *straight in transfer box* <->
+    public static double sensorThresholdActivate = 59.0; // true *straight in transfer box* <->
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
@@ -106,8 +113,11 @@ public class Intake implements Subsystem {
     private AxonPlusServo servo;
     private Robot robot;
 
-    public void __setServoPosition(double target) {
-        servo.setAbsolutePosition(target);
+    public void resetServoPosition() {
+        targetPosition = INTAKE_DROPDOWN_UP;
+        servo.setAbsolutePosition(INTAKE_DROPDOWN_UP);
+        dropdownMode = DropdownMode.FUNCTIONAL;
+        dropdownState = DropdownState.UP;
     }
 
     public void setPosition(double target) {
@@ -134,17 +144,32 @@ public class Intake implements Subsystem {
         return distance2;
     }
 
+    public double getDistance3() {
+        return distance3;
+    }
+
+    public TransferBoxState getTransferState() {
+        return transfer;
+    }
+
     public boolean isPixel1() {
-        return isPixel1;
+        return (distance1 < sensorThresholdVertical);
     }
 
     public boolean isPixel2() {
-        return isPixel2;
+        return (distance2 < sensorThresholdVertical);
     }
 
     public int pixelCount() {
-        if (bothPixels) return 2;
-        else if (isPixel1 || isPixel2) return 1;
+        if (transfer == TransferBoxState.EMPTY) {
+            return 0;
+        } else if (transfer == TransferBoxState.PIXEL1 ||
+                transfer == TransferBoxState.PIXEL2 ||
+                transfer == TransferBoxState.MIDDLE) {
+            return 1;
+        } else if (transfer == TransferBoxState.BOTH) {
+            return 2;
+        }
         return 0;
     }
 
@@ -168,6 +193,7 @@ public class Intake implements Subsystem {
                 hardwareMap.get(AnalogInput.class, "intakeEncoder"));
         sensor1 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor1"));
         sensor2 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor2"));
+        sensor3 = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensor3"));
 
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -176,6 +202,8 @@ public class Intake implements Subsystem {
         servo.setDirection(-1);
         servo.setAbsolutePosition(servo.getRelativePosition());
         setPosition(INTAKE_DDOWN_INITIAL_ANGLE);
+
+        transfer = TransferBoxState.EMPTY;
 
         intakeMode = IntakeMode.IDLE;
         dropdownMode = DropdownMode.INIT;
@@ -189,27 +217,33 @@ public class Intake implements Subsystem {
         if (IS_DISABLED) return;
         servo.update();
 
-        sensor1.update();
-        distance1 = sensor1.getDistance();
-        sensor2.update();
-        distance2 = sensor2.getDistance();
-
-        isPixel1 = (distance1 < sensorThreshold);
-        isPixel2 = (distance2 < sensorThreshold);
-        if (isPixel1 && isPixel2) {
-            if (!bothPixels) {
-                if (tryToAdvance &&
-                        timerThreshold < timer.seconds()) {
-                    tryToAdvance = false;
-                    bothPixels = true;
-                } else if (!tryToAdvance) {
-                    tryToAdvance = true;
-                    timer.reset();
-                }
-            }
+        sensor3.update();
+        distance3 = sensor3.getDistance();
+        if (distance3 < sensorThresholdActivate) {
+            sensor1.update();
+            distance1 = sensor1.getDistance();
+            sensor2.update();
+            distance2 = sensor2.getDistance();
         } else {
-            tryToAdvance = false;
-            bothPixels = false;
+            distance1 = distance2 = 50;
+        }
+
+        if (distance1 > sensorThresholdVertical &&
+            distance2 > sensorThresholdVertical) {
+            transfer = TransferBoxState.EMPTY;
+        } else if (distance1 < sensorThresholdVertical &&
+            distance2 > sensorThresholdVertical) {
+            transfer = TransferBoxState.PIXEL1;
+        } else if (distance1 > sensorThresholdVertical &&
+            distance2 < sensorThresholdVertical) {
+            transfer = TransferBoxState.PIXEL2;
+        } else if (distance1 < sensorThresholdVertical &&
+            distance2 < sensorThresholdVertical) {
+            if (distance3 < sensorThresholdHorizontal) {
+                transfer = TransferBoxState.BOTH;
+            } else {
+                transfer = TransferBoxState.MIDDLE;
+            }
         }
 
         switch (intakeMode) {

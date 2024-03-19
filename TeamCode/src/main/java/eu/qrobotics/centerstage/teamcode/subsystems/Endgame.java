@@ -26,10 +26,10 @@ public class Endgame implements Subsystem {
     public ClimbState climbState;
     public DroneState droneState;
 
-    public static double CLIMB_PASSIVE_POSITION = 0.32;
-    public static double CLIMB_SHOOTER_POSITION = 0.5;
-    public static double CLIMB_ACTIVE_POSITION = 0.75;
-    public static double offset = 0.21;
+    public static double CLIMB_PASSIVE_POSITION = 0;
+    public static double CLIMB_SHOOTER_POSITION = 0.23;
+    public static double CLIMB_ACTIVE_POSITION = 0.55;
+    public static double offset = 0.13;
     public static double shooterClimbPosition;
 
     public static double SHOOTER_PASSIVE_POSITION = 0.33;
@@ -61,6 +61,11 @@ public class Endgame implements Subsystem {
         rightServo.setPwmDisable();
     }
 
+    public void enableClimber() {
+        leftServo.setPwmEnable();
+        rightServo.setPwmEnable();
+    }
+
     public Endgame(HardwareMap hardwareMap, Robot robot) {
         this.robot = robot;
 
@@ -69,6 +74,7 @@ public class Endgame implements Subsystem {
         droneServo = new CachingServo(hardwareMap.get(Servo.class, "droneServo"));
 
         rightServo.setDirection(Servo.Direction.REVERSE);
+
         climbState = ClimbState.PASSIVE;
         droneState = DroneState.PASSIVE;
         shooterClimbPosition = CLIMB_SHOOTER_POSITION;
