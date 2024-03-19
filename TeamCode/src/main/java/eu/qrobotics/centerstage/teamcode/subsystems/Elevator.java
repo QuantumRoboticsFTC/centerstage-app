@@ -58,7 +58,7 @@ public class Elevator implements Subsystem {
 
     private ElapsedTime elapsedTime = new ElapsedTime(0);
 
-    public static PIDCoefficients coefs = new PIDCoefficients(0.0153, 0.000009, 0.00007);
+    public static PIDCoefficients coefs = new PIDCoefficients(0.0053, 0.000004, 0.000007);
     private PIDFController controller = new PIDFController(coefs);
     public static double ff1 = 0.07;
 

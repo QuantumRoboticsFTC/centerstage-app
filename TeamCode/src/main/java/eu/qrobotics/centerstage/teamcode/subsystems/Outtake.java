@@ -81,7 +81,7 @@ public class Outtake implements Subsystem {
     public static double FOURBAR_TRANSFER_PREP_POS = 0.13;
     public static double FOURBAR_TRANSFER_POS = 0.13; //0.095
     public static double FOURBAR_ABOVE_TRANSFER_POS = 0.07;
-    public static double FOURBAR_SCORE_POS = 0.64; // -0.02
+    public static double FOURBAR_SCORE_POS = 0.6; // -0.02
     public static double FOURBAR_SCORE_ANGLED_POS = 0.68;
 
     public static double CLAW_OPEN_POS = 0.64;

@@ -53,7 +53,7 @@ public class TeleOP extends OpMode {
     public static boolean debugTelemetry = false;
 
     public static double yawMultiplier = 0.01;
-    public static double pwrBackdrop = 0.75;
+    public static double pwrBackdrop = 0.7;
     public static double pwrClimb = 0.85;
     public static boolean activateClimber = false;
     public static boolean firstOutsideBackstage = true;
@@ -128,7 +128,7 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (leaveBackboardTimer.seconds() < 0.175) {
+        if (leaveBackboardTimer.seconds() < 0.085) {
             robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
         } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.95) {
             robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);

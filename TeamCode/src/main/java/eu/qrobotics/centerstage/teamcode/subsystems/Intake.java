@@ -33,7 +33,12 @@ public class Intake implements Subsystem {
     }
 
     public enum DropdownState {
-        DOWN,
+        DOWN {
+            @Override
+            public DropdownState previous() {
+                return this;
+            }
+        },
         ALMOST_UP,
         UP,
         STACK_2 {
@@ -50,7 +55,12 @@ public class Intake implements Subsystem {
                 return this;
             }
         },
-        MANUAL;
+        MANUAL {
+            @Override
+            public DropdownState next() {
+                return this;
+            }
+        };
 
         public DropdownState previous() {
             return values()[ordinal() - 1];
@@ -87,7 +97,7 @@ public class Intake implements Subsystem {
     public static double INTAKE_DROPDOWN_ALMOST_UP = 340;
     public static double INTAKE_DROPDOWN_DOWN = -62; //-170
     public static double INTAKE_DROPDOWN_5 = 120; // min/max 100 / 120
-    public static double INTAKE_DROPDOWN_4 = 73; // min/max 73 / 60
+    public static double INTAKE_DROPDOWN_4 = 69; // min/max 69 / 60
     public static double INTAKE_DROPDOWN_3 = 29; // min/max 29 / 0
     public static double INTAKE_DROPDOWN_2 = -10; // min/max -10 / -25
     public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;
@@ -102,7 +112,7 @@ public class Intake implements Subsystem {
     private double distance3 = 0.0;
     public static double sensorThresholdVertical = 12.0; // true limit <-> 6.3575844
     public static double sensorThresholdHorizontal = 12.0; // true *straight in transfer box* <->
-    public static double sensorThresholdActivate = 59.0; // true *straight in transfer box* <->
+    public static double sensorThresholdActivate = 60.0; // true *straight in transfer box* <->
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
