@@ -92,7 +92,7 @@ public class Outtake implements Subsystem {
     public static double ROTATE_LEFT45_POS = 0.25;
     public static double ROTATE_RIGHT_POS = 0.665;
     public static double ROTATE_RIGHT45_POS = 0.53;
-    public static double rotateGain = 1.08; // per ? of hdiffy, rotateGain of rotate
+    public static double rotateGain = 1.145; // per ? of hdiffy, rotateGain of rotate
 
     // TODO: manual stuff
     public double manualFourbarPos;
@@ -272,7 +272,7 @@ public class Outtake implements Subsystem {
         diffyLeftServo.setDirection(Servo.Direction.REVERSE);
 
         lastVDiffy = diffyVPosition = VDIFFY_TRANSFER_PREP_POS;
-        lastHDiffy = diffyHPosition = 0;
+        lastHDiffy = diffyHPosition = HDIFFY_CENTER_POS;
 
         fourBarState = FourBarState.TARGET;
         outtakeState = OuttakeState.TRANSFER_PREP;
@@ -281,7 +281,7 @@ public class Outtake implements Subsystem {
         rotateState = RotateState.CENTER;
         diffyHState = DiffyHorizontalState.CENTER;
 
-        currVDiffy = VDIFFY_ABOVE_TRANSFER_POS;
+        currVDiffy = VDIFFY_TRANSFER_PREP_POS;
         currHDiffy = HDIFFY_CENTER_POS;
     }
 

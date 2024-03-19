@@ -53,7 +53,8 @@ public class TeleOP extends OpMode {
     public static boolean debugTelemetry = false;
 
     public static double yawMultiplier = 0.01;
-    public static double pwr = 0.75;
+    public static double pwrBackdrop = 0.75;
+    public static double pwrClimb = 0.85;
     public static boolean activateClimber = false;
     public static boolean firstOutsideBackstage = true;
 
@@ -127,10 +128,10 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (leaveBackboardTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(-pwr, -pwr, -pwr, -pwr);
-        } else if (climbTimer.seconds() < 0.6) {
-            robot.drive.setMotorPowers(-1, -1, -1, -1);
+        if (leaveBackboardTimer.seconds() < 0.175) {
+            robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
+        } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.95) {
+            robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);
 //        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
 //            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
 ////          TODO: this
@@ -421,7 +422,7 @@ public class TeleOP extends OpMode {
                 break;
         }
         if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(-pwr, -pwr, -pwr, -pwr);
+            robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
             leaveBackboardTimer.reset();
         }
         if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
@@ -482,7 +483,7 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case SHOOTER:
-                if (stickyGamepad1.right_bumper) {
+                if (stickyGamepad1.dpad_right || stickyGamepad1.right_bumper) {
                     switch (robot.endgame.droneState) {
                         case PASSIVE:
                             robot.endgame.droneState = Endgame.DroneState.ACTIVE;
@@ -503,12 +504,11 @@ public class TeleOP extends OpMode {
             case ACTIVE:
                 if (stickyGamepad1.dpad_right || stickyGamepad1.right_bumper) {
                     climbTimer.reset();
-                    robot.drive.setMotorPowers(-1, -1, -1, -1);
                 }
                 break;
         }
 
-        if (0.5 < climbTimer.seconds() && climbTimer.seconds() < 0.7) {
+        if (0.8 < climbTimer.seconds() && climbTimer.seconds() < 0.9) {
             transferDeployTimer.reset();
             robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
             robot.endgame.climbState = Endgame.ClimbState.CLIMBED;
@@ -587,6 +587,10 @@ public class TeleOP extends OpMode {
         telemetry.addLine("<----> DRIVETRAIN <---->");
         if (drivetrainTelemetry) {
             telemetry.addData("field centric", robot.drive.fieldCentric);
+            telemetry.addData("alpha left", robot.drive.getAlphaLeft());
+            telemetry.addData("alpha right", robot.drive.getAlphaRight());
+            telemetry.addData("distance left", robot.drive.getDistanceLeft());
+            telemetry.addData("distance right", robot.drive.getDistanceRight());
         }
         telemetry.addLine("<----> MISC <---->");
         if (extraTelemetry) {

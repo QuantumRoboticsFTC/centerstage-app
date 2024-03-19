@@ -92,7 +92,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public static double initPitchEhub;
     private OPColorSensor sensorLeft;
     private OPColorSensor sensorRight;
-    private double threshold = 10;
+    private double threshold = 10.0;
 
     private IMU.Parameters IMUParameters;
 
@@ -156,8 +156,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-//        sensorLeft = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorLeft"));
-//        sensorRight = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorRight"));
+        sensorLeft = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorLeft"));
+        sensorRight = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorRight"));
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -186,6 +186,14 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         }
 
         setLocalizer(new Odometry(hardwareMap));
+    }
+
+    public double getAlphaLeft() {
+        return sensorLeft.alpha();
+    }
+
+    public double getAlphaRight() {
+        return sensorRight.alpha();
     }
 
     public double getDistanceLeft() {
@@ -285,6 +293,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public void update() {
         if(IS_DISABLED) return;
 
+        sensorLeft.update();
+        sensorRight.update();
         updatePoseEstimate();
 
         if (aTagDetector != null) {
@@ -432,10 +442,10 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        leftFront.setPower(v);
-        leftRear.setPower(v1);
-        rightRear.setPower(v2);
-        rightFront.setPower(v3);
+        leftFront.setPower(motorPowers[0] = v);
+        leftRear.setPower(motorPowers[1] = v1);
+        rightRear.setPower(motorPowers[2] = v2);
+        rightFront.setPower(motorPowers[3] = v3);
     }
 
     public double getPitchValueChub() {
