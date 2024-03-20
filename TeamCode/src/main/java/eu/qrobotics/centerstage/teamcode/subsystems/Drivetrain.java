@@ -188,6 +188,11 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         setLocalizer(new Odometry(hardwareMap));
     }
 
+    public void updateSensors() {
+        sensorLeft.update();
+        sensorRight.update();
+    }
+
     public double getAlphaLeft() {
         return sensorLeft.alpha();
     }
@@ -293,8 +298,6 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public void update() {
         if(IS_DISABLED) return;
 
-        sensorLeft.update();
-        sensorRight.update();
         updatePoseEstimate();
 
         if (aTagDetector != null) {

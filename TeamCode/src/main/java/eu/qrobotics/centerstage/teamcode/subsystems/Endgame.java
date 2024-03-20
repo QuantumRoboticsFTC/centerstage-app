@@ -32,8 +32,8 @@ public class Endgame implements Subsystem {
     public static double offset = 0.2;
     public static double shooterClimbPosition;
 
-    public static double SHOOTER_PASSIVE_POSITION = 0.6;
-    public static double SHOOTER_ACTIVE_POSITION = 0.89; //0.05 era
+    public static double SHOOTER_PASSIVE_POSITION = 0.9;
+    public static double SHOOTER_ACTIVE_POSITION = 0.4;
 
     private CachingServoImplEx leftServo;
     private CachingServoImplEx rightServo;
@@ -95,7 +95,7 @@ public class Endgame implements Subsystem {
                 setPosition(CLIMB_PASSIVE_POSITION);
                 break;
             case SHOOTER:
-                setPosition(shooterClimbPosition);
+                setPosition(CLIMB_SHOOTER_POSITION);
                 break;
             case ACTIVE:
                 setPosition(CLIMB_ACTIVE_POSITION);

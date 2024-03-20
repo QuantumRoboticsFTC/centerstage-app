@@ -53,12 +53,12 @@ public class Outtake implements Subsystem {
 
     // DIFFy
     public static double VDIFFY_ABOVE_TRANSFER_POS = 0.3;
-    public static double VDIFFY_TRANSFER_PREP_POS = 0.18; //0.2325
-    public static double VDIFFY_TRANSFER_POS = 0.175;
+    public static double VDIFFY_TRANSFER_PREP_POS = 0.165;
+    public static double VDIFFY_TRANSFER_POS = 0.16;
     public static double VDIFFY_SCORE_POS = 0.5175;
 
     public static double HDIFFY_LEFT_POS = -0.205;
-    public static double HDIFFY_CENTER_POS = 0.0425; //-0.095
+    public static double HDIFFY_CENTER_POS = 0.045;
     public static double HDIFFY_RIGHT_POS = 0.3;
 
     public static double rotateThresh = 0.5; // rotate thresh
@@ -70,11 +70,11 @@ public class Outtake implements Subsystem {
     public static double currVDiffy;
     public static double currHDiffy;
 
-    public static double gainVDiffyInsideUp = 0.018;
-    public static double gainVDiffyOutsideUp = 0.04;
+    public static double gainVDiffyInsideUp = 0.025;
+    public static double gainVDiffyOutsideUp = 0.05;
 
-    public static double gainVDiffyInsideDown = 0.025;
-    public static double gainVDiffyOutsideDown = 0.05;
+    public static double gainVDiffyInsideDown = 0.018;
+    public static double gainVDiffyOutsideDown = 0.04;
     public static double gainHDiffy = 0.05;
 
     // Other Outtake Servo Values
@@ -299,8 +299,8 @@ public class Outtake implements Subsystem {
 //        diffyLeftServo.setPosition(DIFFYV + DIFFYH);
 //        diffyRightServo.setPosition(DIFFYV - DIFFYH);
 
-        sensorUpCached = sensorUp.getDistance();
-        sensorDownCached = sensorDown.getDistance();
+//        sensorUpCached = sensorUp.getDistance();
+//        sensorDownCached = sensorDown.getDistance();
 
         if (lastOuttakeState != outtakeState) {
             timer.reset();

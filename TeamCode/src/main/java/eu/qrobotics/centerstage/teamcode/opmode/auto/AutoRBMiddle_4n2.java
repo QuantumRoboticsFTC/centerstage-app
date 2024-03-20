@@ -82,8 +82,11 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
         // go right until we see line
         double directionpwr = 0.5;
         double turnpwr = 0.5;
+        robot.drive.updateSensors();
+        robot.drive.setMotorPowers(directionpwr, -directionpwr, directionpwr, -directionpwr);
         while (!robot.drive.lineRight() && opModeIsActive() && !isStopRequested()) {
-            robot.drive.setMotorPowers(directionpwr, -directionpwr, directionpwr, -directionpwr);
+            robot.drive.updateSensors();
+            robot.sleep(0.01);
         }
         robot.drive.setMotorPowers(0, 0, 0, 0);
 
@@ -95,6 +98,7 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
             while (robot.intake.pixelCount() < 2 &&
                     intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                robot.drive.updateSensors();
                 if (robot.drive.lineLeft()) {
                     robot.drive.setMotorPowers(-directionpwr + turnpwr, -directionpwr - turnpwr, -directionpwr - turnpwr, -directionpwr + turnpwr);
                 } else if (robot.drive.lineRight()) {

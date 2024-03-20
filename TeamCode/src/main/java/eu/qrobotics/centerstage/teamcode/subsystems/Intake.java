@@ -110,8 +110,8 @@ public class Intake implements Subsystem {
     private double distance1 = 0.0;
     private double distance2 = 0.0;
     private double distance3 = 0.0;
-    public static double sensorThresholdVertical = 12.0; // true limit <-> 6.3575844
-    public static double sensorThresholdHorizontal = 12.0; // true *straight in transfer box* <->
+    public static double sensorThresholdVertical = 10.0; // true limit <-> 6.3575844
+    public static double sensorThresholdHorizontal = 21.0; // true *straight in transfer box* <-> 20.0
     public static double sensorThresholdActivate = 60.0; // true *straight in transfer box* <->
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
@@ -227,8 +227,10 @@ public class Intake implements Subsystem {
         if (IS_DISABLED) return;
         servo.update();
 
-        sensor3.update();
-        distance3 = sensor3.getDistance();
+        if (intakeMode != IntakeMode.IDLE) {
+            sensor3.update();
+            distance3 = sensor3.getDistance();
+        }
         if (distance3 < sensorThresholdActivate) {
             sensor1.update();
             distance1 = sensor1.getDistance();
