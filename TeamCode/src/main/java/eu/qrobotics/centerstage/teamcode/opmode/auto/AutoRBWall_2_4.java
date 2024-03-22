@@ -235,7 +235,6 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             robot.sleep(0.01);
         }
-        robot.sleep(0.2);
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
         robot.drive.followTrajectory(trajectories.get(13));
         trajectoryTimer.reset();
@@ -248,7 +247,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             robot.sleep(0.01);
         }
-        robot.sleep(0.15);
+        robot.sleep(0.1);
         placePixel();
     }
 
@@ -450,6 +449,8 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                 // 15 -> go to backdrop
                 robot.drive.followTrajectory(trajectories.get(11));
             }
+
+            Intake.intakeSensorsOn = true;
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
                 if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.3) {
@@ -457,7 +458,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                     robot.intake.dropdownState = Intake.DropdownState.UP;
                 }
-                if (robot.drive.getPoseEstimate().getX() > 9) {
+                if (robot.drive.getPoseEstimate().getX() > 5) {
                     if (i == 1) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
                     } else if (i == 2) {
@@ -467,12 +468,18 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
                 }
+                if (robot.drive.getPoseEstimate().getX() > 36) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
+                }
                 robot.sleep(0.01);
             }
             robot.sleep(0.25);
 
-            Intake.intakeSensorsOn = true;
-            placePixel();
+            if (robot.intake.pixelCount() != 2) {
+                placePixel();
+            }
             while (robot.intake.pixelCount() > 0) {
                 retryOuttake();
             }

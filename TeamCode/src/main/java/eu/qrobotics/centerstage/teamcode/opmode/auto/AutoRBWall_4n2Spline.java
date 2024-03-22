@@ -474,7 +474,7 @@ public class AutoRBWall_4n2Spline extends LinearOpMode {
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
 
             // 9 -> go to backdrop
-            robot.drive.followTrajectory(trajectories.get(8));
+            robot.drive.followTrajectory(trajectories.get(9));
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
                 if (robot.drive.getPoseEstimate().getX() > 9) {
@@ -486,7 +486,7 @@ public class AutoRBWall_4n2Spline extends LinearOpMode {
                 robot.sleep(0.01);
             }
         }
-        robot.drive.followTrajectory(trajectories.get(12));
+        robot.drive.followTrajectory(trajectories.get(10));
 
         trajectoryTimer.reset();
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {

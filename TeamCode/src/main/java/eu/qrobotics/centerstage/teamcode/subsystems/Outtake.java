@@ -127,6 +127,10 @@ public class Outtake implements Subsystem {
         manualRotatePos = 0;
     }
 
+    public boolean isAtTargetPosition() {
+        return (currVDiffy == diffyVPosition) && (currHDiffy == diffyHPosition);
+    }
+
     private boolean updateDiffyPosition() {
         // MANUAL update
         if (outtakeState == OuttakeState.MANUAL) {
@@ -331,6 +335,7 @@ public class Outtake implements Subsystem {
 //
 //        diffyLeftServo.setPosition(DIFFYV + DIFFYH);
 //        diffyRightServo.setPosition(DIFFYV - DIFFYH);
+
 
 //        if (outtakeState == OuttakeState.SCORE) {
 //            sensorUp.update();

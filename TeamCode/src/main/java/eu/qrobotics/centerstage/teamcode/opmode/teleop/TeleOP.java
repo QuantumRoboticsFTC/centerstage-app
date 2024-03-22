@@ -37,6 +37,7 @@ public class TeleOP extends OpMode {
     public static double TOO_CLOSE_BACKDROP = 0;
 
     // Timers
+    private ElapsedTime intakeTimer = new ElapsedTime(100);
     private ElapsedTime climbTimer = new ElapsedTime(100);
     private ElapsedTime opModeTimer = new ElapsedTime(100);
     private ElapsedTime blockedIntake = new ElapsedTime(100);
@@ -84,8 +85,8 @@ public class TeleOP extends OpMode {
                 .build();
 
         rumbleEffectAtBackdrop = new Gamepad.RumbleEffect.Builder()
-                .addStep(0.8, 1.0, 300)
-                .addStep(1.0, 0.8, 300)
+                .addStep(0.3, 0.5, 150)
+                .addStep(0.5, 0.3, 150)
                 .build();
 
         telemetry.log().add("Ready!");
@@ -123,6 +124,11 @@ public class TeleOP extends OpMode {
 
         if (robot.outtake.atBackdrop()) {
 //            gamepad1.runRumbleEffect(rumbleEffectAtBackdrop);
+//            gamepad2.runRumbleEffect(rumbleEffectAtBackdrop);
+        }
+
+        if (1.0 < intakeTimer.seconds() && intakeTimer.seconds() < 1.2) {
+            robot.intake.intakeMode = Intake.IntakeMode.IDLE;
         }
 
         if (leaveBackdropTimer.seconds() < 0.09) {
@@ -309,23 +315,28 @@ public class TeleOP extends OpMode {
         switch (robot.outtake.outtakeState) {
             case TRANSFER_PREP:
                 if (stickyGamepad2.right_bumper) {
+                    intakeTimer.reset();
                     transferDeployTimer.reset();
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
-                if (robot.intake.pixelCount() == 2) {
+                if (robot.outtake.isAtTargetPosition() &&
+                        robot.intake.pixelCount() == 2) {
                     gamepad1.runRumbleEffect(rumbleEffectTransfer);
-                    if (robot.intake.intakeMode == Intake.IntakeMode.IDLE) {
-                        gamepad2.runRumbleEffect(rumbleEffectTransfer);
-                        transferDeployTimer.reset();
-                        robot.intake.intakeMode = Intake.IntakeMode.IN;
-                        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
+                    if (0.8 < intakeTimer.seconds()) {
+                        intakeTimer.reset();
                     }
+                }
+                if (0.4 < intakeTimer.seconds() && intakeTimer.seconds() < 0.6) {
+                    gamepad2.runRumbleEffect(rumbleEffectTransfer);
+                    transferDeployTimer.reset();
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
                 }
                 break;
             case TRANSFER:
+                Intake.intakeSensorsOn = true;
                 if (0.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
-                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+                    robot.intake.intakeMode = Intake.IntakeMode.OUT;
                 }
                 if (stickyGamepad2.right_bumper) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
@@ -338,12 +349,26 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case ABOVE_TRANSFER:
+                if (robot.intake.pixelCount() == 2 &&
+                        0.5 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.7) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
+                }
+
                 if (0.4 < transferRetractCenteredTimer.seconds() && transferRetractCenteredTimer.seconds() < 0.6) {
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                 }
                 break;
             case SCORE:
+                if (robot.intake.pixelCount() == 2 &&
+                        0.5 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.7) {
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
+                }
+
                 if (stickyGamepad2.left_bumper) {
                     if (robot.outtake.diffyHState == Outtake.DiffyHorizontalState.CENTER) {
                         robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
@@ -365,6 +390,7 @@ public class TeleOP extends OpMode {
 
                 // SCORING OPTIONS
                 if (stickyGamepad2.a) {
+                    Intake.intakeSensorsOn = false;
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
                     leaveBackdropTimer.reset();
                     scoreTimer.reset();

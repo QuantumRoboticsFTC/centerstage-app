@@ -26,6 +26,8 @@ public class Endgame implements Subsystem {
     public ClimbState climbState;
     public DroneState droneState;
 
+    public ElapsedTime subsystemTimer = new ElapsedTime(0);
+
     public static double CLIMB_PASSIVE_POSITION = 0;
     public static double CLIMB_SHOOTER_POSITION = 0.4;
     public static double CLIMB_ACTIVE_POSITION = 0.6;
@@ -74,7 +76,7 @@ public class Endgame implements Subsystem {
         droneServo = new CachingServo(hardwareMap.get(Servo.class, "droneServo"));
 
         rightServo.setDirection(Servo.Direction.REVERSE);
-        disableClimber();
+        subsystemTimer.reset();
 
         climbState = ClimbState.PASSIVE;
         droneState = DroneState.PASSIVE;
@@ -88,6 +90,10 @@ public class Endgame implements Subsystem {
         if (IS_DISABLED) return;
         // DEBUG SECTION
 //        setPosition(CLIMB_ACTIVE_POSITION);
+
+        if (subsystemTimer.seconds() < 0.3) {
+            disableClimber();
+        }
 
         updateShooterPosition();
 

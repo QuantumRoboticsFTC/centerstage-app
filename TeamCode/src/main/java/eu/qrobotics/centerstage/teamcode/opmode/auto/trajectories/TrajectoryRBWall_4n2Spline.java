@@ -110,19 +110,19 @@ public class TrajectoryRBWall_4n2Spline {
                 .build()
         );
 
-        // 6 -> go to lane before stack // 2nd stack
+        // 6 -> go to lane // 2nd stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(-45, -59))
                 .build()
         );
 
-        // 7 -> go to stack // 2nd stack
+        // 7 -> go to lane before stack // 2nd stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), ZOOM_VEL_CONSTRAINT, ZOOM_ACCEL_CONSTRAINT)
                 .lineToSplineHeading(new Pose2d(-60.5, -28, Math.toRadians(335)))
                 .build()
         );
 
-        // 8 -> go under truss // 2nd stack
+        // 8 -> go to stack // 2nd stack
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(335), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToLinearHeading(new Pose2d(-47, -60, Math.toRadians(0)))
                 .build()
