@@ -17,7 +17,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Audience Centerstage
 public class TrajectoryRAWall {
-    public static Pose2d START_POSE = new Pose2d(-37, -63.5, Math.toRadians(270));
+    public static Pose2d START_POSE = new Pose2d(-37, -63, Math.toRadians(270));
 
     private static Pose2d getTrajectorySequenceEndPose(List<Trajectory> trajectories) {
         if(trajectories.size() == 0)
@@ -42,7 +42,7 @@ public class TrajectoryRAWall {
 
         // 0 -> left
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .splineToConstantHeading(new Vector2d(-48, -34), Math.toRadians(90))
+                .lineToConstantHeading(new Vector2d(-48, -34))
                 .build()
         );
         // 1 -> left to "prepare for stack"

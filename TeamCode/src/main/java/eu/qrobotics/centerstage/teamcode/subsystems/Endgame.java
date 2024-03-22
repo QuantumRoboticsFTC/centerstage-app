@@ -27,9 +27,9 @@ public class Endgame implements Subsystem {
     public DroneState droneState;
 
     public static double CLIMB_PASSIVE_POSITION = 0;
-    public static double CLIMB_SHOOTER_POSITION = 0.3;
-    public static double CLIMB_ACTIVE_POSITION = 0.55;
-    public static double offset = 0.2;
+    public static double CLIMB_SHOOTER_POSITION = 0.4;
+    public static double CLIMB_ACTIVE_POSITION = 0.6;
+    public static double offset = 0.09;
     public static double shooterClimbPosition;
 
     public static double SHOOTER_PASSIVE_POSITION = 0.9;

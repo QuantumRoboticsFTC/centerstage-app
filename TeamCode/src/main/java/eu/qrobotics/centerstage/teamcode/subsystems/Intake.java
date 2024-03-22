@@ -39,14 +39,7 @@ public class Intake implements Subsystem {
                 return this;
             }
         },
-        ALMOST_UP,
-        UP,
-        STACK_2 {
-            @Override
-            public DropdownState previous() {
-                return this;
-            }
-        },
+        STACK_2,
         STACK_3,
         STACK_4,
         STACK_5 {
@@ -55,6 +48,8 @@ public class Intake implements Subsystem {
                 return this;
             }
         },
+        ALMOST_UP,
+        UP,
         MANUAL {
             @Override
             public DropdownState next() {
@@ -110,9 +105,11 @@ public class Intake implements Subsystem {
     private double distance1 = 0.0;
     private double distance2 = 0.0;
     private double distance3 = 0.0;
-    public static double sensorThresholdVertical = 10.0; // true limit <-> 6.3575844
+    public static double sensorThresholdVertical1 = 12.0; // true limit <-> 6.3575844
+    public static double sensorThresholdVertical2 = 12.0; // true limit <-> 10.2
     public static double sensorThresholdHorizontal = 21.0; // true *straight in transfer box* <-> 20.0
     public static double sensorThresholdActivate = 60.0; // true *straight in transfer box* <->
+    public static boolean intakeSensorsOn = false;
 
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(0.0075, 0.000001, 0.00025);
     private PIDFController pidfController = new PIDFController(pidCoefficients);
@@ -124,10 +121,10 @@ public class Intake implements Subsystem {
     private Robot robot;
 
     public void resetServoPosition() {
-        targetPosition = INTAKE_DROPDOWN_UP;
-        servo.setAbsolutePosition(INTAKE_DROPDOWN_UP);
+        targetPosition = INTAKE_DROPDOWN_DOWN;
+        servo.setAbsolutePosition(INTAKE_DROPDOWN_DOWN);
         dropdownMode = DropdownMode.FUNCTIONAL;
-        dropdownState = DropdownState.UP;
+        dropdownState = DropdownState.DOWN;
     }
 
     public void setPosition(double target) {
@@ -163,11 +160,11 @@ public class Intake implements Subsystem {
     }
 
     public boolean isPixel1() {
-        return (distance1 < sensorThresholdVertical);
+        return (distance1 < sensorThresholdVertical1);
     }
 
     public boolean isPixel2() {
-        return (distance2 < sensorThresholdVertical);
+        return (distance2 < sensorThresholdVertical2);
     }
 
     public int pixelCount() {
@@ -227,11 +224,13 @@ public class Intake implements Subsystem {
         if (IS_DISABLED) return;
         servo.update();
 
-        if (intakeMode != IntakeMode.IDLE) {
+        if (intakeMode != IntakeMode.IDLE || intakeSensorsOn) {
             sensor3.update();
             distance3 = sensor3.getDistance();
+        } else {
+            distance3 = 60.0;
         }
-        if (distance3 < sensorThresholdActivate) {
+        if (distance3 < sensorThresholdActivate || intakeSensorsOn) {
             sensor1.update();
             distance1 = sensor1.getDistance();
             sensor2.update();
@@ -240,17 +239,17 @@ public class Intake implements Subsystem {
             distance1 = distance2 = 50;
         }
 
-        if (distance1 > sensorThresholdVertical &&
-            distance2 > sensorThresholdVertical) {
+        if (distance1 > sensorThresholdVertical1 &&
+            distance2 > sensorThresholdVertical2) {
             transfer = TransferBoxState.EMPTY;
-        } else if (distance1 < sensorThresholdVertical &&
-            distance2 > sensorThresholdVertical) {
+        } else if (distance1 < sensorThresholdVertical1 &&
+            distance2 > sensorThresholdVertical2) {
             transfer = TransferBoxState.PIXEL1;
-        } else if (distance1 > sensorThresholdVertical &&
-            distance2 < sensorThresholdVertical) {
+        } else if (distance1 > sensorThresholdVertical1 &&
+            distance2 < sensorThresholdVertical2) {
             transfer = TransferBoxState.PIXEL2;
-        } else if (distance1 < sensorThresholdVertical &&
-            distance2 < sensorThresholdVertical) {
+        } else if (distance1 < sensorThresholdVertical1 &&
+            distance2 < sensorThresholdVertical2) {
             if (distance3 < sensorThresholdHorizontal) {
                 transfer = TransferBoxState.BOTH;
             } else {

@@ -1,6 +1,7 @@
 package eu.qrobotics.centerstage.teamcode.opmode.teleop;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,6 +19,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Outtake;
 import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 import eu.qrobotics.centerstage.teamcode.util.StickyGamepad;
 
+@Config
 @TeleOp
 public class TeleOP extends OpMode {
     enum DriveMode {
@@ -26,6 +28,7 @@ public class TeleOP extends OpMode {
     }
 
     Gamepad.RumbleEffect rumbleEffectTransfer;
+    Gamepad.RumbleEffect rumbleEffectAtBackdrop;
 
     // Previous State Region
     // Subsystems
@@ -41,7 +44,7 @@ public class TeleOP extends OpMode {
     private ElapsedTime transferRetractCenteredTimer = new ElapsedTime(100);
     private ElapsedTime transferRetractSideTimer = new ElapsedTime(100);
     private ElapsedTime scoreTimer = new ElapsedTime(100);
-    private ElapsedTime leaveBackboardTimer = new ElapsedTime(100);
+    private ElapsedTime leaveBackdropTimer = new ElapsedTime(100);
     private ElapsedTime endgameDisablePWM = new ElapsedTime(100);
 
     // Telemetry Switches
@@ -56,7 +59,7 @@ public class TeleOP extends OpMode {
     public static double pwrBackdrop = 0.7;
     public static double pwrClimb = 0.85;
     public static boolean activateClimber = false;
-    public static boolean firstOutsideBackstage = true;
+    public static double backdropFwdScale = 0.4;
 
     Robot robot;
     DriveMode driveMode;
@@ -77,7 +80,12 @@ public class TeleOP extends OpMode {
         batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         rumbleEffectTransfer = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 600)
+                .addStep(0.8, 0.8, 300)
+                .build();
+
+        rumbleEffectAtBackdrop = new Gamepad.RumbleEffect.Builder()
+                .addStep(0.8, 1.0, 300)
+                .addStep(1.0, 0.8, 300)
                 .build();
 
         telemetry.log().add("Ready!");
@@ -106,17 +114,6 @@ public class TeleOP extends OpMode {
             robot.endgame.disableClimber();
         }
 
-//        if (0 < robot.drive.getPoseEstimate().getX() && robot.drive.getPoseEstimate().getX() < 10) {
-//            robot.intake.dropdownState = Intake.DropdownState.DOWN;
-//        }
-//        if (robot.drive.getPoseEstimate().getX() < 0 && robot.intake.getAbsolute() < 600 && firstOutsideBackstage) {
-//            robot.intake.intakeMode = Intake.IntakeMode.IN;
-//            firstOutsideBackstage = false;
-//        }
-//        if (robot.drive.getPoseEstimate().getX() > 0) {
-//            firstOutsideBackstage = true;
-//        }
-
         if (stickyGamepad1.dpad_up) {
             switch (driveMode) {
                 case SLOW:
@@ -128,23 +125,22 @@ public class TeleOP extends OpMode {
             }
         }
 
-        if (leaveBackboardTimer.seconds() < 0.085) {
-            robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
+        if (robot.outtake.atBackdrop()) {
+//            gamepad1.runRumbleEffect(rumbleEffectAtBackdrop);
+        }
+
+        if (leaveBackdropTimer.seconds() < 0.09) {
+            if (0.035 < leaveBackdropTimer.seconds()) {
+                robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
+            } else {
+                robot.drive.setMotorPowers(0, 0, 0, 0);
+            }
         } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.95) {
             robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);
-//        } else if (robot.outtake.getMeanSensorDistance() < TOO_CLOSE_BACKDROP &&
-//            robot.outtake.outtakeState == Outtake.OuttakeState.SCORE) {
-////          TODO: this
-//            switch (driveMode) {
-//                case NORMAL:
-//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
-//                    break;
-//                case SLOW:
-//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
-//                    break;
-//            }
-        } else
-        if (!robot.drive.isBusy()) {
+//        } else if (robot.outtake.outtakeState == Outtake.OuttakeState.SCORE &&
+//                robot.outtake.atBackdrop()) {
+//            robot.drive.setMotorPowersFromGamepad(gamepad1, 0.82, false, false);
+        } else if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
                     robot.drive.setMotorPowersFromGamepad(gamepad1, 1, false, false);
@@ -316,7 +312,6 @@ public class TeleOP extends OpMode {
 
         switch (robot.outtake.outtakeState) {
             case TRANSFER_PREP:
-                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
                 if (stickyGamepad2.right_bumper) {
                     transferDeployTimer.reset();
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
@@ -332,13 +327,13 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case TRANSFER:
-                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (0.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.3) {
+                if (0.2 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
                     robot.outtake.clawState = Outtake.ClawState.CLOSED;
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 }
                 if (stickyGamepad2.right_bumper) {
-                    robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
+                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     transferDeployTimer.reset();
                 }
                 if (stickyGamepad2.left_bumper) {
@@ -347,12 +342,6 @@ public class TeleOP extends OpMode {
                 }
                 break;
             case ABOVE_TRANSFER:
-                robot.outtake.fourBarState = Outtake.FourBarState.TARGET;
-                if (0.3 < transferDeployTimer.seconds() && transferDeployTimer.seconds() < 0.4) {
-                    robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-                    robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                }
-
                 if (0.4 < transferRetractCenteredTimer.seconds() && transferRetractCenteredTimer.seconds() < 0.6) {
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
@@ -381,6 +370,7 @@ public class TeleOP extends OpMode {
                 // SCORING OPTIONS
                 if (stickyGamepad2.a) {
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
+                    leaveBackdropTimer.reset();
                     scoreTimer.reset();
                 }
                 break;
@@ -398,6 +388,7 @@ public class TeleOP extends OpMode {
 
                 if (stickyGamepad2.a) {
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
+                    leaveBackdropTimer.reset();
                     scoreTimer.reset();
                 }
 
@@ -421,11 +412,7 @@ public class TeleOP extends OpMode {
                 }
                 break;
         }
-        if (0.2 < scoreTimer.seconds() && scoreTimer.seconds() < 0.3) {
-            robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
-            leaveBackboardTimer.reset();
-        }
-        if (0.45 < scoreTimer.seconds() && scoreTimer.seconds() < 0.55) {
+        if (0.3 < scoreTimer.seconds() && scoreTimer.seconds() < 0.5) {
             if (robot.outtake.diffyHState == Outtake.DiffyHorizontalState.CENTER) {
                 robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
                 transferRetractCenteredTimer.reset();
@@ -444,16 +431,16 @@ public class TeleOP extends OpMode {
         }
 
         // manual
-        if (gamepad2.left_stick_y != 0) {
-            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
-            robot.outtake.getManualValues();
-            robot.outtake.manualHDiffy += gamepad2.left_stick_y * 0.005;
-        }
-        if (gamepad2.left_stick_x != 0) {
-            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
-            robot.outtake.getManualValues();
-            robot.outtake.manualVDiffy += gamepad2.left_stick_x * -0.005;
-        }
+//        if (gamepad2.left_stick_y != 0) {
+//            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
+//            robot.outtake.getManualValues();
+//            robot.outtake.manualHDiffy += gamepad2.left_stick_y * 0.005;
+//        }
+//        if (gamepad2.left_stick_x != 0) {
+//            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
+//            robot.outtake.getManualValues();
+//            robot.outtake.manualVDiffy += gamepad2.left_stick_x * -0.005;
+//        }
 
 //        if (gamepad2.left_stick_y != 0) {
 //            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
@@ -463,7 +450,6 @@ public class TeleOP extends OpMode {
 
         if (gamepad2.right_stick_x != 0) {
 //            robot.outtake.outtakeState = Outtake.OuttakeState.MANUAL;
-            robot.outtake.fourBarState = Outtake.FourBarState.MANUAL;
             robot.outtake.getManualValues();
             robot.outtake.manualFourbarPos += -gamepad2.right_stick_x * yawMultiplier;
         }
@@ -587,10 +573,10 @@ public class TeleOP extends OpMode {
         telemetry.addLine("<----> DRIVETRAIN <---->");
         if (drivetrainTelemetry) {
             telemetry.addData("field centric", robot.drive.fieldCentric);
-            telemetry.addData("alpha left", robot.drive.getAlphaLeft());
-            telemetry.addData("alpha right", robot.drive.getAlphaRight());
-            telemetry.addData("distance left", robot.drive.getDistanceLeft());
-            telemetry.addData("distance right", robot.drive.getDistanceRight());
+//            telemetry.addData("alpha left", robot.drive.getAlphaLeft());
+//            telemetry.addData("alpha right", robot.drive.getAlphaRight());
+//            telemetry.addData("distance left", robot.drive.getDistanceLeft());
+//            telemetry.addData("distance right", robot.drive.getDistanceRight());
         }
         telemetry.addLine("<----> MISC <---->");
         if (extraTelemetry) {

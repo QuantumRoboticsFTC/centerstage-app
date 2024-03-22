@@ -130,7 +130,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
         if(isAutonomous) {
             follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                    new Pose2d(0.25, 0.25, Math.toRadians(0.0)), 0.2);
+                    new Pose2d(0.25, 0.25, Math.toRadians(0.0)), 0.3);
         }
         motorPowers = new double[]{0.0, 0.0, 0.0, 0.0};
 
@@ -156,8 +156,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        sensorLeft = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorLeft"));
-        sensorRight = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorRight"));
+//        sensorLeft = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorLeft"));
+//        sensorRight = new OPColorSensor(hardwareMap.get(ColorRangeSensor.class, "sensorRight"));
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -185,7 +185,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
-        setLocalizer(new Odometry(hardwareMap));
+        setLocalizer(new IMUOdo(hardwareMap, this));
     }
 
     public void updateSensors() {
@@ -465,8 +465,8 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     @Override
     public double getRawExternalHeading() {
-//        return imuChub.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        return 0;
+        return imuEhub.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        return 0;
     }
 
     // CHUB
@@ -497,7 +497,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
 
     @Override
     public Double getExternalHeadingVelocity() {
-        return (double) imuChub.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
+        return (double) imuEhub.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate;
     }
 
     @NonNull
