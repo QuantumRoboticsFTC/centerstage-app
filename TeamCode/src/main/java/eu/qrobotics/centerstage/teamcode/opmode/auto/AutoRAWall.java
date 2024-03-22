@@ -45,7 +45,7 @@ public class AutoRAWall extends LinearOpMode {
     double intakeTimerLimit = 0.45;
 
     private ATagDetector aprilDetector;
-
+/*
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
@@ -94,7 +94,7 @@ public class AutoRAWall extends LinearOpMode {
 
         return readFromCamera;
     }
-
+*/
     void solvePurplePixel() {
         if (teamProp == 1) {
             // left

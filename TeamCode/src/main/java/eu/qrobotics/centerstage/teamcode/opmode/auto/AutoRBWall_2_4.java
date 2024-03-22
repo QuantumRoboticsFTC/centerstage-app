@@ -118,8 +118,8 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         }
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
     }
-/*
-    int cameraTeamProp(int portalId) {
+
+    int cameraTeamProp() {
         int readFromCamera = noDetectionFlag;
 
         OpenCvCamera camera;
@@ -147,7 +147,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             readFromCamera = teamPropPieline.getTeamProp();
             telemetry.addData("getTeamProp() ", teamPropPieline.getTeamProp());
-            telemetry.addData("getAvg() ", teamPropPieline.getMax());
+            telemetry.addData("getMax() ", teamPropPieline.getMax());
             telemetry.addData("getCnt() ", teamPropPieline.getCount());
             telemetry.addData("isRed ", teamPropPieline.isPropRed());
             telemetry.addData("readFromCamera ", readFromCamera);
@@ -161,7 +161,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         camera.closeCameraDeviceAsync(() -> {});
         return readFromCamera;
     }
-*/
+
     public void configureDetector(int exposureMS, int gain) {
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
         aTagDetector = new ATagDetector(robot, hardwareMap,portals[0]);
@@ -268,8 +268,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
 //        configureDetector(1, 120);
 //        updateDetectorThread.start();
 
-//        int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
-//        teamProp = cameraTeamProp(portals[1]);
+        teamProp = cameraTeamProp();
 
         if (teamProp == 1) {
             trajectories = trajectoriesLeft;

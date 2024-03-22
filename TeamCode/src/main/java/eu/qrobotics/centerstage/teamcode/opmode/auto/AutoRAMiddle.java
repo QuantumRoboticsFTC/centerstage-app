@@ -50,11 +50,11 @@ public class AutoRAMiddle extends LinearOpMode {
     double bigIntakeTimerLimit = 1.2;
 
     private ATagDetector aprilDetector;
-
+/*
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetection = new TeamPropDetectionRed(true);
+        teamPropDetection = new TeamPropDetectionRed();
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -99,7 +99,7 @@ public class AutoRAMiddle extends LinearOpMode {
 
         return readFromCamera;
     }
-
+*/
     void solvePurplePixel() {
         robot.drive.followTrajectory(trajectories.get(0));
         if (teamProp == 1) {

@@ -116,7 +116,7 @@ public class AutoRBWall_4n2Spline extends LinearOpMode {
         }
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
     }
-
+/*
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
@@ -165,7 +165,7 @@ public class AutoRBWall_4n2Spline extends LinearOpMode {
 
         return readFromCamera;
     }
-
+*/
     public void configureDetector(int exposureMS, int gain) {
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
         aTagDetector = new ATagDetector(robot, hardwareMap,portals[0]);

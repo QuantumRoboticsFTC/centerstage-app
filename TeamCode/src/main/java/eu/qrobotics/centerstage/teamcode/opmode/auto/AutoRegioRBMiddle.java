@@ -52,7 +52,7 @@ public class AutoRegioRBMiddle extends LinearOpMode {
     double bigIntakeTimerLimit = 1.7;
 
     private ATagDetector aprilDetector;
-
+/*
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
@@ -101,7 +101,7 @@ public class AutoRegioRBMiddle extends LinearOpMode {
 
         return readFromCamera;
     }
-
+*/
     void gotobackboard() {
         ;
     }
