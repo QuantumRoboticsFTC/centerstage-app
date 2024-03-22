@@ -110,10 +110,6 @@ public class TeleOP extends OpMode {
         stickyGamepad2.update();
         lastStateUpdate();
 
-        if (0.5 < opModeTimer.seconds() && opModeTimer.seconds() < 0.7) {
-            robot.endgame.disableClimber();
-        }
-
         if (stickyGamepad1.dpad_up) {
             switch (driveMode) {
                 case SLOW:

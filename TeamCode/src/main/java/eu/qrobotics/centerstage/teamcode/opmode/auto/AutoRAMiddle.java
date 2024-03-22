@@ -28,7 +28,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Audience Truss
 @Config
-@Autonomous(name = "04 AutoRAMiddle // Red Audience Middle", group = "Red")
+@Autonomous(name = "02 AutoRAMiddle // Red Audience Middle", group = "main")
 public class AutoRAMiddle extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectories;
@@ -42,7 +42,6 @@ public class AutoRAMiddle extends LinearOpMode {
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
     public static int cycleCount = 2;
-    int trajectoryIdx = 0;
 
     ElapsedTime bigIntakeTimer = new ElapsedTime(10);
     ElapsedTime intakeTimer = new ElapsedTime(10);
@@ -258,7 +257,7 @@ public class AutoRAMiddle extends LinearOpMode {
                 if (0.6 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.7) {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 }
-                if (1.0 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 1.2) {
+                if (5 < robot.drive.getPoseEstimate().getX() && robot.drive.getPoseEstimate().getX() < 12) {
                     if (i == 1) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
                     } else if (i == 2) {

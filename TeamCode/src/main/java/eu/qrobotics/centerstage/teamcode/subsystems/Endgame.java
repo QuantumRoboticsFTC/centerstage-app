@@ -74,6 +74,7 @@ public class Endgame implements Subsystem {
         droneServo = new CachingServo(hardwareMap.get(Servo.class, "droneServo"));
 
         rightServo.setDirection(Servo.Direction.REVERSE);
+        disableClimber();
 
         climbState = ClimbState.PASSIVE;
         droneState = DroneState.PASSIVE;

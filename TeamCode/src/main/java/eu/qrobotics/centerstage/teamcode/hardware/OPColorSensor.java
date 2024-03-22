@@ -26,7 +26,6 @@ public class OPColorSensor {
 
     public void update() {
         distance = delegate.getDistance(DistanceUnit.MM);
-        alpha = delegate.alpha();
     }
 
     public void close() {

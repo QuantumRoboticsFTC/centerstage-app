@@ -39,9 +39,9 @@ public class Elevator implements Subsystem {
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
 
-    public static double AUTO_HEIGHT0 = 185; // preload
-    public static double AUTO_HEIGHT1 = 340; // first cycle
-    public static double AUTO_HEIGHT2 = 500; // second cycle
+    public static double AUTO_HEIGHT0 = 200; // preload
+    public static double AUTO_HEIGHT1 = 400; // first cycle
+    public static double AUTO_HEIGHT2 = 550; // second cycle
     public static double NEUTRAL_SIDE_THRESHOLD_LOW = 30; // no global coordinates below this point
     public static double diffyHOffset = 230;
     public static double diffyValue = 0;
@@ -172,7 +172,7 @@ public class Elevator implements Subsystem {
         targetHeight = TargetHeight.FIRST_LINE;
 
         manualPower = IDLE_POWER;
-        climbedPosition = FIRST_POSITION;
+        climbedPosition = SECOND_POSITION;
         diffyValue = 0;
     }
 

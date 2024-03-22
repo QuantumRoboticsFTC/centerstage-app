@@ -74,8 +74,8 @@ public class Outtake implements Subsystem {
     public static double gainHDiffy = 0.0475;
 
     // Other Outtake Servo Values
-    public static double FOURBAR_TRANSFER_PREP_POS = 0.17;
-    public static double FOURBAR_TRANSFER_POS = 0.167;
+    public static double FOURBAR_TRANSFER_PREP_POS = 0.1675;
+    public static double FOURBAR_TRANSFER_POS = 0.165;
     public static double FOURBAR_ABOVE_TRANSFER_POS = 0.1;
     public static double FOURBAR_SCORE_POS = 0.654; // -0.02
     public static double FOURBAR_SCORE_ANGLED_POS = 0.695;

@@ -40,7 +40,7 @@ public class TrajectoryRAMiddle {
     public static List<Trajectory> getTrajectories(Robot robot, int cycleCount, boolean parkedRight, int teamProp) {
         List<Trajectory> trajectories = new ArrayList<>();
 
-        if (teamProp == 0) {
+        if (teamProp == 1) {
             // 0 -> left
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToLinearHeading(new Pose2d(-40, -22, Math.toRadians(50)))
@@ -51,7 +51,7 @@ public class TrajectoryRAMiddle {
                     .lineToLinearHeading(new Pose2d(-36, -12, Math.toRadians(0)))
                     .build()
             );
-        } else if (teamProp == 1) {
+        } else if (teamProp == 2 || teamProp == -1) {
             // 0 -> center
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToLinearHeading(new Pose2d(-39, -32, Math.toRadians(280)))
@@ -62,7 +62,7 @@ public class TrajectoryRAMiddle {
                     .lineToLinearHeading(new Pose2d(-36, -12, Math.toRadians(0)))
                     .build()
             );
-        } else {
+        } else if (teamProp == 3) {
             // 0 -> right
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(270), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                     .lineToLinearHeading(new Pose2d(-36, -33, Math.toRadians(190)))

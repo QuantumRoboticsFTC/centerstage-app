@@ -2,6 +2,7 @@ package eu.qrobotics.centerstage.teamcode.opmode.auto;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -12,6 +13,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +31,7 @@ import eu.qrobotics.centerstage.teamcode.subsystems.Robot;
 
 // Red Backboard Centerstage
 @Config
-@Autonomous(name = "01 AutoRBWall 2+4 // Red Backdrop Wall", group = "Red")
+@Autonomous(name = "01 AutoRBWall 2+4 // Red Backdrop Wall", group = "main")
 public class AutoRBWall_2_4 extends LinearOpMode {
     public Robot robot;
     List<Trajectory> trajectories;
@@ -39,7 +43,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
     private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
-    int teamProp = 2; // TODO: atentie e -1 defapt dra na n avem camera
+    int teamProp = -1;
     public static int cycleCount = 2;
     int trajectoryIdx = 0;
     public static double MAX_DISTANCE = -100;
@@ -50,7 +54,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
     ElapsedTime trajectoryTimer = new ElapsedTime(50);
     double timerLimit1 = 28;
     double timerLimit2 = 28;
-    double intakeTimerLimit = 0.5;
+    double intakeTimerLimit = 0.37;
     double bigIntakeTimerLimit = 1.8;
 
     private ATagDetector aTagDetector;
@@ -114,56 +118,50 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         }
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
     }
-
+/*
     int cameraTeamProp(int portalId) {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetection = new TeamPropDetectionRed(true);
+        OpenCvCamera camera;
+        TeamPropDetectionRed teamPropPieline = new TeamPropDetectionRed();
 
-        telemetry.addData("Webcam 1", "Initing");
-        telemetry.update();
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        FtcDashboard.getInstance().startCameraStream(camera, 0);
 
-        visionPortalTeamProp = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(1920, 1080))
-                .addProcessor(teamPropDetection)
-                .setLiveViewContainerId(portalId)
-                .build();
+        camera.setPipeline(teamPropPieline);
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                camera.startStreaming(1920, 1080, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                // :salute:
+            }
+        });
 
         telemetry.setMsTransmissionInterval(50);
 
-        if (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            telemetry.addData("Webcam 1", "Waiting");
-            telemetry.update();
-            while (!isStopRequested() && (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                telemetry.addData("Webcam 1", "Waiting");
-                telemetry.addData("State", visionPortalTeamProp.getCameraState());
-                telemetry.update();
-                sleep(50);
-                //sleep(20);
-            }
-            telemetry.addData("Webcam 1", "Ready");
+        while (!isStarted() && !isStopRequested()) {
+            readFromCamera = teamPropPieline.getTeamProp();
+            telemetry.addData("getTeamProp() ", teamPropPieline.getTeamProp());
+            telemetry.addData("getAvg() ", teamPropPieline.getMax());
+            telemetry.addData("getCnt() ", teamPropPieline.getCount());
+            telemetry.addData("isRed ", teamPropPieline.isPropRed());
+            telemetry.addData("readFromCamera ", readFromCamera);
             telemetry.update();
         }
 
-        if (isStopRequested()&&!isStopRequested()) {
-            robot.stop();
+        if (isStopRequested()) {
             return robotStopFlag;
         }
 
-        while(!isStarted()){
-            readFromCamera = teamPropDetection.getTeamProp();
-            telemetry.addData("Case", readFromCamera);
-            telemetry.addData("ID", teamPropDetection.getID());
-            telemetry.addData("Max", teamPropDetection.getMax());
-            telemetry.update();
-        }
-
-        visionPortalTeamProp.close();
-
+        camera.closeCameraDeviceAsync(() -> {});
         return readFromCamera;
     }
-
+*/
     public void configureDetector(int exposureMS, int gain) {
         int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
         aTagDetector = new ATagDetector(robot, hardwareMap,portals[0]);
@@ -217,31 +215,41 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         }
         robot.intake.intakeMode = Intake.IntakeMode.OUT_SLOW;
         robot.outtake.outtakeState = Outtake.OuttakeState.ABOVE_TRANSFER;
-        robot.sleep(0.15);
+        robot.sleep(0.1);
     }
 
     void placePixel() {
         robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.12);
+        robot.sleep(0.25);
     }
 
-    void retractOuttake() {
-        robot.outtake.rotateState = Outtake.RotateState.CENTER;
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.sleep(0.7);
+    void retryOuttake() {
+        robot.drive.followTrajectory(trajectories.get(12));
+        trajectoryTimer.reset();
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                robot.outtake.rotateState = Outtake.RotateState.CENTER;
+                robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
+                robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+            }
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.2);
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
-        robot.sleep(0.35);
-        robot.outtake.rotateState = Outtake.RotateState.RIGHT;
-        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
-        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
-        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-        robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
-        robot.sleep(0.6);
-        robot.outtake.clawState = Outtake.ClawState.OPEN;
-        robot.sleep(0.1);
+        robot.drive.followTrajectory(trajectories.get(13));
+        trajectoryTimer.reset();
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT;
+                robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
+                robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+            }
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.15);
+        placePixel();
     }
 
     @Override
@@ -259,14 +267,15 @@ public class AutoRBWall_2_4 extends LinearOpMode {
 
 //        configureDetector(1, 120);
 //        updateDetectorThread.start();
+
+//        int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
 //        teamProp = cameraTeamProp(portals[1]);
-        teamProp = 2;
 
         if (teamProp == 1) {
             trajectories = trajectoriesLeft;
         } else if (teamProp == 2) {
             trajectories = trajectoriesCenter;
-        } else if (teamProp == 3) {
+        } else if (teamProp == 3 || teamProp == -1) {
             trajectories = trajectoriesRight;
         }
 
@@ -364,25 +373,29 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
-                if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                if (0.3 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.5) {
                     robot.intake.intakeMode = Intake.IntakeMode.IN;
+                    Intake.intakeSensorsOn = true;
                 }
                 robot.sleep(0.01);
             }
 
 //            startLineFollower();
-            Intake.intakeSensorsOn = true;
             bigIntakeTimer.reset();
             intakeTimer.reset();
             while (robot.intake.pixelCount() < 2 &&
-                    intakeTimer.seconds() < intakeTimerLimit / 2.0
+                    intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
                 robot.sleep(0.01);
             }
             robot.intake.dropdownState = robot.intake.dropdownState.previous();
             while (robot.intake.pixelCount() < 2 &&
-                    intakeTimer.seconds() < intakeTimerLimit / 2.0
+                    intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
                 robot.sleep(0.01);
             }
             while (robot.intake.pixelCount() < 2 && bigIntakeTimer.seconds() < bigIntakeTimerLimit &&
@@ -391,6 +404,8 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                 while (robot.intake.pixelCount() < 2 &&
                         intakeTimer.seconds() < intakeTimerLimit
                         && opModeIsActive() && !isStopRequested()) {
+                    telemetry.addData("pixel count", robot.intake.pixelCount());
+                    telemetry.update();
                     robot.sleep(0.01);
                 }
                 if (robot.intake.pixelCount() == 2) {
@@ -398,6 +413,8 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                 } else {
                     robot.intake.dropdownState = robot.intake.dropdownState.previous();
                 }
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
             }
             Intake.intakeSensorsOn = false;
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
@@ -415,17 +432,12 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                     robot.intake.dropdownState = Intake.DropdownState.ALMOST_UP;
                 }
 
-                if (0.4 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.5) {
+                if (0.3 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
                     robot.intake.intakeMode = Intake.IntakeMode.OUT;
-                    robot.intake.dropdownState = Intake.DropdownState.UP;
-                    robot.outtake.clawState = Outtake.ClawState.CLOSED;
-                }
-
-                if (0.6 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.7) {
-                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 }
                 robot.sleep(0.01);
             }
+            robot.intake.intakeMode = Intake.IntakeMode.IN;
 //            aTagDetector.detect();
 //            if (aTagDetector.detected) {
 //                robot.drive.setPoseEstimate(aTagDetector.estimatedPose);
@@ -441,6 +453,11 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested() && robot.outtake.getMeanSensorDistance() >= MAX_DISTANCE) {
+                if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.3) {
+                    robot.outtake.clawState = Outtake.ClawState.CLOSED;
+                    robot.intake.intakeMode = Intake.IntakeMode.IDLE;
+                    robot.intake.dropdownState = Intake.DropdownState.UP;
+                }
                 if (robot.drive.getPoseEstimate().getX() > 9) {
                     if (i == 1) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
@@ -453,16 +470,16 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                 }
                 robot.sleep(0.01);
             }
-            placePixel();
-//            boolean retry = false;
-//            while (retry) {
-//                retractOuttake();
-//                placePixel();
-//                retry = false;
-//            }
-        }
-        robot.drive.followTrajectory(trajectories.get(12));
+            robot.sleep(0.25);
 
+            Intake.intakeSensorsOn = true;
+            placePixel();
+            while (robot.intake.pixelCount() > 0) {
+                retryOuttake();
+            }
+            Intake.intakeSensorsOn = false;
+        }
+        robot.drive.followTrajectory(trajectories.get(14));
         trajectoryTimer.reset();
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
