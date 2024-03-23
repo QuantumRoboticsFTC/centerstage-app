@@ -34,8 +34,8 @@ public class Endgame implements Subsystem {
     public static double offset = 0.09;
     public static double shooterClimbPosition;
 
-    public static double SHOOTER_PASSIVE_POSITION = 0.9;
-    public static double SHOOTER_ACTIVE_POSITION = 0.4;
+    public static double SHOOTER_PASSIVE_POSITION = 0.98;
+    public static double SHOOTER_ACTIVE_POSITION = 0.6;
 
     private CachingServoImplEx leftServo;
     private CachingServoImplEx rightServo;

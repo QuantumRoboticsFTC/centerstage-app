@@ -57,7 +57,7 @@ public class TeleOP extends OpMode {
     public static boolean debugTelemetry = false;
 
     public static double yawMultiplier = 0.01;
-    public static double pwrBackdrop = 0.7;
+    public static double pwrBackdrop = 0.8;
     public static double pwrClimb = 0.85;
     public static boolean activateClimber = false;
     public static double backdropFwdScale = 0.4;
@@ -131,17 +131,19 @@ public class TeleOP extends OpMode {
             robot.intake.intakeMode = Intake.IntakeMode.IDLE;
         }
 
-        if (leaveBackdropTimer.seconds() < 0.09) {
+        if (leaveBackdropTimer.seconds() < 0.11) {
             if (0.035 < leaveBackdropTimer.seconds()) {
                 robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
             } else {
                 robot.drive.setMotorPowers(0, 0, 0, 0);
             }
-        } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.95) {
+        } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.85) {
             robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);
 //        } else if (robot.outtake.outtakeState == Outtake.OuttakeState.SCORE &&
 //                robot.outtake.atBackdrop()) {
 //            robot.drive.setMotorPowersFromGamepad(gamepad1, 0.82, false, false);
+        } else if (0.9 < climbTimer.seconds() && climbTimer.seconds() < 1.1) {
+            robot.drive.setMotorPowers(pwrClimb, pwrClimb, pwrClimb, pwrClimb);
         } else if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:

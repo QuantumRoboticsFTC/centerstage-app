@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import eu.qrobotics.centerstage.teamcode.cv.ATagDetector;
-import eu.qrobotics.centerstage.teamcode.cv.TeamPropDetectionRed;
 import eu.qrobotics.centerstage.teamcode.opmode.auto.trajectories.TrajectoryRBMiddle_4n2;
 import eu.qrobotics.centerstage.teamcode.subsystems.Elevator;
 import eu.qrobotics.centerstage.teamcode.subsystems.Endgame;
@@ -33,7 +32,7 @@ public class AutoRBMiddle_4n2 extends LinearOpMode {
     List<Trajectory> trajectories;
 
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetectionRed teamPropDetection;
+//    private TeamPropDetectionRed teamPropDetection;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = 2; // TODO: atentie e -1 defapt dra na n avem camera

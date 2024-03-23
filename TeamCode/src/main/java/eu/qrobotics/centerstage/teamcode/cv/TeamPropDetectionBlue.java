@@ -2,6 +2,8 @@ package eu.qrobotics.centerstage.teamcode.cv;
 
 import android.graphics.Canvas;
 
+import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Core;
@@ -10,27 +12,33 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+@Config
 public class TeamPropDetectionBlue implements VisionProcessor {
     private Scalar rectColor = new Scalar(255.0, 0.0, 0.0);
     private Scalar bLowerBound = new Scalar(105.0, 80.0, 35.0);
     private Scalar bUpperBound = new Scalar(120.0, 255.0, 255.0);
-    private Scalar rLowerBound = new Scalar(0.0, 80.0, 35.0);
-    private Scalar rUpperBound = new Scalar(20.0, 255.0, 255.0);
+//    private Scalar rLowerBound = new Scalar(0.0, 80.0, 35.0);
+//    private Scalar rUpperBound = new Scalar(20.0, 255.0, 255.0);
 
-    private double maxAverage;
     private int teamProp; // 123 <=> LCR
-    private String position = "undefined";
     private boolean isPropRed; // false = blue, true = red
     private int cnt = 0;
+    private double leftVal = 0.0;
+    private double centreVal = 0.0;
+    public static double threshold = 1e6;
 
     Mat processMat = new Mat();
 
-    public TeamPropDetectionBlue(boolean isPropRed){
-        this.isPropRed=isPropRed;
+    public TeamPropDetectionBlue() {
+
     }
 
-    public double getMax() {
-        return maxAverage;
+    public double leftValue() {
+        return leftVal;
+    }
+
+    public double centreValue() {
+        return centreVal;
     }
 
     public int getCount() {
@@ -45,44 +53,21 @@ public class TeamPropDetectionBlue implements VisionProcessor {
         return isPropRed;
     }
 
-    public String getID() {
-        return position;
-    }
-
-    private void evaluateFrame(boolean isRed, double leftAvg, double centAvg, double rightAvg) {
-        maxAverage = 0;
-        if (maxAverage < leftAvg) {
-            maxAverage = leftAvg;
+    private void evaluateFrame(boolean isRed, double leftAvg, double centAvg) {
+        if (threshold < leftAvg) {
             isPropRed = isRed;
-            if (isRed) {
-                teamProp = 1;
-                position = "RED LEFT";
-            } else {
-                teamProp = 3;
-                position = "BLUE LEFT";
-            }
+            teamProp = 1;
+            leftVal = leftAvg;
+            return;
         }
-        if (maxAverage < centAvg) {
-            maxAverage = centAvg;
+        if (threshold < centAvg) {
             isPropRed = isRed;
             teamProp = 2;
-            if (isRed) {
-                position = "RED CENT";
-            } else {
-                position = "BLUE CENT";
-            }
+            centreVal = centAvg;
+            return;
         }
-        if (maxAverage < rightAvg) {
-            maxAverage = rightAvg;
-            isPropRed = isRed;
-            if (isRed) {
-                teamProp = 3;
-                position = "RED RIGHT";
-            } else {
-                teamProp = 1;
-                position = "BLUE RIGHT";
-            }
-        }
+        isPropRed = isRed;
+        teamProp = 3;
         return;
     }
 
@@ -95,28 +80,25 @@ public class TeamPropDetectionBlue implements VisionProcessor {
     public Object processFrame (Mat input, long captureTimeNanos) {
         ++cnt;
 
-        // 1920x1080
-        Rect leftRect = new Rect(1, 500, 639, 220);
-        Rect centRect = new Rect(640, 500, 639, 220);
-        Rect rightRect = new Rect(1280, 500, 639, 220);
+        // 1080x1920
+        Rect leftRect = new Rect(800, 1, 400, 539);
+        Rect centRect = new Rect(800, 540, 400, 539);
 
         // BLUE
+//        Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
+//        Core.inRange(processMat, bLowerBound, bUpperBound, processMat);
+//
+//        evaluateFrame(false, Core.sumElems(processMat.submat(leftRect)).val[0],
+//                Core.sumElems(processMat.submat(centRect)).val[1]);
+
+        // RED
         Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
         Core.inRange(processMat, bLowerBound, bUpperBound, processMat);
 
-        evaluateFrame(false, Core.sumElems(processMat.submat(leftRect)).val[0],
-                Core.sumElems(processMat.submat(centRect)).val[0],
-                Core.sumElems(processMat.submat(rightRect)).val[0]);
+        evaluateFrame(true, Core.sumElems(processMat.submat(leftRect)).val[0],
+                Core.sumElems(processMat.submat(centRect)).val[0]);
 
-        // RED
-//        Imgproc.cvtColor(input, processMat, Imgproc.COLOR_RGB2HSV);
-//        Core.inRange(processMat, rLowerBound, rUpperBound, processMat);
-//
-//        evaluateFrame(true, Core.sumElems(processMat.submat(leftRect)).val[0],
-//                Core.sumElems(processMat.submat(centRect)).val[0],
-//                Core.sumElems(processMat.submat(rightRect)).val[0]);
-
-        return input;
+        return null;
     }
 
     @Override

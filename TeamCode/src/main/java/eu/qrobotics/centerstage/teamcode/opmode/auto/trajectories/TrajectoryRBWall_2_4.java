@@ -52,7 +52,7 @@ public class TrajectoryRBWall_2_4 {
             );
             // 1 -> initial backdrop
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToLinearHeading(new Pose2d(48, -36, Math.toRadians(0)))
+                    .lineToLinearHeading(new Pose2d(48.5, -36, Math.toRadians(0)))
                     .build()
             );
         } else if (teamProp == 2 || teamProp == -1) {
@@ -63,7 +63,7 @@ public class TrajectoryRBWall_2_4 {
             );
             // 1 -> initial backdrop
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToLinearHeading(new Pose2d(48, -45.5, Math.toRadians(0)))
+                    .lineToLinearHeading(new Pose2d(48.5, -45.5, Math.toRadians(0)))
                     .build()
             );
         } else if (teamProp == 3) {
@@ -74,7 +74,7 @@ public class TrajectoryRBWall_2_4 {
             );
             // 1 -> initial backdrop
             trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                    .lineToLinearHeading(new Pose2d(48, -36, Math.toRadians(0)))
+                    .lineToLinearHeading(new Pose2d(48.5, -36, Math.toRadians(0)))
                     .build()
             );
         }
@@ -99,7 +99,7 @@ public class TrajectoryRBWall_2_4 {
 
         // 5 -> go under truss
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-45, -59))
+                .lineToConstantHeading(new Vector2d(-37, -59))
                 .build()
         );
 
@@ -130,7 +130,7 @@ public class TrajectoryRBWall_2_4 {
 
         // 10 -> go under truss
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(-45, -58.5))
+                .lineToConstantHeading(new Vector2d(-37, -58.5))
                 .build()
         );
 
@@ -143,7 +143,7 @@ public class TrajectoryRBWall_2_4 {
 
         // 12 -> debug go to lane
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
-                .lineToConstantHeading(new Vector2d(43, -49))
+                .lineToConstantHeading(new Vector2d(38, -50))
                 .build()
         );
 

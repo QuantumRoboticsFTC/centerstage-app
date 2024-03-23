@@ -37,24 +37,25 @@ public class AutoRAMiddle extends LinearOpMode {
     List<Trajectory> trajectoriesRight;
 
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetectionRed teamPropDetection;
+    private TeamPropDetectionRed teamPropDetectionRed;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
-    public static int cycleCount = 2;
+    public static int cycleCount = 3;
 
-    ElapsedTime bigIntakeTimer = new ElapsedTime(10);
-    ElapsedTime intakeTimer = new ElapsedTime(10);
-    ElapsedTime trajectoryTimer = new ElapsedTime(10);
+    ElapsedTime autoTimer = new ElapsedTime(100);
+    ElapsedTime bigIntakeTimer = new ElapsedTime(100);
+    ElapsedTime intakeTimer = new ElapsedTime(100);
+    ElapsedTime trajectoryTimer = new ElapsedTime(100);
     double intakeTimerLimit = 0.5;
     double bigIntakeTimerLimit = 1.2;
 
     private ATagDetector aprilDetector;
-/*
-    int cameraTeamProp(int portalId) {
+
+    int cameraTeamProp() {
         int readFromCamera = noDetectionFlag;
 
-        teamPropDetection = new TeamPropDetectionRed();
+        teamPropDetectionRed = new TeamPropDetectionRed();
 
         telemetry.addData("Webcam 1", "Initing");
         telemetry.update();
@@ -62,8 +63,8 @@ public class AutoRAMiddle extends LinearOpMode {
         visionPortalTeamProp = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(1920, 1080))
-                .addProcessor(teamPropDetection)
-                .setLiveViewContainerId(portalId)
+                .addProcessor(teamPropDetectionRed)
+                .enableLiveView(true)
                 .build();
 
         telemetry.setMsTransmissionInterval(50);
@@ -76,41 +77,41 @@ public class AutoRAMiddle extends LinearOpMode {
                 telemetry.addData("State", visionPortalTeamProp.getCameraState());
                 telemetry.update();
                 sleep(50);
-                //sleep(20);
             }
             telemetry.addData("Webcam 1", "Ready");
             telemetry.update();
         }
 
-        if (isStopRequested()&&!isStopRequested()) {
+        if (isStopRequested()) {
             robot.stop();
             return robotStopFlag;
         }
 
-        while(!isStarted()){
-            readFromCamera = teamPropDetection.getTeamProp();
+        while (!isStarted()) {
+            readFromCamera = teamPropDetectionRed.getTeamProp();
             telemetry.addData("Case", readFromCamera);
-            telemetry.addData("ID", teamPropDetection.getID());
-            telemetry.addData("Max", teamPropDetection.getMax());
+            telemetry.addData("left", teamPropDetectionRed.leftValue());
+            telemetry.addData("cent", teamPropDetectionRed.centreValue());
+            telemetry.addData("thresh", teamPropDetectionRed.threshold);
             telemetry.update();
         }
 
-        visionPortalTeamProp.close();
+        visionPortalTeamProp.stopStreaming();
 
         return readFromCamera;
     }
-*/
+
     void solvePurplePixel() {
         robot.drive.followTrajectory(trajectories.get(0));
         if (teamProp == 1) {
             // left
-            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         } else if (teamProp == 3) {
             // right
             robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         } else {
             // center
-            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
+            robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
         }
         trajectoryTimer.reset();
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -135,23 +136,35 @@ public class AutoRAMiddle extends LinearOpMode {
         robot.sleep(0.2);
     }
 
-    void retractOuttake() {
-        robot.outtake.rotateState = Outtake.RotateState.CENTER;
-        robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
-        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
-        robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
-        robot.sleep(1.25);
+    void retryOuttake() {
+        robot.drive.followTrajectory(trajectories.get(10));
+        trajectoryTimer.reset();
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                robot.outtake.rotateState = Outtake.RotateState.CENTER;
+                robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;
+                robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+            }
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.25);
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
-        robot.sleep(0.35);
-        robot.outtake.rotateState = Outtake.RotateState.LEFT;
-        robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-        robot.outtake.manualFourbarPos = Outtake.FOURBAR_SCORE_POS;
-        robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
-        robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
-        robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
-        robot.sleep(0.65);
-        robot.outtake.clawState = Outtake.ClawState.OPEN;
         robot.sleep(0.1);
+        robot.drive.followTrajectory(trajectories.get(11));
+        trajectoryTimer.reset();
+        while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
+            if (0.2 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.4) {
+                robot.outtake.rotateState = Outtake.RotateState.RIGHT;
+                robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
+                robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
+                robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
+            }
+            robot.sleep(0.01);
+        }
+        robot.sleep(0.2);
+        placePixel();
+        robot.sleep(0.2);
     }
 
     @Override
@@ -167,26 +180,27 @@ public class AutoRAMiddle extends LinearOpMode {
         trajectoriesCenter = TrajectoryRAMiddle.getTrajectories(robot, cycleCount, false, 2);
         trajectoriesRight = TrajectoryRAMiddle.getTrajectories(robot, cycleCount, false, 3);
 
-        int[] portals= VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
-//        aprilDetector=new AprilDetector(hardwareMap,portals[0]);
-//        setManualExposure(6,250);
-//        robot.setTagDetector(aprilDetector);
-
-        //teamProp = cameraTeamProp(portals[1]);
-        teamProp = 2;
+        teamProp = cameraTeamProp();
 
         if (teamProp == 1) {
             trajectories = trajectoriesLeft;
         } else if (teamProp == 2) {
             trajectories = trajectoriesCenter;
-        } else {
+        } else if (teamProp == 3 || teamProp == -1) {
             trajectories = trajectoriesRight;
         }
-        waitForStart();
 
-//        aprilDetector.track=false;
+        while(!isStarted()) {
+            if (isStopRequested()) {
+                robot.stop();
+            }
+        }
+        if (isStopRequested()) {
+            robot.stop();
+        }
 
         robot.start();
+        autoTimer.reset();
 
         if (teamProp == -10) {
             robot.stop();
@@ -206,18 +220,22 @@ public class AutoRAMiddle extends LinearOpMode {
             robot.sleep(0.01);
         }
 
-        Intake.intakeSensorsOn = true;
+
         bigIntakeTimer.reset();
         intakeTimer.reset();
         while (robot.intake.pixelCount() < 2 &&
-                intakeTimer.seconds() < intakeTimerLimit / 2.0
+                intakeTimer.seconds() < intakeTimerLimit
                 && opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("pixel count", robot.intake.pixelCount());
+            telemetry.update();
             robot.sleep(0.01);
         }
         robot.intake.dropdownState = robot.intake.dropdownState.previous();
         while (robot.intake.pixelCount() < 2 &&
-                intakeTimer.seconds() < intakeTimerLimit / 2.0
+                intakeTimer.seconds() < intakeTimerLimit
                 && opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("pixel count", robot.intake.pixelCount());
+            telemetry.update();
             robot.sleep(0.01);
         }
         while (robot.intake.pixelCount() < 2 && bigIntakeTimer.seconds() < bigIntakeTimerLimit &&
@@ -226,6 +244,8 @@ public class AutoRAMiddle extends LinearOpMode {
             while (robot.intake.pixelCount() < 2 &&
                     intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
                 robot.sleep(0.01);
             }
             if (robot.intake.pixelCount() == 2) {
@@ -233,6 +253,8 @@ public class AutoRAMiddle extends LinearOpMode {
             } else {
                 robot.intake.dropdownState = robot.intake.dropdownState.previous();
             }
+            telemetry.addData("pixel count", robot.intake.pixelCount());
+            telemetry.update();
         }
         Intake.intakeSensorsOn = false;
         robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
@@ -241,6 +263,7 @@ public class AutoRAMiddle extends LinearOpMode {
         // TODO: *cica* cycles
         for (int i = 1; i <= cycleCount; i++) {
             // 3/6/9 <-> go to backdrop
+            Intake.intakeSensorsOn = true;
             robot.drive.followTrajectory(trajectories.get(currTraj++));
             trajectoryTimer.reset();
             while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -257,24 +280,34 @@ public class AutoRAMiddle extends LinearOpMode {
                 if (0.6 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.7) {
                     robot.intake.intakeMode = Intake.IntakeMode.IDLE;
                 }
-                if (5 < robot.drive.getPoseEstimate().getX() && robot.drive.getPoseEstimate().getX() < 12) {
+                if (robot.drive.getPoseEstimate().getX() > 5) {
                     if (i == 1) {
-                        robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT0;
-                    } else if (i == 2) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT1;
-                    } else if (i == 3) {
+                    } else if (i == 2) {
                         robot.elevator.targetHeight = Elevator.TargetHeight.AUTO_HEIGHT2;
-                    }
-                    if (i == 3) {
-                        robot.intake.dropdownState = Intake.DropdownState.UP;
                     }
                     robot.elevator.setElevatorState(Elevator.ElevatorState.LINES);
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
-                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.RIGHT;
+                    robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
+                }
+                if (robot.drive.getPoseEstimate().getX() > 30 &&
+                        robot.intake.pixelCount() == 2) {
+                    robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
+                    robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
+                    robot.outtake.clawState = Outtake.ClawState.OPEN;
                 }
                 robot.sleep(0.01);
             }
-            placePixel();
+
+            if (robot.intake.pixelCount() != 2) {
+                robot.sleep(0.2);
+                placePixel();
+            }
+            while (robot.intake.pixelCount() > 0) {
+                retryOuttake();
+            }
+            Intake.intakeSensorsOn = false;
+
             if (i == 3) {
                 break;
             }
@@ -310,19 +343,21 @@ public class AutoRAMiddle extends LinearOpMode {
                 robot.sleep(0.01);
             }
 
-
-            Intake.intakeSensorsOn = true;
             bigIntakeTimer.reset();
             intakeTimer.reset();
             while (robot.intake.pixelCount() < 2 &&
-                    intakeTimer.seconds() < intakeTimerLimit / 2.0
+                    intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
                 robot.sleep(0.01);
             }
             robot.intake.dropdownState = robot.intake.dropdownState.previous();
             while (robot.intake.pixelCount() < 2 &&
-                    intakeTimer.seconds() < intakeTimerLimit / 2.0
+                    intakeTimer.seconds() < intakeTimerLimit
                     && opModeIsActive() && !isStopRequested()) {
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
                 robot.sleep(0.01);
             }
             while (robot.intake.pixelCount() < 2 && bigIntakeTimer.seconds() < bigIntakeTimerLimit &&
@@ -331,6 +366,8 @@ public class AutoRAMiddle extends LinearOpMode {
                 while (robot.intake.pixelCount() < 2 &&
                         intakeTimer.seconds() < intakeTimerLimit
                         && opModeIsActive() && !isStopRequested()) {
+                    telemetry.addData("pixel count", robot.intake.pixelCount());
+                    telemetry.update();
                     robot.sleep(0.01);
                 }
                 if (robot.intake.pixelCount() == 2) {
@@ -338,13 +375,15 @@ public class AutoRAMiddle extends LinearOpMode {
                 } else {
                     robot.intake.dropdownState = robot.intake.dropdownState.previous();
                 }
+                telemetry.addData("pixel count", robot.intake.pixelCount());
+                telemetry.update();
             }
             Intake.intakeSensorsOn = false;
             robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER;
         }
 
         // 10 -> park
-        robot.drive.followTrajectory(trajectories.get(currTraj++));
+        robot.drive.followTrajectory(trajectories.get(12));
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
             if (0.1 < trajectoryTimer.seconds() && trajectoryTimer.seconds() < 0.3) {
                 robot.outtake.diffyHState = Outtake.DiffyHorizontalState.CENTER;

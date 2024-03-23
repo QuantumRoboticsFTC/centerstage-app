@@ -2,7 +2,6 @@ package eu.qrobotics.centerstage.teamcode.opmode.auto;
 
 import android.util.Size;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -13,9 +12,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +36,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
     List<Trajectory> trajectoriesRight;
 
     private VisionPortal visionPortalTeamProp;
-    private TeamPropDetectionRed teamPropDetection;
+    private TeamPropDetectionRed teamPropDetectionRed;
     int noDetectionFlag = -1;
     int robotStopFlag = -10; // if robot.stop while camera
     int teamProp = -1;
@@ -54,8 +50,8 @@ public class AutoRBWall_2_4 extends LinearOpMode {
     ElapsedTime trajectoryTimer = new ElapsedTime(50);
     double timerLimit1 = 28;
     double timerLimit2 = 28;
-    double intakeTimerLimit = 0.37;
-    double bigIntakeTimerLimit = 1.8;
+    double intakeTimerLimit = 0.4;
+    double bigIntakeTimerLimit = 2.0;
 
     private ATagDetector aTagDetector;
     private Thread updateDetectorThread = new Thread(() -> updateDetector());
@@ -122,43 +118,49 @@ public class AutoRBWall_2_4 extends LinearOpMode {
     int cameraTeamProp() {
         int readFromCamera = noDetectionFlag;
 
-        OpenCvCamera camera;
-        TeamPropDetectionRed teamPropPieline = new TeamPropDetectionRed();
+        teamPropDetectionRed = new TeamPropDetectionRed();
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(camera, 0);
+        telemetry.addData("Webcam 1", "Initing");
+        telemetry.update();
 
-        camera.setPipeline(teamPropPieline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                camera.startStreaming(1920, 1080, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-
-            @Override
-            public void onError(int errorCode) {
-                // :salute:
-            }
-        });
+        visionPortalTeamProp = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(1920, 1080))
+                .addProcessor(teamPropDetectionRed)
+                .enableLiveView(true)
+                .build();
 
         telemetry.setMsTransmissionInterval(50);
 
-        while (!isStarted() && !isStopRequested()) {
-            readFromCamera = teamPropPieline.getTeamProp();
-            telemetry.addData("getTeamProp() ", teamPropPieline.getTeamProp());
-            telemetry.addData("getMax() ", teamPropPieline.getMax());
-            telemetry.addData("getCnt() ", teamPropPieline.getCount());
-            telemetry.addData("isRed ", teamPropPieline.isPropRed());
-            telemetry.addData("readFromCamera ", readFromCamera);
+        if (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Webcam 1", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (visionPortalTeamProp.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                telemetry.addData("Webcam 1", "Waiting");
+                telemetry.addData("State", visionPortalTeamProp.getCameraState());
+                telemetry.update();
+                sleep(50);
+            }
+            telemetry.addData("Webcam 1", "Ready");
             telemetry.update();
         }
 
         if (isStopRequested()) {
+            robot.stop();
             return robotStopFlag;
         }
 
-        camera.closeCameraDeviceAsync(() -> {});
+        while (!isStarted()) {
+            readFromCamera = teamPropDetectionRed.getTeamProp();
+            telemetry.addData("Case", readFromCamera);
+            telemetry.addData("left", teamPropDetectionRed.leftValue());
+            telemetry.addData("cent", teamPropDetectionRed.centreValue());
+            telemetry.addData("thresh", teamPropDetectionRed.threshold);
+            telemetry.update();
+        }
+
+        visionPortalTeamProp.stopStreaming();
+
         return readFromCamera;
     }
 
@@ -235,7 +237,9 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             robot.sleep(0.01);
         }
+        robot.sleep(0.25);
         robot.outtake.clawState = Outtake.ClawState.CLOSED;
+        robot.sleep(0.1);
         robot.drive.followTrajectory(trajectories.get(13));
         trajectoryTimer.reset();
         while (robot.drive.isBusy() && opModeIsActive() && !isStopRequested()) {
@@ -247,8 +251,9 @@ public class AutoRBWall_2_4 extends LinearOpMode {
             }
             robot.sleep(0.01);
         }
-        robot.sleep(0.1);
+        robot.sleep(0.2);
         placePixel();
+        robot.sleep(0.2);
     }
 
     @Override
@@ -264,9 +269,7 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         trajectoriesCenter = TrajectoryRBWall_2_4.getTrajectories(robot, cycleCount, false, 2);
         trajectoriesRight = TrajectoryRBWall_2_4.getTrajectories(robot, cycleCount, false, 3);
 
-//        configureDetector(1, 120);
-//        updateDetectorThread.start();
-
+//        int[] portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL);
         teamProp = cameraTeamProp();
 
         if (teamProp == 1) {
@@ -285,8 +288,6 @@ public class AutoRBWall_2_4 extends LinearOpMode {
         if (isStopRequested()) {
             robot.stop();
         }
-
-//        aprilDetector.track=false;
 
         robot.start();
         autoTimer.reset();
@@ -468,19 +469,19 @@ public class AutoRBWall_2_4 extends LinearOpMode {
                     robot.outtake.outtakeState = Outtake.OuttakeState.SCORE;
                     robot.outtake.diffyHState = Outtake.DiffyHorizontalState.LEFT;
                 }
-                if (robot.drive.getPoseEstimate().getX() > 36) {
+                if (robot.drive.getPoseEstimate().getX() > 30 &&
+                    robot.intake.pixelCount() == 2) {
                     robot.outtake.outtakeState = Outtake.OuttakeState.TRANSFER_PREP;
                     robot.elevator.setElevatorState(Elevator.ElevatorState.TRANSFER);
                     robot.outtake.clawState = Outtake.ClawState.OPEN;
                 }
                 robot.sleep(0.01);
             }
-            robot.sleep(0.25);
-
             if (robot.intake.pixelCount() != 2) {
+                robot.sleep(0.2);
                 placePixel();
             }
-            while (robot.intake.pixelCount() > 0) {
+            for (int tryCount = 0; tryCount <= 2 && robot.intake.pixelCount() > 0; tryCount++) {
                 retryOuttake();
             }
             Intake.intakeSensorsOn = false;
