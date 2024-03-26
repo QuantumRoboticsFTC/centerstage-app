@@ -147,10 +147,10 @@ public class TeleOP extends OpMode {
         } else if (!robot.drive.isBusy()) {
             switch (driveMode) {
                 case NORMAL:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, false, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
                     break;
                 case SLOW:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, false, false);
+                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
                     break;
             }
         }
