@@ -45,15 +45,16 @@ public class Outtake implements Subsystem {
     public OuttakeState outtakeState;
     public OuttakeState lastOuttakeState;
 
-    // DIFFy
-    public static double VDIFFY_ABOVE_TRANSFER_POS = 0.3;
-    public static double VDIFFY_TRANSFER_PREP_POS = 0.165;
-    public static double VDIFFY_TRANSFER_POS = 0.16;
-    public static double VDIFFY_SCORE_POS = 0.53;
 
-    public static double HDIFFY_LEFT_POS = -0.222;
-    public static double HDIFFY_CENTER_POS = 0.044;
-    public static double HDIFFY_RIGHT_POS = 0.3;
+    // DIFFy
+    public static double VDIFFY_ABOVE_TRANSFER_POS = 0.179;
+    public static double VDIFFY_TRANSFER_PREP_POS = 0.136;
+    public static double VDIFFY_TRANSFER_POS = 0.133;
+    public static double VDIFFY_SCORE_POS = 0.519;
+
+    public static double HDIFFY_LEFT_POS = -0.143;
+    public static double HDIFFY_CENTER_POS = 0.122;
+    public static double HDIFFY_RIGHT_POS = 0.39;
 
     public static double rotateThresh = 0.5; // rotate thresh
     public static double vDiffyThresholdVS = 0.3; // vertical speed
@@ -73,6 +74,7 @@ public class Outtake implements Subsystem {
     public static double gainVDiffyOutsideDown = 0.04;
     public static double gainHDiffy = 0.0475;
 
+
     // Other Outtake Servo Values
     public static double FOURBAR_TRANSFER_PREP_POS = 0.1535;
     public static double FOURBAR_TRANSFER_POS = 0.151;
@@ -89,6 +91,7 @@ public class Outtake implements Subsystem {
     public static double ROTATE_RIGHT_POS = 0.665;
     public static double ROTATE_RIGHT45_POS = 0.53;
     public static double rotateGain = -1.05; // per ? of hdiffy, rotateGain of rotate
+    public static  double rotateOffset=-0.05;
 
     // TODO: manual stuff
     public double manualFourbarPos;
@@ -230,9 +233,9 @@ public class Outtake implements Subsystem {
             if (outtakeState != OuttakeState.MANUAL) {
                 manualRotatePos = 0;
             }
-            rotateServo.setPosition(position + manualRotatePos);
+            rotateServo.setPosition(position + manualRotatePos+rotateOffset);
         } else {
-            rotateServo.setPosition(ROTATE_TRANSFER_POS);
+            rotateServo.setPosition(ROTATE_TRANSFER_POS+rotateOffset);
         }
     }
 

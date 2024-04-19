@@ -137,7 +137,7 @@ public class TrajectoryRBWall_2_4 {
         // 11 -> go to backdrop
         trajectories.add(makeTrajectoryBuilder(trajectories, Math.toRadians(0), BASE_VEL_CONSTRAINT, BASE_ACCEL_CONSTRAINT)
                 .lineToConstantHeading(new Vector2d(30, -58.5))
-                .splineToConstantHeading(new Vector2d(48.2, -47.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(48.2, -48.5), Math.toRadians(0))
                 .build()
         );
 

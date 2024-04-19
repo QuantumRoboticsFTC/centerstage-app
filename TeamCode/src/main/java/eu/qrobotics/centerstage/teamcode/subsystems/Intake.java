@@ -88,13 +88,13 @@ public class Intake implements Subsystem {
     public static double INTAKE_OUT_SLOW_SPEED = -0.45;
     public static double INTAKE_IN_SLOW_SPEED = 0.225;
 
-    public static double INTAKE_DROPDOWN_UP = 800;
+    public static double INTAKE_DROPDOWN_UP =200;//800;
     public static double INTAKE_DROPDOWN_ALMOST_UP = 340;
-    public static double INTAKE_DROPDOWN_DOWN = -72; //-170
-    public static double INTAKE_DROPDOWN_5 = 120; // min/max 100 / 120
-    public static double INTAKE_DROPDOWN_4 = 69; // min/max 69 / 60
-    public static double INTAKE_DROPDOWN_3 = 29; // min/max 29 / 0
-    public static double INTAKE_DROPDOWN_2 = -10; // min/max -10 / -25
+    public static double INTAKE_DROPDOWN_DOWN =-400;// -72; //-170
+    public static double INTAKE_DROPDOWN_5 =-270;//120; // min/max 100 / 120
+    public static double INTAKE_DROPDOWN_4 =-320;//69; // min/max 69 / 60
+    public static double INTAKE_DROPDOWN_3 =-350;//29; // min/max 29 / 0
+    public static double INTAKE_DROPDOWN_2 =-390;//-10; // min/max -10 / -25
     public static double INTAKE_DDOWN_INITIAL_ANGLE = 160;
     public static double epsilon = 5;
     public double manualPower;

@@ -14,6 +14,7 @@ import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.kinematics.Kinematics;
 import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
+import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
@@ -109,7 +110,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
     public ATagDetector aTagDetector;
     public boolean useAprilTagDetector = false;
     /* angle formal definition is: from robot heading to robot-camera line, measured trigonometrically */
-    public Pose2d cameraPose = new Pose2d(8, 0, Math.toRadians(0));
+
 
     public Localization localization;
 
@@ -186,6 +187,7 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         }
 
         setLocalizer(new IMUOdo(hardwareMap, this));
+
     }
 
     public void updateSensors() {
@@ -436,6 +438,12 @@ public class Drivetrain extends MecanumDrive implements Subsystem {
         );
         List<Double> powers = Kinematics.calculateMotorFeedforward(velocities, accelerations, kV, kA, kStatic);
         setMotorPowers(powers.get(0), powers.get(1), powers.get(2), powers.get(3));
+    }
+
+    public Pose2d cameraPoseToDrive(Pose2d aTagPose){
+        return new Pose2d(aTagPose.vec().
+                minus(cameraPose.vec().rotated(aTagPose.getHeading() - cameraPose.getHeading())),
+                aTagPose.getHeading());
     }
 
     public void setATagDetector(ATagDetector aTagDetector, boolean useATagDetector) {

@@ -42,8 +42,8 @@ public class DiffySync extends OpMode {
 
     }
 
-    public double leftPos = 0.2;
-    public double rightPos = 0.2;
+    public double leftPos = 0.258;
+    public double rightPos = 0.014;
     public double multiplier = 0.003;
 
     @Override

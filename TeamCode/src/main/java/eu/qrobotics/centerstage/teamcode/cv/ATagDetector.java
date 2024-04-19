@@ -56,44 +56,51 @@ public class ATagDetector {
         detected = false;
     }
     public void detect() {
-        detections = processor.getDetections();
-        if (detections == null ||
-                detections.size() == 0) {
-            detected = false;
-            debugText = "#1: No detections";
-            return;
-        }
+        detected = false;
+        debugText = "#1: No detections";
 
-        detected = true;
+        try{
+            detections = (List<AprilTagDetection>) processor.getDetections().clone();
+            if (detections == null ||
+                    detections.size() == 0) {
 
-        double xRobot = 0, yRobot = 0, hRobot = 0;
-        int batchSize=Math.min(detectionAvgOf,detections.size());
-
-        detections.sort((april1, april2) -> (april1.ftcPose.range < april2.ftcPose.range ? 1 : 0));
-
-        for (int i = 0; i < batchSize; i++) {
-            AprilTagDetection aTag = detections.get(i);
-            Pose2d aTagPose = AprilPoses.aprilPoses.get(aTag.id);
-
-            if (aTag == null ||
-                    aTag.ftcPose==null) {
-                continue;
+                return;
             }
 
-            double angle=Math.toRadians(aTag.ftcPose.yaw-aTag.ftcPose.bearing);
-            double dx=Math.sin(angle)*aTag.ftcPose.range;
-            double dy=Math.cos(angle)*aTag.ftcPose.range;
-            xRobot += (aTagPose.getX() - dy) * 1.0;
-            yRobot += (aTagPose.getY() + dx) * 1.0;
-            hRobot += aTag.ftcPose.yaw * 1.0;
+            detected = true;
+
+            double xRobot = 0, yRobot = 0, hRobot = 0;
+            int batchSize=Math.min(detectionAvgOf,detections.size());
+
+            detections.sort((april1, april2) -> (april1.ftcPose.range < april2.ftcPose.range ? 1 : 0));
+
+            for (int i = 0; i < batchSize; i++) {
+                AprilTagDetection aTag = detections.get(i);
+                Pose2d aTagPose = AprilPoses.aprilPoses.get(aTag.id);
+
+                if (aTag == null ||
+                        aTag.ftcPose==null) {
+                    continue;
+                }
+
+                double angle=Math.toRadians(aTag.ftcPose.yaw-aTag.ftcPose.bearing);
+                double dx=Math.sin(angle)*aTag.ftcPose.range;
+                double dy=Math.cos(angle)*aTag.ftcPose.range;
+                xRobot += (aTagPose.getX() - dy) * 1.0;
+                yRobot += (aTagPose.getY() + dx) * 1.0;
+                hRobot += aTag.ftcPose.yaw * 1.0;
+            }
+
+            xRobot/=batchSize;
+            yRobot/=batchSize;
+            hRobot/=batchSize;
+
+            estimatedPose = new Pose2d(xRobot, yRobot, -hRobot);
+            debugText = "#2: Size of " + batchSize;
         }
+        catch (Exception e){
 
-        xRobot/=batchSize;
-        yRobot/=batchSize;
-        hRobot/=batchSize;
-
-        estimatedPose = new Pose2d(xRobot, yRobot, hRobot);
-        debugText = "#2: Size of " + batchSize;
+        }
 
 //        aTag = detections.get(0);
 //        xRobot=aTag.rawPose.x;

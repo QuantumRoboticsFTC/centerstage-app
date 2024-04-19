@@ -131,28 +131,37 @@ public class TeleOP extends OpMode {
             robot.intake.intakeMode = Intake.IntakeMode.IDLE;
         }
 
-        if (leaveBackdropTimer.seconds() < 0.11) {
-            if (0.035 < leaveBackdropTimer.seconds()) {
-                robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
-            } else {
-                robot.drive.setMotorPowers(0, 0, 0, 0);
-            }
-        } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.85) {
-            robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);
-//        } else if (robot.outtake.outtakeState == Outtake.OuttakeState.SCORE &&
-//                robot.outtake.atBackdrop()) {
-//            robot.drive.setMotorPowersFromGamepad(gamepad1, 0.82, false, false);
-        } else if (0.9 < climbTimer.seconds() && climbTimer.seconds() < 1.1) {
-            robot.drive.setMotorPowers(pwrClimb, pwrClimb, pwrClimb, pwrClimb);
-        } else if (!robot.drive.isBusy()) {
-            switch (driveMode) {
-                case NORMAL:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
-                    break;
-                case SLOW:
-                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
-                    break;
-            }
+//        if (leaveBackdropTimer.seconds() < 0.11) {
+//            if (0.035 < leaveBackdropTimer.seconds()) {
+//                robot.drive.setMotorPowers(-pwrBackdrop, -pwrBackdrop, -pwrBackdrop, -pwrBackdrop);
+//            } else {
+//                robot.drive.setMotorPowers(0, 0, 0, 0);
+//            }
+//        } else if (0.3 < climbTimer.seconds() && climbTimer.seconds() < 0.85) {
+//            robot.drive.setMotorPowers(-pwrClimb, -pwrClimb, -pwrClimb, -pwrClimb);
+////        } else if (robot.outtake.outtakeState == Outtake.OuttakeState.SCORE &&
+////                robot.outtake.atBackdrop()) {
+////            robot.drive.setMotorPowersFromGamepad(gamepad1, 0.82, false, false);
+//        } else if (0.9 < climbTimer.seconds() && climbTimer.seconds() < 1.1) {
+//            robot.drive.setMotorPowers(pwrClimb, pwrClimb, pwrClimb, pwrClimb);
+//        } else if (!robot.drive.isBusy()) {
+//            switch (driveMode) {
+//                case NORMAL:
+//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
+//                    break;
+//                case SLOW:
+//                    robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
+//                    break;
+//            }
+//        }
+
+        switch (driveMode) {
+            case NORMAL:
+                robot.drive.setMotorPowersFromGamepad(gamepad1, 1, true, false);
+                break;
+            case SLOW:
+                robot.drive.setMotorPowersFromGamepad(gamepad1, 0.7, true, false);
+                break;
         }
 
         if (stickyGamepad1.y) {

@@ -27,7 +27,8 @@ public class Elevator implements Subsystem {
         THIRD_LINE,
         AUTO_HEIGHT0,
         AUTO_HEIGHT1,
-        AUTO_HEIGHT2
+        AUTO_HEIGHT2,
+        PIXEL_CHECK
     }
 
     public ElevatorState elevatorState;
@@ -39,6 +40,9 @@ public class Elevator implements Subsystem {
     public static double SECOND_POSITION = 500;
     public static double THIRD_POSITION = 830;
 
+
+
+    public static double PCHECK_HEIGHT=90;
     public static double AUTO_HEIGHT0 = 200; // preload
     public static double AUTO_HEIGHT1 = 400; // first cycle
     public static double AUTO_HEIGHT2 = 550; // second cycle
@@ -107,6 +111,8 @@ public class Elevator implements Subsystem {
                 return AUTO_HEIGHT1 + diffyValue;
             case AUTO_HEIGHT2:
                 return AUTO_HEIGHT2 + diffyValue;
+            case PIXEL_CHECK:
+                return PCHECK_HEIGHT + diffyValue;
         }
         return 0;
     }
